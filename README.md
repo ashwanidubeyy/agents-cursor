@@ -88,71 +88,184 @@ You've successfully run and modified your React Native App. :partying_face:
 
 # Cursor AI Agent Systems
 
-This repo ships two agentic "software factory" systems for Cursor. Each is a set of **12 specialized agents** that do one job, write their output to a file, then stop and hand off to the next agent (a human approves each step).
+This repo ships **two** agentic "software factory" systems for Cursor. Each is a set of **12 specialized agents** that do one job, write output to a file, then stop and hand off to the next agent (a human approves each step).
 
-| System | Folder | Stack | E2E |
-| ------ | ------ | ----- | --- |
-| React Native | `.cursor/` | RN + TypeScript | Detox |
-| Next.js | `.cursornext/` | Next.js + TypeScript | Playwright |
+| System | Folder | Stack | E2E | Full guide |
+| ------ | ------ | ----- | --- | ---------- |
+| **React Native** | `.cursor/` | RN + TypeScript | Detox | [`.cursor/README.md`](.cursor/README.md) · [cheat sheet](.cursor/USAGE.md) |
+| **Next.js** | `.cursornext/` | Next.js + TypeScript | Playwright | [`.cursornext/README.md`](.cursornext/README.md) |
 
-> **Full guides:**
-> - React Native → [`.cursor/README.md`](.cursor/README.md) (cheat sheet: [`.cursor/USAGE.md`](.cursor/USAGE.md))
-> - Next.js → [`.cursornext/README.md`](.cursornext/README.md)
+Both systems share the **same 12 agents and the same workflow** — only the framework details differ. Pick the folder for your stack; the agents auto-load that folder's rules.
 
-## Workflow (both systems)
+---
+
+## 1. React Native vs Next.js — what differs
+
+| Concern | React Native (`.cursor/`) | Next.js (`.cursornext/`) |
+| ------- | ------------------------- | ------------------------ |
+| Scaffold (Agent 08) | RN Community CLI → then `npm install` + `cd ios && pod install` | `create-next-app` → then `npm install` + `npm run dev` |
+| Run the app | `npm run ios` / `npm run android` (Metro) | `npm run dev` (localhost:3000) |
+| Structure | `src/screens/*`, `navigation/` (React Navigation) | `src/app/*` (App Router), Server/Client Components |
+| Styling | styled-components + `react-native-size-matters` | styled-components + CSS, `next/image` |
+| Figma assets (Agent 00) | SVG → `src/assets/icons`; PNG → Android `drawable/` + iOS `Images.xcassets/` | SVG → `src/assets/icons`; raster → `public/images/` |
+| E2E (Agent 11) | **Detox** — `@detox-testing-agent`, needs **testing target** (iOS/Android) | **Playwright** — `@e2e-testing-agent`, needs **base URL** |
+| Unit/component tests | Jest + React Native Testing Library | Jest/Vitest + React Testing Library |
+| Figma token file | `.env` | `.env.local` |
+| Rules folder | `react-native.mdc`, `figma-to-react-native.mdc`, `detox-testing.mdc` | `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc` |
+| E2E setup doc | [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) |
+
+**Same across both:** Planning (PRD), Coding, Documentation, Test Cases, Fixing, Code Scanning, Vulnerability, Pre-PR Validation, PR Orchestrator, Prompt Generator — and the "one agent, one task, one stop" contract.
+
+---
+
+## 2. Agents (priority + invocation)
+
+**Priority** = how essential the agent is to ship something. **P1** = core path, **P2** = recommended quality gates, **P3** = optional/on-demand.
+
+| Priority | Agent | Invoke | Output |
+| -------- | ----- | ------ | ------ |
+| P1 | Figma Analyzer | `@figma-analyzer` | `cache/figma-specs-{feature}.md` + assets |
+| P1 | Planning | `@planning-agent` | `logs/prd-{feature}-{ts}.md` |
+| P1 | Coding | `@coding-agent` | Source + `logs/coding/coding-{feature}.md` |
+| P1 | Fixing | `@fixing-agent` | `logs/fixing/fixing-{feature}.md` |
+| P2 | Test Cases | `@testcases-agent` | `logs/test-cases-{feature}.md` + test file |
+| P2 | E2E Testing | `@detox-testing-agent` (RN) / `@e2e-testing-agent` (Next.js) | `logs/{detox,e2e}-testing/{feature}/{ts}/test-results.md` |
+| P2 | Pre-PR Validation | `@pre-pr-validation-agent` | READY / NOT READY report |
+| P2 | PR Orchestrator | `@pr-orchestrator-agent` | `logs/pr/pr-{feature}-{ts}.md` |
+| P3 | Documentation | `@documentation-agent` | Documented code |
+| P3 | Code Scanning | `@code-scanning-agent` | `logs/code-scanning/...` |
+| P3 | Vulnerability | `@vulnerability-agent` | `logs/vulnerability/...` |
+| P3 | Project Scaffold | `@project-scaffold-agent` | New project + boilerplate |
+| P3 | Prompt Generator | `@prompt-generator-agent` | Planning/project prompt |
+
+---
+
+## 3. Job A — Integrate a NEW module (priority order)
+
+Run these in order; review each output before the next. **P1** steps are the minimum to ship; P2/P3 are quality gates.
 
 ```
-@figma-analyzer → @planning-agent → @coding-agent → @documentation-agent
-→ @testcases-agent → @e2e/detox-testing-agent → @fixing-agent
-→ @code-scanning-agent → @vulnerability-agent → @pre-pr-validation-agent → @pr-orchestrator-agent
+P1  1. @figma-analyzer       → design specs + exported assets
+P1  2. @planning-agent       → PRD
+P1  3. @coding-agent         → implementation
+P3  4. @documentation-agent  → JSDoc/comments
+P2  5. @testcases-agent      → test cases + test file
+P2  6. E2E agent             → E2E run + results
+P1  7. @fixing-agent         → fix failures
+P3  8. @code-scanning-agent  → quality report
+P3  9. @vulnerability-agent  → security report
+P2 10. @pre-pr-validation-agent → READY / NOT READY
+P2 11. @pr-orchestrator-agent   → PR document
 ```
 
-Minimum flow for a designed feature: `@figma-analyzer → @planning-agent → @coding-agent → @fixing-agent`.
+### React Native example
 
-## Agents (invoke with `@`)
+```
+@figma-analyzer
+Feature name: profile-card
+Mobile URL: https://www.figma.com/design/ABC123/App?node-id=10-8700
+Mobile Frame: M_Profile_Card
+Section: Profile card – avatar, name, stats, action buttons
+```
+```
+@planning-agent
+Plan feature: profile-card from .cursor/cache/figma-specs-profile-card.md
+```
+```
+@coding-agent
+Implement PRD from .cursor/logs/prd-profile-card-20260615-120000.md
+```
+```
+@fixing-agent
+Test profile-card.
+Testing target: Android Emulator
+```
 
-| Agent | Invoke | Output |
-| ----- | ------ | ------ |
-| Project Scaffold | `@project-scaffold-agent` | New project + boilerplate |
-| Prompt Generator | `@prompt-generator-agent` | Planning/project prompt |
-| Figma Analyzer | `@figma-analyzer` | `cache/figma-specs-{feature}.md` + SVG/PNG export |
-| Planning | `@planning-agent` | `logs/prd-{feature}-{ts}.md` |
-| Coding | `@coding-agent` | Source + `logs/coding/coding-{feature}.md` |
-| Documentation | `@documentation-agent` | Documented code |
-| Test Cases | `@testcases-agent` | `logs/test-cases-{feature}.md` + Jest test |
-| E2E Testing | `@detox-testing-agent` (RN) / `@e2e-testing-agent` (Next.js) | `logs/{e2e,detox}-testing/{feature}/{ts}/test-results.md` |
-| Fixing | `@fixing-agent` | `logs/fixing/fixing-{feature}.md` |
-| Code Scanning | `@code-scanning-agent` | `logs/code-scanning/...` |
-| Vulnerability | `@vulnerability-agent` | `logs/vulnerability/...` |
-| Pre-PR Validation | `@pre-pr-validation-agent` | READY / NOT READY report |
-| PR Orchestrator | `@pr-orchestrator-agent` | `logs/pr/pr-{feature}-{ts}.md` |
+### Next.js example
 
-## Rules (auto-applied by Cursor)
+```
+@figma-analyzer
+Feature name: pricing-section
+URL: https://www.figma.com/design/ABC123/Web?node-id=22-140
+Frame: Pricing_Section
+Section: Pricing section – plan cards, toggle, CTA
+```
+```
+@planning-agent
+Plan feature: pricing-section from .cursornext/cache/figma-specs-pricing-section.md
+```
+```
+@coding-agent
+Implement PRD from .cursornext/logs/prd-pricing-section-20260615-120000.md
+```
+```
+@fixing-agent
+Test pricing-section.
+Base URL: http://localhost:3000
+```
 
+> **Minimum path (designed feature):** `@figma-analyzer → @planning-agent → @coding-agent → @fixing-agent`. No design? Skip Figma and describe the feature to `@planning-agent`.
+
+---
+
+## 4. Job B — Fix bugs in an EXISTING module (priority order)
+
+```
+P1  1. @fixing-agent          → reproduce + apply simple fixes (or test-and-fix by TC-ID)
+P2  2. @planning-agent + @coding-agent  → only if the fix needs new/complex behavior
+P2  3. @pre-pr-validation-agent → confirm READY
+P2  4. @pr-orchestrator-agent   → PR document
+```
+
+The Fixing Agent has **two modes**: *fix-only* (describe the bug) and *test-and-fix* (run tests, fix failures by TC-ID — needs a test-cases file + target/URL).
+
+### React Native examples
+
+```
+@fixing-agent
+Fix profile-card: avatar overflows its container on small screens, and the
+follow button has no press feedback.
+```
+```
+@fixing-agent
+Test profile-card.
+Testing target: iOS Simulator
+```
+
+### Next.js examples
+
+```
+@fixing-agent
+Fix pricing-section: monthly/yearly toggle does not update prices, and the
+CTA button is missing a data-testid.
+```
+```
+@fixing-agent
+Test pricing-section.
+Base URL: http://localhost:3000
+```
+
+> If the Fixing Agent reports an issue as "**Requires Coding Agent**" (new feature / complex change), hand it to `@planning-agent` → `@coding-agent`, then re-validate.
+
+---
+
+## 5. Rules, docs, scripts
+
+### Rules (auto-applied by Cursor)
 - **React Native** (`.cursor/rules/`): `agent-workflow-rules.mdc`, `react-native.mdc`, `figma-to-react-native.mdc`, `detox-testing.mdc`, `coding-standards.md`.
 - **Next.js** (`.cursornext/rules/`): `agent-workflow-rules.mdc`, `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc`, `coding-standards.md`.
 
-## Reference docs
-
+### Reference docs
 | Doc | Purpose |
 | --- | ------- |
-| `.cursor/README.md` | Full React Native agent-system guide |
-| `.cursornext/README.md` | Full Next.js agent-system guide |
-| `docs/DETOX-INTEGRATION.md` | RN Detox E2E setup (iOS + Android native wiring, troubleshooting, new-project checklist) |
-| `.cursornext/docs/E2E-PLAYWRIGHT.md` | Next.js Playwright E2E setup (config, specs, troubleshooting, new-project checklist) |
-| `.cursor/TOKEN-USAGE.md` | Tips to reduce Cursor token usage (incl. agent-system specifics) |
-| `.cursor/USAGE.md` | One-page command cheat sheet (React Native) |
+| [`.cursor/README.md`](.cursor/README.md) | Full React Native agent-system guide |
+| [`.cursornext/README.md`](.cursornext/README.md) | Full Next.js agent-system guide |
+| [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | RN Detox E2E setup (iOS + Android native wiring, troubleshooting, checklist) |
+| [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) | Next.js Playwright E2E setup (config, specs, troubleshooting, checklist) |
+| [`.cursor/TOKEN-USAGE.md`](.cursor/TOKEN-USAGE.md) | Tips to reduce Cursor token usage |
+| [`.cursor/USAGE.md`](.cursor/USAGE.md) | One-page command cheat sheet (React Native) |
 
-## Scripts
-
-**Detox artifacts** (`scripts/`):
-
-```sh
-node scripts/collect-detox-artifacts.js {feature}   # collect failure screenshots/videos → logs
-```
-
-**Figma export** — needs `FIGMA_ACCESS_TOKEN`:
-
+### Figma export scripts (need `FIGMA_ACCESS_TOKEN`)
 ```sh
 # React Native (.cursor) — token in .env; PNG → Android drawable + iOS Images.xcassets
 node .cursor/scripts/export-figma-svg.js <feature> <nodeId> [fileKey]
@@ -163,17 +276,17 @@ node .cursornext/scripts/export-figma-svg.js <feature> <nodeId> [fileKey] [outFi
 node .cursornext/scripts/export-figma-png.js <nodeId> <output-name> <fileKey> [scale]
 ```
 
-## E2E npm scripts
-
+### E2E commands
 ```sh
-# React Native (Detox)
+# React Native (Detox) — this project
 npm run e2e:build:android && npm run e2e:android   # emulator
 npm run e2e:build:ios && npm run e2e:ios           # simulator
 npm run e2e:android:attached                       # physical device
+node scripts/collect-detox-artifacts.js {feature}  # collect failure screenshots/videos → logs
 
 # Next.js (Playwright) — when used in a Next.js project
-npm run e2e                                         # all specs
-npx playwright test e2e/{feature}.spec.ts           # single spec
+npm run e2e                                          # all specs
+npx playwright test e2e/{feature}.spec.ts            # single spec
 ```
 
 # Troubleshooting
