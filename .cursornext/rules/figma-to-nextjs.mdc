@@ -1,0 +1,82 @@
+---
+alwaysApply: true
+---
+# Figma to Next.js Conversion Rules
+
+## Rule 1: Never Use Hardcoded Figma Values in Styles
+
+```typescript
+// ❌ WRONG – Direct Figma values
+const Box = styled.div`
+  color: #3b82f6;
+  font-size: 24px;
+  padding: 32px;
+  border-radius: 8px;
+`;
+
+// ✅ CORRECT – Design system (COLORS, TYPOGRAPHY, SPACING)
+const Box = styled.div`
+  color: ${COLORS.PRIMARY};
+  ${TYPOGRAPHY.HEADING_H2_BOLD};
+  padding: ${SPACING.LG};
+  border-radius: ${SPACING.XS};
+`;
+```
+
+## Rule 2: Figma Frames → React/HTML Components
+
+- **Figma Frame** = `<div>`/`<section>` container or a layout component.
+- **Figma Component** = Reusable component (e.g. `ProductCard`, `PrimaryButton`).
+- **Figma Auto Layout** = CSS flexbox/grid: `display: flex`, `flex-direction`, `align-items`, `justify-content`, `gap`.
+
+## Rule 3: Figma Auto-Layout → CSS
+
+- Vertical stack → `display: flex; flex-direction: column; gap: ...`.
+- Horizontal stack → `display: flex; flex-direction: row; gap: ...`.
+- Center align → `align-items: center; justify-content: center;`.
+- Grid layouts → `display: grid; grid-template-columns: ...; gap: ...`.
+
+## Rule 4: Figma Effects → CSS
+
+- **Shadow:** `box-shadow: x y blur spread color;` (map color to COLORS token).
+- **Opacity:** `opacity`.
+- **Blur:** `backdrop-filter: blur(...)` or `filter: blur(...)`.
+- **Corner radius:** `border-radius` (prefer spacing/radius tokens).
+
+## Rule 5: Figma Text Styles → TYPOGRAPHY (including fontWeight)
+
+Map Figma text styles to project TYPOGRAPHY tokens (e.g. `TYPOGRAPHY.TEXT_PARAGRAPH_14`, `TYPOGRAPHY.HEADING_H1_BOLD`). **Always include fontWeight:** map Figma weight (100–900) to the correct token (e.g. 400 → Regular, 500 → Medium, 700 → Bold). Do not hardcode font-family/font-size/line-height when a token exists; do not omit font-weight for text.
+
+## Rule 6: Figma Colors → COLORS
+
+Map every color to a `COLORS` token (e.g. `COLORS.BACKGROUND_WHITE`, `COLORS.TEXT_PRIMARY`). No raw hex in styles except via the COLORS object.
+
+## Rule 7: Assets
+
+- **SVG icons / vectors** → export as React components in `src/assets/icons` (single `Icons` object) or as `.svg` imported with SVGR. No raw inline SVG duplicated across files.
+- **Raster images (png/jpg/webp)** → place in `public/images/` and render via `next/image` (with `width`/`height` or `fill` + `sizes`). Prefer WebP/optimized formats.
+
+## Rule 8: Error Handling
+
+Use optional chaining: `obj?.value` when accessing nested or optional data (per project rule).
+
+## Responsive (Next.js / Web)
+
+- Use relative units (`rem`, `%`, `clamp()`), CSS media queries, and fluid layouts (flex/grid) for responsiveness across breakpoints.
+- Define breakpoints in the theme; reuse them in styled-components media queries.
+- Ensure interactive targets are comfortably tappable/clickable (≈ 44px) and have visible focus states.
+
+## Server vs Client
+
+- Static, presentational sections → Server Components.
+- Anything with state, handlers, styled-components, or browser APIs → Client Component (`'use client'`).
+
+## Validation Checklist
+
+- [ ] No hardcoded hex in styles (use COLORS).
+- [ ] Typography from TYPOGRAPHY where available; **fontWeight set for every text style** (e.g. 400, 500, 700) per Figma/spec.
+- [ ] Layout uses flexbox/grid mapped from Auto Layout.
+- [ ] box-shadow / border-radius from tokens where applicable.
+- [ ] SVGs as components in `@/assets/icons`; raster images in `public/` via `next/image`.
+- [ ] Optional chaining for safe access where appropriate.
+- [ ] Correct Server/Client component boundary.

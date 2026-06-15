@@ -1,0 +1,42 @@
+export const TICKET_STATUS = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+};
+
+export const TICKET_PRIORITY = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+};
+
+export const FILTER_ALL = 'ALL';
+
+export const SORT_ORDER = {
+  NEWEST: 'NEWEST',
+  OLDEST: 'OLDEST',
+};
+
+export const PAGE_SIZE = 10;
+export const ANALYTICS_REFRESH_MS = 60000;
+export const SEARCH_DEBOUNCE_MS = 300;
+export const NAME_MAX = 50;
+export const SUBJECT_MAX = 100;
+export const DESCRIPTION_MAX = 1000;
+export const CURRENT_AGENT_ID = 'agent-1';
+export const USE_MOCK_API = true;
+export const OVERLAY_OPACITY = 0.5;
+
+export const TIMELINE_EVENT_TYPES = {
+  CREATED: 'CREATED',
+  STATUS_CHANGED: 'STATUS_CHANGED',
+  PRIORITY_CHANGED: 'PRIORITY_CHANGED',
+  ASSIGNED: 'ASSIGNED',
+  COMMENT_ADDED: 'COMMENT_ADDED',
+};
+
+export const COMMENT_TYPES = {
+  CUSTOMER_REPLY: 'CUSTOMER_REPLY',
+  AGENT_REPLY: 'AGENT_REPLY',
+  INTERNAL_NOTE: 'INTERNAL_NOTE',
+};

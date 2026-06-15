@@ -1,0 +1,37 @@
+---
+description: Detox E2E setup and how testing agents use it
+globs: e2e/**/*.js, .detoxrc.js
+---
+
+# Detox E2E (Testing Agents)
+
+## Config and Specs
+
+- **Config:** `.detoxrc.js` (apps, devices, configurations).
+- **E2E Jest:** `e2e/jest.config.js`.
+- **Specs:** `e2e/**/*.e2e.js` (e.g. `e2e/landing.e2e.js`).
+
+## Commands (for Fixing Agent / test-and-fix)
+
+- **iOS:** `npm run e2e:ios` or `detox test -c ios.sim.debug`
+- **Android (emulator):** `npm run e2e:android` or `detox test -c android.emu.debug`
+- **Android (attached device):** `npm run e2e:android:attached` or `detox test -c android.att.debug`
+- **Build first if needed:** `npm run e2e:build:ios` / `npm run e2e:build:android` / `npm run e2e:build:android:attached`
+
+Use **testing target** from user (iOS Simulator / Android Emulator) to choose the command.
+
+## Native setup (must exist before running)
+
+- **Android:** `DetoxTest.java` in `android/app/src/androidTest/.../<applicationId>/`; Detox Maven repo in `android/build.gradle`; `testBuildType` + `testInstrumentationRunner` + `androidTestImplementation('com.wix:detox:+')` in `android/app/build.gradle`; manifest references `network_security_config` (cleartext to Metro `10.0.2.2`).
+- **iOS:** `cd ios && pod install` (generates `.xcworkspace`); scheme/workspace names match `.detoxrc.js`.
+- If any piece is missing, complete setup first — see `docs/DETOX-INTEGRATION.md`.
+
+## testIDs
+
+- E2E specs use `by.id('testID-value')`; elements must have `testID="testID-value"`.
+- testIDs come from `.cursor/logs/test-cases-{feature}.md` (section **testID / selectors (for E2E)**).
+- Test Case Authoring Agent fills testIDs in test cases; Fixing Agent adds or preserves testIDs when fixing E2E failures.
+
+## Full steps
+
+See **`docs/DETOX-INTEGRATION.md`** for setup, agent workflow, and troubleshooting.

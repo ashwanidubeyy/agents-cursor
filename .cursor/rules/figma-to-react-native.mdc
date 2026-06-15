@@ -1,0 +1,70 @@
+---
+alwaysApply: true
+---
+# Figma to React Native Conversion Rules
+
+## Rule 1: Never Use Hardcoded Figma Values in Styles
+
+```javascript
+// ❌ WRONG – Direct Figma values
+const styles = StyleSheet.create({
+  box: {
+    color: '#3B82F6',
+    fontSize: 24,
+    padding: 32,
+    borderRadius: 8,
+  },
+});
+
+// ✅ CORRECT – Design system (ColorCode, FONTS)
+const styles = StyleSheet.create({
+  box: {
+    color: ColorCode.backgroundColor007AFF,
+    ...FONTS.headingH2Bold,
+    padding: spacing.lg,
+    borderRadius: 8,
+  },
+});
+```
+
+## Rule 2: Figma Frames → React Native Components
+
+- **Figma Frame** = `<View>` or screen container.
+- **Figma Component** = Reusable component (e.g. `ProductCard`, `PrimaryButton`).
+- **Figma Auto Layout** = `flexDirection`, `alignItems`, `justifyContent`, `gap` (or marginBottom/marginRight).
+
+## Rule 3: Figma Auto-Layout → StyleSheet
+
+- Vertical stack → `flexDirection: 'column'`, `gap` or marginBottom.
+- Horizontal stack → `flexDirection: 'row'`, `gap` or marginRight.
+- Center align → `alignItems: 'center'`, `justifyContent: 'center'`.
+
+## Rule 4: Figma Effects → React Native
+
+- **Shadow:** iOS `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`; Android `elevation`.
+- **Opacity:** `opacity` in StyleSheet.
+- **Blur:** `BlurView` (expo-blur or react-native-blur) if needed.
+
+## Rule 5: Figma Text Styles → FONTS (including fontWeight)
+
+Map Figma text styles to project FONTS (e.g. `FONTS.textParagraph14`, `FONTS.headingH1Bold`). **Always include fontWeight:** map Figma weight (100–900) to the correct fontFamily/FONTS token (e.g. 400 → Regular, 500 → Medium, 700 → Bold). Do not hardcode fontFamily/fontSize/lineHeight when a token exists; do not omit fontWeight in StyleSheet for text.
+
+## Rule 6: Figma Colors → ColorCode
+
+Map every color to ColorCode (e.g. `ColorCode.backgroundColorFFFFFF`, `ColorCode.titleColor1C1C1E`). No raw hex in styles except via ColorCode.
+
+## Rule 7: Error Handling
+
+Use optional chaining: `obj?.value` when accessing nested or optional data (per project rule).
+
+## Responsive (React Native)
+
+- Use `dimensions`, `scale`, `verticalScale`, `moderateScale` (e.g. react-native-size-matters) for key dimensions when supporting multiple screen sizes.
+- Touch targets: minimum 44px (height/width or padding).
+
+## Validation Checklist
+
+- [ ] No hardcoded hex in StyleSheet (use ColorCode).
+- [ ] Typography from FONTS where available; **fontWeight set for every text style** (e.g. '400', '500', '700') per Figma/spec.
+- [ ] Shadow/elevation for both iOS and Android.
+- [ ] Optional chaining for safe access where appropriate.

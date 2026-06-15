@@ -1,0 +1,225 @@
+---
+description: Next.js best practices – App Router, TypeScript, design system (COLORS, TYPOGRAPHY), server/client components, performance, and accessibility.
+globs: "**/*.{js,jsx,ts,tsx}"
+alwaysApply: false
+---
+# Next.js Best Practices
+
+Definitive guidelines for building robust, performant, and maintainable Next.js apps with the App Router, TypeScript, functional components, and a feature-first architecture. Use COLORS and TYPOGRAPHY tokens (no hardcoded colors/typography).
+
+## 1. Code Organization and Structure
+
+### 1.1. Code Style Principles
+
+- Ensure components are modular, reusable, and maintainable.
+- Organize files by feature/route, grouping related components, hooks, and styles.
+- Minimize `useEffect`, `useState`, and heavy computations inside render; prefer Server Components for data fetching.
+
+### 1.2. App Router Structure
+
+Organize by route and feature. Co-locate route-specific UI; share reusable UI in `components/`.
+
+**✅ GOOD:**
+
+```
+src/
+├── app/
+│   ├── layout.tsx          # Root layout + providers
+│   ├── page.tsx            # /
+│   ├── dashboard/
+│   │   ├── page.tsx
+│   │   ├── loading.tsx
+│   │   └── error.tsx
+│   └── api/
+│       └── users/route.ts  # Route handler
+├── components/             # Shared UI (widgets, layouts)
+├── services/               # API/business logic
+├── store/                  # Redux Toolkit slices
+├── theme/                  # COLORS, TYPOGRAPHY, spacing
+├── hooks/
+├── utils/
+├── types/
+└── constants/
+```
+
+### 1.3. Naming Conventions
+
+- **Variables and Functions:** camelCase (e.g. `isFetchingData`, `handleUserInput`).
+- **Components:** PascalCase (e.g. `UserProfile`, `DashboardCard`).
+- **Route folders:** lowercase URL segments (e.g. `user-profile`, `dashboard`).
+- **Hooks:** camelCase with `use` prefix (e.g. `useAuth`, `useDebounce`).
+- **Utilities:** camelCase (e.g. `formatDate`, `validateEmail`). Types: `*.types.ts`.
+
+### 1.4. Absolute Imports
+
+Use path aliases instead of deep relative imports.
+
+**❌ BAD:** `import { Button } from '../../../../components/widgets/Button';`
+**✅ GOOD:** `import { Button } from '@/widgets/Button';`
+
+Configure in `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}
+```
+
+### 1.5. One Component Per File
+
+Each `.tsx` file exports one primary React component. Small, tightly coupled subcomponents may be co-located.
+
+---
+
+## 2. Server and Client Components
+
+### 2.1. Default to Server Components
+
+- Pages, layouts, and static UI are Server Components by default. Do data fetching here.
+- No `useState`/`useEffect`/event handlers/browser APIs in Server Components.
+
+### 2.2. Use Client Components Intentionally
+
+- Add `'use client'` only when you need interactivity, browser APIs, styled-components, Redux hooks, or context.
+- Keep client boundaries at the leaves; pass server-fetched data down via props.
+
+### 2.3. Custom Hooks for Reusable Logic
+
+```typescript
+// hooks/useDebounce.ts
+export const useDebounce = <T,>(value: T, delay = 300): T => {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+};
+```
+
+---
+
+## 3. State Management
+
+- **Local:** `useState`, `useReducer` for component/subtree state.
+- **Global:** Redux Toolkit for complex app state (typed `useAppSelector`/`useAppDispatch`). Zustand/Jotai for simpler needs. Avoid overusing Context.
+- **Server state:** prefer fetching in Server Components or use TanStack Query in Client Components when caching/mutations are needed.
+
+---
+
+## 4. Styling and Design System
+
+### 4.1. Co-located styles
+
+- Use **styled-components** in a `styles.ts` per component; never inline large style objects.
+- Or CSS Modules (`*.module.css`) / Tailwind if that is the project standard — be consistent.
+
+**❌ BAD:** `<div style={{ backgroundColor: 'red', padding: 10 }} />`
+**✅ GOOD:** styled component in `ComponentName/styles.ts`, imported as `ComponentNameStyles.Container`.
+
+### 4.2. Colors and Typography (Mandatory)
+
+- **Colors:** Use COLORS only (e.g. `COLORS.PRIMARY`, `COLORS.TEXT_PRIMARY`). No raw hex in styles.
+- **Typography:** Use TYPOGRAPHY (e.g. `TYPOGRAPHY.TEXT_PARAGRAPH_14`, `TYPOGRAPHY.HEADING_H2_BOLD`) including font-weight. No hardcoded font values when a token exists.
+
+### 4.3. Effects and Responsiveness
+
+- **Shadow:** `box-shadow`. **Radius:** `border-radius` from tokens.
+- Responsive via media queries, relative units (`rem`, `clamp()`), flexbox/grid.
+- SSR for styled-components: `StyledComponentsRegistry` in root layout + `compiler.styledComponents` in `next.config.js`.
+
+---
+
+## 5. Routing & Navigation
+
+Use App Router file-based routing. Navigate with `next/link` and `useRouter`/`redirect` from `next/navigation`. Define path constants in `constants/routes.ts`; never hardcode route strings.
+
+---
+
+## 6. Data Fetching, API & Services
+
+- Fetch in Server Components with `fetch` (set `cache`/`next.revalidate`) or server SDKs.
+- Centralize client API logic in `services/` using the axios instance in `api/network.ts`; use `API_PATHS`. Do not scatter API calls inside UI components.
+- Route handlers (`app/api/.../route.ts`) for server endpoints; validate inputs; keep secrets server-side.
+
+---
+
+## 7. Performance
+
+### 7.1. General
+
+- Prefer Server Components to ship less JS. Minimize client bundle.
+- Use `React.memo`, `useCallback`, `useMemo` for expensive renders/callbacks in Client Components.
+- Use `next/dynamic` for code-splitting heavy client-only components.
+
+### 7.2. Lists
+
+- Virtualize long lists (`@tanstack/react-virtual`). Provide stable unique keys (never index).
+
+### 7.3. Images & Fonts
+
+- Use `next/image` (automatic optimization, lazy loading, correct sizing) and `next/font` (no layout shift, self-hosted).
+
+### 7.4. Caching
+
+- Use App Router caching/revalidation (`revalidate`, `revalidateTag`, `revalidatePath`) appropriately; understand static vs dynamic rendering.
+
+---
+
+## 8. Accessibility
+
+- Semantic HTML; `aria-*` where needed; label all form inputs.
+- Keyboard navigability and visible focus states.
+- Sufficient color contrast; respect reduced motion.
+
+---
+
+## 9. SEO & Metadata
+
+- Export `metadata` or `generateMetadata` per route. Use Open Graph/Twitter tags. Use `next/sitemap`/robots where relevant.
+
+---
+
+## 10. Error Handling
+
+- Optional chaining: `obj?.value`, `arr?.[0]`.
+- `error.tsx` and `not-found.tsx` for route-level error/empty states. Use `.then()/.catch()` for service promises; expose user-facing error UI.
+
+---
+
+## 11. Common Pitfalls
+
+### 11.1. Do Not Mutate State
+
+**❌ BAD:** `user.name = 'Jane';`
+**✅ GOOD:** `setUser(prev => ({ ...prev, name: 'Jane' }));`
+
+### 11.2. Conditional Rendering
+
+Prefer ternary or explicit null over `&&` when the left side can be `0`/`false`.
+
+**✅ GOOD:** `{showMessage ? <p>Hello!</p> : null}`
+
+### 11.3. Client/Server Boundary Mistakes
+
+Don't import server-only modules into Client Components; don't use hooks/handlers in Server Components.
+
+---
+
+## Validation Checklist
+
+- [ ] No hardcoded hex in styles (use COLORS).
+- [ ] Typography from TYPOGRAPHY where available (with font-weight).
+- [ ] Correct Server/Client boundary (`'use client'` only where needed).
+- [ ] Optional chaining for safe access where appropriate.
+- [ ] App Router structure; absolute imports (`@/*`).
+- [ ] One component per file; co-located styles and tests.
+- [ ] Lists virtualized where large; stable unique keys.
+- [ ] `next/image` for raster images; `next/font` for fonts.
+- [ ] Per-route `metadata` for SEO.
+- [ ] Route constants used; no hardcoded paths.

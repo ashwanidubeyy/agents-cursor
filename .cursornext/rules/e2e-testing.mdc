@@ -1,0 +1,38 @@
+---
+description: Playwright E2E setup and how testing agents use it
+globs: e2e/**/*.ts, playwright.config.ts
+---
+# Playwright E2E (Testing Agents)
+
+## Config and Specs
+
+- **Config:** `playwright.config.ts` (projects, devices/browsers, baseURL, webServer).
+- **Specs:** `e2e/**/*.spec.ts` (e.g. `e2e/dashboard.spec.ts`).
+- **webServer:** configure Playwright to start the app (`npm run dev` or `npm run start` after `build`) and wait for `baseURL` (e.g. `http://localhost:3000`).
+
+## Commands (for Fixing Agent / test-and-fix)
+
+- **Run all:** `npm run e2e` (alias for `npx playwright test`)
+- **Single spec:** `npx playwright test e2e/{feature}.spec.ts`
+- **Headed/debug:** `npx playwright test --headed` or `--debug`
+- **UI mode:** `npx playwright test --ui`
+- **Install browsers first if needed:** `npx playwright install`
+- **Report:** `npx playwright show-report`
+
+Use a **base URL** from the user (default `http://localhost:3000`) to target the running app. Ensure the dev/prod server is up (or rely on the `webServer` block in `playwright.config.ts`).
+
+## Selectors (test ids)
+
+- Prefer role-based and accessible locators: `getByRole`, `getByLabel`, `getByText`.
+- For stable hooks, use `data-testid` and `getByTestId('value')`; elements must have `data-testid="value"`.
+- test ids come from `.cursornext/logs/test-cases-{feature}.md` (section **selectors / test ids (for E2E)**).
+- Test Case Authoring Agent fills selectors in test cases; Fixing Agent adds or preserves `data-testid` when fixing E2E failures.
+
+## Artifacts
+
+- Enable `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`, and `trace: 'on-first-retry'` in `playwright.config.ts`.
+- Artifacts are written to `test-results/` and the HTML report to `playwright-report/`. The E2E agent copies relevant artifacts into `.cursornext/logs/e2e-testing/{feature}/{timestamp}/`.
+
+## Full steps
+
+See **`.cursornext/agents/agent-11-e2e-testing.md`** for the agent workflow, artifact collection, and reporting format.

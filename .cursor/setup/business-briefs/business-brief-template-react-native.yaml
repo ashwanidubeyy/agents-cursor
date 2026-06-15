@@ -1,0 +1,141 @@
+# Business Brief Template — React Native Mobile Apps (Vibe Engineering)
+# Fill this to give the Prompt Generator Agent business context for a feature.
+# The agent merges this with Figma specs (if provided) and outputs a prompt for
+# the Planning Agent.
+#
+# Time to complete: 5–10 minutes
+# Next step: Run @prompt-generator-agent with this brief (and optional Figma specs path).
+
+# ============================================================================
+# FEATURE IDENTIFICATION
+# ============================================================================
+
+feature_name: ""           # kebab-case, e.g. "auth-login", "product-detail", "onboarding"
+figma_node_id: ""          # Optional. From Figma URL, e.g. "488-37542"
+figma_specs_file: ""       # Optional. e.g. "figma-specs-auth-login.md" (in .cursor/cache/)
+screenshot_file: ""        # Optional. e.g. "Screenshot_2026-02-02.png"
+
+# ============================================================================
+# 1. FEATURE PURPOSE (React Native mobile)
+# ============================================================================
+
+feature_type:              # One or more: screen, component, flow, module
+  - ""                     # e.g. "screen", "component", "flow"
+
+primary_purpose:           # What is this feature FOR in the app? (1–2 sentences)
+  - ""
+
+primary_use_cases:         # Where in the app / when is it shown? (list 2–4)
+  - ""                     # e.g. "Login screen on first launch"
+  - ""                     # e.g. "Product detail when user taps a product"
+  - ""
+
+target_audience:           # Who uses or sees this screen/flow?
+  - ""                     # e.g. "Logged-out users", "All app users", "Post-purchase"
+
+# ============================================================================
+# 2. USER WORKFLOW (in-app behavior)
+# ============================================================================
+
+typical_workflow:          # How does the user interact with this feature?
+  - ""                     # e.g. "User enters credentials and taps Sign in"
+  - ""                     # e.g. "User swipes through 3 onboarding screens"
+
+time_to_complete:          # Expected time for user to complete (if applicable)
+  - ""                     # e.g. "Under 30 seconds", "One-time onboarding"
+
+key_actions:              # Main things the user DOES (list 2–5)
+  - ""                     # e.g. "Enter email and password"
+  - ""                     # e.g. "Tap Forgot password"
+  - ""
+
+# ============================================================================
+# 3. BUSINESS RULES & CONSTRAINTS (mobile app)
+# ============================================================================
+
+strict_constraints:        # Hard rules that MUST be enforced
+  - ""                     # e.g. "Password min 8 chars"
+  - ""                     # e.g. "Max 4 steps in onboarding flow"
+  - ""
+
+layout_rules:             # Layout / responsive behavior
+  - ""                     # e.g. "Single column; safe area respected"
+  - ""                     # e.g. "Scroll when keyboard open (KeyboardAvoidingView)"
+
+content_requirements:     # Required fields, validation, copy
+  - ""                     # e.g. "Email required; valid format"
+  - ""                     # e.g. "At least one primary CTA"
+  - ""
+
+# ============================================================================
+# 4. THEMING / CONFIGURATION (yes | no | maybe)
+# ============================================================================
+# Should this be themeable or configurable? yes / no / maybe
+
+colors:
+  screen_background: ""    # yes/no/maybe
+  card_backgrounds: ""
+  text_colors: ""
+  accent_colors: ""       # e.g. primary button, links
+  border_colors: ""
+
+content:
+  headings: ""             # yes/no/maybe
+  descriptions: ""
+  button_text: ""
+  placeholder_text: ""
+  error_messages: ""
+
+layout:
+  number_of_screens: ""    # yes/no/maybe (e.g. onboarding steps)
+  spacing: ""              # yes/no/maybe
+  image_aspect_ratio: ""
+
+styling:
+  border_radius: ""
+  shadows: ""
+  typography_scale: ""     # FONTS tokens only vs override
+
+other_customizations:
+  - ""                     # e.g. "Show/hide optional fields"
+  - ""
+
+# ============================================================================
+# 5. SUCCESS METRICS
+# ============================================================================
+
+success_criteria:          # How do we know this feature works well? (2–5)
+  - ""                     # e.g. "User completes login in under 30 seconds"
+  - ""                     # e.g. "No crashes on iOS 15+ and Android 12+"
+  - ""
+
+business_goals:            # What app/product outcome does this support?
+  - ""                     # e.g. "Increase sign-up conversion"
+  - ""
+
+# ============================================================================
+# 6. MOBILE-SPECIFIC CONSIDERATIONS (Optional)
+# ============================================================================
+
+accessibility_notes:
+  - ""                     # e.g. "accessibilityLabel on all interactive elements"
+  - ""                     # e.g. "Touch targets ≥ 44px (min)"
+
+performance_notes:
+  - ""                     # e.g. "Use FlatList/FlashList for long lists"
+  - ""                     # e.g. "Lazy load images below fold"
+
+integration_notes:         # Navigation, state, APIs
+  - ""                     # e.g. "Navigates to Home on success; uses auth slice"
+  - ""
+
+edge_cases:
+  - ""                     # e.g. "Handle network offline during submit"
+  - ""                     # e.g. "Deep link into this screen"
+  - ""
+
+# ============================================================================
+# DESIGN SYSTEM (React Native — agent maps Figma to these)
+# ============================================================================
+# Colors: ColorCode only. Typography: FONTS only. Spacing: theme/spacing.
+# Shadows: iOS shadow* props; Android elevation. Safety: obj?.value where needed.

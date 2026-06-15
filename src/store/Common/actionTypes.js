@@ -1,0 +1,6 @@
+export const SET_APP_READY = 'SET_APP_READY';
+export const SET_ONLINE_STATUS = 'SET_ONLINE_STATUS';
+export const SET_PENDING_REPLY = 'SET_PENDING_REPLY';
+export const CLEAR_PENDING_REPLY = 'CLEAR_PENDING_REPLY';
+export const SHOW_TOAST = 'SHOW_TOAST';
+export const HIDE_TOAST = 'HIDE_TOAST';

@@ -1,0 +1,20 @@
+# Business brief template (short – optional)
+# For full Next.js template with Prompt Generator flow, use: business-brief-template-nextjs.yaml
+# Copy and fill for each feature; use with @prompt-generator-agent then @planning-agent.
+
+feature_name: my-feature        # kebab-case
+section_purpose: "One-line purpose"
+customization:                  # theme/customization
+  - section_background
+  - text_colors
+routes_or_components:
+  - name: ComponentName
+    type: route | component
+    rendering: server | client  # Server Component or Client Component
+    props: []
+validation:
+  critical_rules: []
+  error_rules: []
+success_metrics:
+  - "First-shot accuracy"
+  - "Lint/type/build clean"

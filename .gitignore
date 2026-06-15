@@ -66,6 +66,9 @@ yarn-error.log
 # testing
 /coverage
 
+# Detox E2E raw artifacts (heavy png/mp4 from test runs; use scripts/collect-detox-artifacts.js → keep test-results.md)
+.cursor/logs/detox-testing/artifacts/
+
 # Yarn
 .yarn/*
 !.yarn/patches

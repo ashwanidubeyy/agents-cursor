@@ -1,0 +1,113 @@
+---
+alwaysApply: true
+---
+# Agent Workflow Rules (React Native Vibe Engineering)
+
+## Agent Boundaries
+
+### Agent 00: Figma Analyzer
+- **Does:** Accept Figma URL + Mobile Frame name, use Figma MCP to extract specs (mobile only), save to `.cursor/cache/figma-specs-{feature}.md`. Extract hierarchy, measurements, colors, typography, spacing; map to React Native (ColorCode, FONTS). When icons/vectors are present, export required SVGs (via Figma MCP export or Figma REST API with `FIGMA_ACCESS_TOKEN`) to `.cursor/cache/figma-svgs/{feature}/` so development can use them directly.
+- **Setup:** Set `FIGMA_ACCESS_TOKEN` in environment (e.g. copy `.env.example` to `.env` and add your token; never commit the token). See agent-00-figma-analyzer.md for details.
+- **Does not:** Create PRD, write code, or proceed to next agent automatically.
+- **Stops when:** Specs file is saved. Invoke: `@figma-analyzer` with Feature name, Mobile URL + Frame, Section.
+
+### Agent 01: Planning Agent
+- **Does:** Read Figma specs or prompt, create PRD with communication history, save to `.cursor/logs/prd-{feature}-{timestamp}.md`.
+- **Does not:** Write code or run tests.
+- **Stops when:** PRD is saved. Invoke: `@planning-agent` with prompt or path to specs.
+
+### Agent 02: Coding Agent
+- **Does:** Read PRD, load rules/skills, implement code, update coding log, run lint/validation.
+- **Does not:** Create PRD or run E2E tests.
+- **Stops when:** Code is implemented and log updated. Invoke: `@coding-agent` with PRD path.
+
+### Agent 03: Documentation Agent
+- **Does:** Add JSDoc, file headers, inline comments.
+- **Does not:** Change logic or add features.
+- **Stops when:** Documentation added. Invoke: `@documentation-agent`.
+
+### Agent 04: Fixing Agent
+- **Does:** Fix issues from user prompt; read code/coding log, apply fixes, save fixing log to `.cursor/logs/fixing/fixing-{feature}.md`. When testing is requested: require test-cases file (`.cursor/logs/test-cases-{feature}.md`) and testing target (iOS Simulator / Android Emulator); run Jest (and E2E via Detox/Maestro if configured), track results by test case ID and priority, fix simple failures, re-run failed tests, document in same fixing log.
+- **Does not:** Create PRD or implement new features.
+- **Stops when:** Fixes applied and log updated (and tests run + results documented if test-and-fix). Invoke: `@fixing-agent` with feature name or "Test {feature}" + testing target. Test cases template: `.cursor/rules/log-templates/test-cases-template.md`. **E2E (Detox):** config `.detoxrc.js`, specs `e2e/**/*.e2e.js`, commands `npm run e2e:ios` / `e2e:android`; see `docs/DETOX-INTEGRATION.md` and `.cursor/rules/detox-testing.mdc`.
+
+### Agent 05: Code Scanning Agent
+- **Does:** Run quality checklist, run ESLint (and SonarQube if configured), document findings, save report to `.cursor/logs/code-scanning/`.
+- **Does not:** Fix code.
+- **Stops when:** Report saved. Invoke: `@code-scanning-agent`.
+
+### Agent 06: Vulnerability Agent
+- **Does:** Run npm audit (and Snyk if configured), categorize by severity (P1–P4), document prioritized remediation, save report to `.cursor/logs/vulnerability/`.
+- **Does not:** Apply fixes.
+- **Stops when:** Report saved. Invoke: `@vulnerability-agent`.
+
+### Agent 07: PR Orchestrator Agent
+- **Does:** Collect PRD, coding log, fixing log, scans; generate PR document.
+- **Does not:** Submit or merge PR.
+- **Stops when:** PR document saved. Invoke: `@pr-orchestrator-agent`.
+
+### Agent 08: Project Scaffold Agent
+- **Does:** Create a new React Native project with **given app name** and **sample folder structure with boilerplate**. Scaffolds src/ (api, components/layouts, components/widgets, constants, hooks, screens, store, utility), Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, one sample screen (Home), one store slice (Common). Saves log to `.cursor/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
+- **Does not:** Run React Native CLI or npm install; does not create ios/android (user runs CLI separately if needed).
+- **Stops when:** All files/folders created and log saved. Invoke: `@project-scaffold-agent` with app name; optional "in new folder" to create sibling directory.
+
+### Agent 09: Prompt Generator Agent
+- **Does:** Two modes. (A) Read **business brief** (YAML) and optionally **Figma specs**; generate **prompt for the Planning Agent**; save to `.cursor/cache/prompt-{feature}.md`. (B) Generate **project creation prompt** (React Native + TypeScript + standard boilerplate); save to `.cursor/cache/prompt-project-create-{name}.md` so user or Coding Agent can follow it.
+- **Does not:** Create PRD or write code; does not run React Native CLI or Figma MCP (specs must already be in cache from Figma Analyzer if used for mode A).
+- **Stops when:** Prompt file is saved. Invoke: `@prompt-generator-agent` with feature name (mode A) or project name + "TypeScript and boilerplate" (mode B).
+
+### Agent 10: Test Case Authoring Agent
+- **Does:** Create/manual QA test cases + automated Jest test files for a feature. Bridges the gap between Planning/Coding outputs and Fixing Agent inputs.
+- **Does not:** Run Detox E2E tests or fix code.
+- **Stops when:** Test cases file and Jest test file created. Invoke: `@testcases-agent` with feature name + PRD/coding log paths.
+
+### Agent 11: Detox Testing Agent
+- **Does:** Create Detox E2E test files for a module or entire app (if not created), run Detox tests with screenshot/video capture, generate detailed test reports with artifacts organized in folders (ss, video, test-results.md).
+- **Does not:** Fix code, create PRD, or implement features.
+- **Stops when:** Tests executed, artifacts organized, test results document generated. Invoke: `@detox-testing-agent` with feature name (or "entire app") + testing target (iOS Simulator / Android Emulator / Both). **E2E (Detox):** config `.detoxrc.js`, specs `e2e/**/*.e2e.js`, commands `npm run e2e:ios` / `e2e:android`; see `docs/DETOX-INTEGRATION.md` and `.cursor/rules/detox-testing.mdc`.
+
+### Agent 12: Pre-PR Validation Agent
+- **Does:** Review **only the changed files** (git diff vs base branch; default `main`) and related dependents (for breaking-change context) before a PR. Validates code quality & best practices, folder-structure compliance, React/React Native (and Next.js if present) performance, security/insecure patterns, TypeScript/lint/test (scoped), PR readiness, and potential breaking changes. Runs scoped ESLint/type check/Jest, produces P1/P2/P3 findings and a **READY / NOT READY** verdict. Saves report to `.cursor/logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md`. **Recommendations only — does not modify code.**
+- **Does not:** Fix/refactor code, create PRD, implement/scaffold, or create/commit/submit/merge a PR.
+- **Stops when:** Report saved and verdict announced. Invoke: `@pre-pr-validation-agent` (optional base branch). Run **before** `@pr-orchestrator-agent`; hand off fixes to `@fixing-agent` / `@coding-agent`.
+
+---
+
+## Workflow Sequence
+
+0. **Project Scaffold Agent** (optional) → New RN project with app name + folder structure + boilerplate → `.cursor/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`
+1. **Figma Analyzer** → `.cursor/cache/figma-specs-{feature}.md`
+1b. **Business brief** (developer fills) → `.cursor/setup/business-briefs/business-brief-{feature}.yaml`
+1c. **Prompt Generator Agent** (optional) → Reads brief + Figma specs → `.cursor/cache/prompt-{feature}.md` (use this as input to Planning Agent)
+2. **Planning Agent** → `.cursor/logs/prd-{feature}-{timestamp}.md`
+3. **Coding Agent** → Code + `.cursor/logs/coding/coding-{feature}.md`
+4. **Documentation Agent** → Comments + doc log
+5. **Test Case Authoring Agent** (optional) → `.cursor/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.js`
+6. **Detox Testing Agent** (optional) → Detox E2E tests + artifacts (ss/, video/, test-results.md) at `.cursor/logs/detox-testing/{feature}/{timestamp}/`
+7. **Fixing Agent** → Fixes + `.cursor/logs/fixing/fixing-{feature}.md`
+8. **Code Scanning Agent** → `.cursor/logs/code-scanning/`
+9. **Vulnerability Agent** → `.cursor/logs/vulnerability/`
+10. **Pre-PR Validation Agent** (before PR) → `.cursor/logs/pre-pr/pre-pr-{feature}-{timestamp}.md`
+11. **PR Orchestrator Agent** → `.cursor/logs/pr/pr-{feature}-{timestamp}.md`
+
+Each step requires manual invocation except where an agent explicitly calls another (e.g. Planning does not auto-call Coding).
+
+---
+
+## Invocation (Explicit)
+
+- `@project-scaffold-agent` — App name (e.g. MyApp, FitnessTracker); optional "in new folder" — Creates project with folder structure + boilerplate
+- `@prompt-generator-agent` — Feature name (mode A) or project name + "TypeScript and boilerplate" (mode B)
+- `@figma-analyzer` — Feature name, Mobile URL + Frame, Section
+- `@planning-agent` — Use prompt or path to specs/PRD
+- `@coding-agent` — Implement PRD from [prd-file]
+- `@documentation-agent` — Document the code
+- `@fixing-agent` — Feature name or description of what to fix
+- `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests
+- `@detox-testing-agent` — Feature name (or "entire app") + testing target (iOS Simulator / Android Emulator / Both) — Creates Detox tests, runs E2E, captures screenshots/videos, generates reports
+- `@code-scanning-agent` — Scan quality for [feature]
+- `@vulnerability-agent` — Scan security
+- `@pre-pr-validation-agent` — Validate only changed files before a PR (quality, structure, performance, security, TS/lint/test, PR readiness, breaking changes) + READY/NOT READY verdict
+- `@pr-orchestrator-agent` — Create PR for [feature]
+
+One agent, one task, one stop. Human approval at each step.

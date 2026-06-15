@@ -1,0 +1,287 @@
+---
+description: React Native best practices – feature-first structure, TypeScript, design system (ColorCode, FONTS), performance, and accessibility.
+globs: "**/*.{js,jsx,ts,tsx}"
+alwaysApply: false
+---
+# React Native Best Practices
+
+Definitive guidelines for building robust, performant, and maintainable React Native apps with TypeScript, functional components, and a feature-first architecture. Use ColorCode and FONTS (no hardcoded colors/typography).
+
+## 1. Code Organization and Structure
+
+### 1.1. Code Style Principles
+
+- Ensure components are modular, reusable, and maintainable.
+- Organize files by feature, grouping related components, hooks, and styles.
+- Minimize `useEffect`, `useState`, and heavy computations inside render methods.
+
+### 1.2. Feature-First Directory Structure
+
+Organize by feature, not by type. Co-locate components, screens, hooks, and styles per feature.
+
+**✅ GOOD:**
+
+```
+src/
+├── features/
+│   ├── Auth/
+│   │   ├── components/
+│   │   │   └── LoginForm/
+│   │   │       ├── LoginForm.jsx
+│   │   │       ├── LoginForm.styles.js
+│   │   │       └── LoginForm.test.jsx
+│   │   ├── screens/
+│   │   │   └── LoginScreen/
+│   │   └── hooks/
+│   │       └── useAuth.js
+│   └── Profile/
+├── components/       # Shared UI (Button, Input, etc.)
+├── navigation/
+├── services/
+├── utils/
+├── types/
+└── App.tsx
+```
+
+### 1.3. Naming Conventions
+
+- **Variables and Functions:** Use camelCase (e.g., `isFetchingData`, `handleUserInput`).
+- **Components:** Use PascalCase (e.g., `UserProfile`, `ChatScreen`).
+- **Directories:** Use lowercase and hyphenated (e.g., `user-profile`, `chat-screen`).
+- **Hooks:** Use camelCase with `use` prefix (e.g., `useAuth`, `useCounter`).
+- **Utilities:** Use camelCase (e.g., `formatDate`, `validateEmail`).
+
+### 1.4. File Naming and Co-location
+
+- PascalCase for components/screens; camelCase for hooks/utilities.
+- Co-locate: `ComponentName.tsx`, `ComponentName.styles.ts`, `ComponentName.test.tsx`.
+
+### 1.3. Absolute Imports
+
+Use path aliases instead of deep relative imports.
+
+**❌ BAD:** `import { Button } from '../../../../components/Button/Button';`  
+**✅ GOOD:** `import { Button } from '@components/Button/Button';`
+
+Configure in `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@features/*": ["src/features/*"],
+      "@navigation/*": ["src/navigation/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"],
+      "@types/*": ["src/types/*"]
+    }
+  }
+}
+```
+
+### 1.4. One Component Per File
+
+Each `.tsx` file exports exactly one React component as default. Small, tightly coupled stateless components may be co-located.
+
+---
+
+## 2. Component Architecture
+
+### 2.1. Functional Components and Hooks
+
+Use functional components and React Hooks only. No class components.
+
+**✅ GOOD:**
+
+```typescript
+import React, { useState, useEffect } from 'react';
+const MyComponent: React.FC = () => { /* ... */ };
+```
+
+### 2.2. Custom Hooks for Reusable Logic
+
+Extract stateful logic into custom hooks.
+
+**✅ GOOD:**
+
+```javascript
+// hooks/useCounter.js
+export const useCounter = (initialValue = 0) => {
+  const [count, setCount] = useState(initialValue);
+  return { count, setCount };
+};
+```
+
+### 2.3. Presentational vs. Container
+
+- **Presentational:** Props in, events out; no direct API/global state.
+- **Container/Screen:** State, data fetching, business logic; passes data and callbacks to presentational components.
+
+---
+
+## 3. State Management
+
+- **Local:** `useState`, `useReducer` for component/subtree state.
+- **Global:** Redux Toolkit for complex app state; Zustand or Jotai for simpler needs. Avoid overusing Context for app-wide state.
+
+---
+
+## 4. Styling and Design System
+
+### 4.1. StyleSheet.create and Co-location
+
+- Use consistent styling, either through `StyleSheet.create()` or Styled Components.
+- Define styles in a `.styles.js` file; never inline large style objects.
+
+**❌ BAD:** `<View style={{ backgroundColor: 'red', padding: 10 }} />`  
+**✅ GOOD:** `StyleSheet.create` in `ComponentName.styles.js` and `import { styles } from './ComponentName.styles'`.
+
+### 4.1.1. Responsive Design
+
+- Ensure responsive design by considering different screen sizes and orientations.
+- Use `dimensions`, `scale`, `verticalScale`, `moderateScale` (e.g., react-native-size-matters) for key dimensions when supporting multiple screen sizes.
+
+### 4.2. Colors and Typography (Mandatory)
+
+- **Colors:** Use ColorCode only (e.g. `ColorCode.backgroundColor007AFF`, `ColorCode.titleColor1C1C1E`). No raw hex in styles.
+- **Typography:** Use FONTS (e.g. `FONTS.textParagraph14`, `FONTS.headingH2Bold`). No hardcoded fontFamily/fontSize/lineHeight when a token exists.
+
+**✅ GOOD:**
+
+```typescript
+const styles = StyleSheet.create({
+  title: {
+    color: ColorCode.titleColor1C1C1E,
+    ...FONTS.headingH2Bold,
+  },
+  container: {
+    backgroundColor: ColorCode.backgroundColorFFFFFF,
+  },
+});
+```
+
+### 4.3. Platform and Effects
+
+- **Shadow:** iOS `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`; Android `elevation`.
+- **Safe area:** SafeAreaView or react-native-safe-area-context.
+- Use `Platform.select` for platform-specific values when needed.
+
+---
+
+## 5. Navigation
+
+Use React Navigation. Define navigators and screens under `navigation/` (e.g. `AppNavigator.tsx`).
+
+---
+
+## 6. API and Services
+
+Centralize API logic in a service layer (e.g. `services/authService.ts`) using axios or fetch. Do not scatter API calls inside UI components.
+
+---
+
+## 7. Performance
+
+### 7.1. General Performance Guidelines
+
+- Minimize `useEffect`, `useState`, and heavy computations inside render methods.
+- Use `React.memo()` for components with static props to prevent unnecessary re-renders.
+- Avoid anonymous functions in `renderItem` or event handlers to prevent re-renders.
+
+### 7.2. List Optimization
+
+- **Lists:** Use FlatList or SectionList (or FlashList) for long lists.
+- Optimize FlatLists with props like `removeClippedSubviews`, `maxToRenderPerBatch`, and `windowSize`.
+- Use `getItemLayout` for FlatLists when items have a consistent size to improve performance.
+- Set `estimatedItemSize` where applicable; memoize list items.
+
+**✅ GOOD (optimized FlatList):**
+
+```javascript
+const renderItem = useCallback(({ item }) => <ListItem item={item} />, []);
+
+const getItemLayout = useCallback(
+  (_data, index) => ({
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * index,
+    index,
+  }),
+  []
+);
+
+return (
+  <FlatList
+    data={items}
+    renderItem={renderItem}
+    removeClippedSubviews={true}
+    maxToRenderPerBatch={10}
+    windowSize={10}
+    getItemLayout={getItemLayout}
+    estimatedItemSize={ITEM_HEIGHT}
+  />
+);
+```
+
+### 7.3. Memoization
+
+- Use `React.memo`, `useCallback`, `useMemo` for expensive renders and callbacks.
+
+### 7.4. Images
+
+- Optimize image handling using libraries designed for React Native, like `react-native-fast-image`.
+- Prefer FastImage for network images; use defaultSource/onError and sizing where appropriate.
+
+### 7.5. Navigation
+
+- Avoid heavy work in focus/blur; lazy load screen content when possible.
+
+---
+
+## 8. Accessibility
+
+- Use `accessibilityLabel`, `accessibilityRole`, `accessibilityHint`, `accessibilityState` on interactive elements.
+- Touch targets: minimum 44px (height/width or padding).
+- Support screen readers and reduce-motion where applicable.
+
+---
+
+## 9. Error Handling
+
+- Use optional chaining: `obj?.value`, `arr?.[0]` for nested/optional data.
+- Use try/catch for async code; expose user-facing error states.
+
+---
+
+## 10. Common Pitfalls
+
+### 10.1. Do Not Mutate State
+
+**❌ BAD:** `user.name = 'Jane';`  
+**✅ GOOD:** `setUser(prev => ({ ...prev, name: 'Jane' }));`
+
+### 10.2. Conditional Rendering
+
+Avoid `&&` when the left side can be `0` or `false` (can render as text and cause issues). Prefer ternary or explicit null.
+
+**✅ GOOD:** `{showMessage ? <Text>Hello!</Text> : null}`
+
+### 10.3. Platform Differences
+
+Test on both iOS and Android. Use `Platform.select` for platform-specific styles or logic.
+
+---
+
+## Validation Checklist
+
+- [ ] No hardcoded hex in styles (use ColorCode).
+- [ ] Typography from FONTS where available.
+- [ ] Shadow/elevation for both iOS and Android.
+- [ ] Optional chaining for safe access where appropriate.
+- [ ] Feature-first structure; absolute imports.
+- [ ] One component per file; co-located styles and tests.
+- [ ] FlatLists optimized with `removeClippedSubviews`, `maxToRenderPerBatch`, `windowSize`, and `getItemLayout` where applicable.
+- [ ] `React.memo` used for components with static props.
+- [ ] Responsive design considerations for different screen sizes.
+- [ ] Images optimized with `react-native-fast-image` for network images.

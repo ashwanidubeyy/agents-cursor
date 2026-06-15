@@ -1,0 +1,147 @@
+# Business Brief Template — Next.js Web Apps (Vibe Engineering)
+# Fill this to give the Prompt Generator Agent business context for a feature.
+# The agent merges this with Figma specs (if provided) and outputs a prompt for
+# the Planning Agent.
+#
+# Time to complete: 5–10 minutes
+# Next step: Run @prompt-generator-agent with this brief (and optional Figma specs path).
+
+# ============================================================================
+# FEATURE IDENTIFICATION
+# ============================================================================
+
+feature_name: ""           # kebab-case, e.g. "auth-login", "dashboard", "product-detail"
+figma_node_id: ""          # Optional. From Figma URL, e.g. "488-37542"
+figma_specs_file: ""       # Optional. e.g. "figma-specs-auth-login.md" (in .cursornext/cache/)
+screenshot_file: ""        # Optional. e.g. "Screenshot_2026-02-02.png"
+
+# ============================================================================
+# 1. FEATURE PURPOSE (Next.js web)
+# ============================================================================
+
+feature_type:              # One or more: route/page, component, flow, module
+  - ""                     # e.g. "route", "component", "flow"
+
+primary_purpose:           # What is this feature FOR? (1–2 sentences)
+  - ""
+
+primary_use_cases:         # Where/when is it shown? (list 2–4)
+  - ""                     # e.g. "Login page for logged-out users"
+  - ""                     # e.g. "Dashboard after sign-in"
+  - ""
+
+target_audience:           # Who uses or sees this page/flow?
+  - ""                     # e.g. "Logged-out users", "Admins", "All users"
+
+rendering_notes:           # Server vs Client expectations
+  - ""                     # e.g. "Page server-rendered; filter panel is interactive (client)"
+
+# ============================================================================
+# 2. USER WORKFLOW (in-app behavior)
+# ============================================================================
+
+typical_workflow:          # How does the user interact?
+  - ""                     # e.g. "User enters credentials and clicks Sign in"
+  - ""                     # e.g. "User filters the table and opens a row detail"
+
+time_to_complete:          # Expected time (if applicable)
+  - ""                     # e.g. "Under 30 seconds"
+
+key_actions:               # Main things the user DOES (list 2–5)
+  - ""                     # e.g. "Enter email and password"
+  - ""                     # e.g. "Click Forgot password"
+  - ""
+
+# ============================================================================
+# 3. BUSINESS RULES & CONSTRAINTS
+# ============================================================================
+
+strict_constraints:        # Hard rules that MUST be enforced
+  - ""                     # e.g. "Password min 8 chars"
+  - ""                     # e.g. "Max 3 steps in onboarding flow"
+  - ""
+
+layout_rules:              # Layout / responsive behavior
+  - ""                     # e.g. "Single column on mobile, 3-column grid on desktop"
+  - ""                     # e.g. "Sticky header"
+
+content_requirements:      # Required fields, validation, copy
+  - ""                     # e.g. "Email required; valid format"
+  - ""                     # e.g. "At least one primary CTA"
+  - ""
+
+# ============================================================================
+# 4. THEMING / CONFIGURATION (yes | no | maybe)
+# ============================================================================
+
+colors:
+  page_background: ""      # yes/no/maybe
+  card_backgrounds: ""
+  text_colors: ""
+  accent_colors: ""        # e.g. primary button, links
+  border_colors: ""
+
+content:
+  headings: ""             # yes/no/maybe
+  descriptions: ""
+  button_text: ""
+  placeholder_text: ""
+  error_messages: ""
+
+layout:
+  number_of_sections: ""   # yes/no/maybe
+  spacing: ""
+  image_aspect_ratio: ""
+
+styling:
+  border_radius: ""
+  shadows: ""
+  typography_scale: ""     # TYPOGRAPHY tokens only vs override
+
+other_customizations:
+  - ""                     # e.g. "Show/hide optional fields"
+  - ""
+
+# ============================================================================
+# 5. SUCCESS METRICS
+# ============================================================================
+
+success_criteria:          # How do we know this works? (2–5)
+  - ""                     # e.g. "User completes login in under 30 seconds"
+  - ""                     # e.g. "Lighthouse a11y/perf ≥ 90"
+  - ""
+
+business_goals:            # What outcome does this support?
+  - ""                     # e.g. "Increase sign-up conversion"
+  - ""
+
+# ============================================================================
+# 6. WEB-SPECIFIC CONSIDERATIONS (Optional)
+# ============================================================================
+
+accessibility_notes:
+  - ""                     # e.g. "Labeled inputs; aria-* on interactive elements"
+  - ""                     # e.g. "Keyboard navigable; visible focus states"
+
+performance_notes:
+  - ""                     # e.g. "next/image for hero; virtualize long table"
+  - ""                     # e.g. "Server-render initial data; cache/revalidate"
+
+seo_notes:
+  - ""                     # e.g. "Per-route metadata; Open Graph tags"
+
+integration_notes:         # Routing, state, APIs, data fetching
+  - ""                     # e.g. "Fetch data in Server Component via service; auth slice"
+  - ""
+
+edge_cases:
+  - ""                     # e.g. "Handle empty state / error.tsx"
+  - ""                     # e.g. "Unauthenticated redirect"
+  - ""
+
+# ============================================================================
+# DESIGN SYSTEM (Next.js — agent maps Figma to these)
+# ============================================================================
+# Colors: COLORS only. Typography: TYPOGRAPHY only (with font-weight). Spacing: theme/spacing.
+# Effects: box-shadow; border-radius from tokens. Safety: obj?.value where needed.
+# Server Components by default; 'use client' only for interactivity.
