@@ -82,6 +82,88 @@ You've successfully run and modified your React Native App. :partying_face:
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
 - If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
 
+# Cursor AI Agent Systems
+
+This repo ships two agentic "software factory" systems for Cursor. Each is a set of **12 specialized agents** that do one job, write their output to a file, then stop and hand off to the next agent (a human approves each step).
+
+| System | Folder | Stack | E2E |
+| ------ | ------ | ----- | --- |
+| React Native | `.cursor/` | RN + TypeScript | Detox |
+| Next.js | `.cursornext/` | Next.js + TypeScript | Playwright |
+
+> **Quick start:** React Native cheat sheet → `.cursor/USAGE.md`; full guide → `.cursor/README.md`.
+
+## Workflow (both systems)
+
+```
+@figma-analyzer → @planning-agent → @coding-agent → @documentation-agent
+→ @testcases-agent → @e2e/detox-testing-agent → @fixing-agent
+→ @code-scanning-agent → @vulnerability-agent → @pre-pr-validation-agent → @pr-orchestrator-agent
+```
+
+Minimum flow for a designed feature: `@figma-analyzer → @planning-agent → @coding-agent → @fixing-agent`.
+
+## Agents (invoke with `@`)
+
+| Agent | Invoke | Output |
+| ----- | ------ | ------ |
+| Project Scaffold | `@project-scaffold-agent` | New project + boilerplate |
+| Prompt Generator | `@prompt-generator-agent` | Planning/project prompt |
+| Figma Analyzer | `@figma-analyzer` | `cache/figma-specs-{feature}.md` + SVG/PNG export |
+| Planning | `@planning-agent` | `logs/prd-{feature}-{ts}.md` |
+| Coding | `@coding-agent` | Source + `logs/coding/coding-{feature}.md` |
+| Documentation | `@documentation-agent` | Documented code |
+| Test Cases | `@testcases-agent` | `logs/test-cases-{feature}.md` + Jest test |
+| E2E Testing | `@detox-testing-agent` (RN) / `@e2e-testing-agent` (Next.js) | `logs/{e2e,detox}-testing/{feature}/{ts}/test-results.md` |
+| Fixing | `@fixing-agent` | `logs/fixing/fixing-{feature}.md` |
+| Code Scanning | `@code-scanning-agent` | `logs/code-scanning/...` |
+| Vulnerability | `@vulnerability-agent` | `logs/vulnerability/...` |
+| Pre-PR Validation | `@pre-pr-validation-agent` | READY / NOT READY report |
+| PR Orchestrator | `@pr-orchestrator-agent` | `logs/pr/pr-{feature}-{ts}.md` |
+
+## Rules (auto-applied by Cursor)
+
+- **React Native** (`.cursor/rules/`): `agent-workflow-rules.mdc`, `react-native.mdc`, `figma-to-react-native.mdc`, `detox-testing.mdc`, `coding-standards.md`.
+- **Next.js** (`.cursornext/rules/`): `agent-workflow-rules.mdc`, `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc`, `coding-standards.md`.
+
+## Reference docs
+
+| Doc | Purpose |
+| --- | ------- |
+| `docs/DETOX-INTEGRATION.md` | RN Detox E2E setup (iOS + Android native wiring, troubleshooting, new-project checklist) |
+| `.cursornext/docs/E2E-PLAYWRIGHT.md` | Next.js Playwright E2E setup (config, specs, troubleshooting, new-project checklist) |
+| `.cursor/TOKEN-USAGE.md` | Tips to reduce Cursor token usage (incl. agent-system specifics) |
+| `.cursor/USAGE.md` | One-page command cheat sheet |
+
+## Scripts
+
+**Detox artifacts** (`scripts/`):
+
+```sh
+node scripts/collect-detox-artifacts.js {feature}   # collect failure screenshots/videos → logs
+```
+
+**Figma export** (`.cursor/scripts/` and `.cursornext/scripts/`) — needs `FIGMA_ACCESS_TOKEN` (copy `.env.example` → `.env`):
+
+```sh
+node .cursor/scripts/export-figma-svg.js <nodeId> <name> [fileKey]
+node .cursor/scripts/export-figma-png.js <nodeId> <android_name> <IosImageSet> [fileKey]
+node .cursor/scripts/fetch-figma-nodes.js <fileKey> <nodeIds>
+```
+
+## E2E npm scripts
+
+```sh
+# React Native (Detox)
+npm run e2e:build:android && npm run e2e:android   # emulator
+npm run e2e:build:ios && npm run e2e:ios           # simulator
+npm run e2e:android:attached                       # physical device
+
+# Next.js (Playwright) — when used in a Next.js project
+npm run e2e                                         # all specs
+npx playwright test e2e/{feature}.spec.ts           # single spec
+```
+
 # Troubleshooting
 
 If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.

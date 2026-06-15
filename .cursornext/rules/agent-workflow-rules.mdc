@@ -29,7 +29,7 @@ alwaysApply: true
 ### Agent 04: Fixing Agent
 - **Does:** Fix issues from user prompt; read code/coding log, apply fixes, save fixing log to `.cursornext/logs/fixing/fixing-{feature}.md`. When testing is requested: require test-cases file (`.cursornext/logs/test-cases-{feature}.md`); run Jest + React Testing Library (and E2E via Playwright if configured), track results by test case ID and priority, fix simple failures, re-run failed tests, document in same fixing log.
 - **Does not:** Create PRD or implement new features.
-- **Stops when:** Fixes applied and log updated (and tests run + results documented if test-and-fix). Invoke: `@fixing-agent` with feature name or "Test {feature}". Test cases template: `.cursornext/rules/log-templates/test-cases-template.md`. **E2E (Playwright):** config `playwright.config.ts`, specs `e2e/**/*.spec.ts`, commands `npm run e2e`; see `.cursornext/rules/e2e-testing.mdc`.
+- **Stops when:** Fixes applied and log updated (and tests run + results documented if test-and-fix). Invoke: `@fixing-agent` with feature name or "Test {feature}". Test cases template: `.cursornext/rules/log-templates/test-cases-template.md`. **E2E (Playwright):** config `playwright.config.ts`, specs `e2e/**/*.spec.ts`, commands `npm run e2e`; see `.cursornext/docs/E2E-PLAYWRIGHT.md` and `.cursornext/rules/e2e-testing.mdc`.
 
 ### Agent 05: Code Scanning Agent
 - **Does:** Run quality checklist, run ESLint (`next lint`) + TypeScript check (and SonarQube if configured), document findings, save report to `.cursornext/logs/code-scanning/`.
@@ -64,7 +64,7 @@ alwaysApply: true
 ### Agent 11: Playwright E2E Testing Agent
 - **Does:** Create Playwright E2E spec files for a route/flow or entire app (if not created), run Playwright tests with screenshot/trace/video capture, generate detailed test reports with artifacts organized in folders (screenshots, videos, traces, test-results.md).
 - **Does not:** Fix code, create PRD, or implement features.
-- **Stops when:** Tests executed, artifacts organized, test results document generated. Invoke: `@e2e-testing-agent` with feature name (or "entire app") + base URL (e.g. http://localhost:3000). **E2E (Playwright):** config `playwright.config.ts`, specs `e2e/**/*.spec.ts`, commands `npm run e2e`; see `.cursornext/rules/e2e-testing.mdc`.
+- **Stops when:** Tests executed, artifacts organized, test results document generated. Invoke: `@e2e-testing-agent` with feature name (or "entire app") + base URL (e.g. http://localhost:3000). **E2E (Playwright):** config `playwright.config.ts`, specs `e2e/**/*.spec.ts`, commands `npm run e2e`; see `.cursornext/docs/E2E-PLAYWRIGHT.md` and `.cursornext/rules/e2e-testing.mdc`.
 
 ### Agent 12: Pre-PR Validation Agent
 - **Does:** Review **only the changed files** (git diff vs base branch; default `main`) and related dependents (for breaking-change context) before a PR. Validates code quality & best practices, folder-structure compliance, React/Next.js performance (Server/Client split, `next/image`, memoization), security/insecure patterns, TypeScript/lint/test/build (scoped), PR readiness, and potential breaking changes. Runs scoped ESLint/type check/build/Jest, produces P1/P2/P3 findings and a **READY / NOT READY** verdict. Saves report to `.cursornext/logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md`. **Recommendations only — does not modify code.**

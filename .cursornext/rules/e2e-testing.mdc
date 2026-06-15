@@ -33,6 +33,12 @@ Use a **base URL** from the user (default `http://localhost:3000`) to target the
 - Enable `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`, and `trace: 'on-first-retry'` in `playwright.config.ts`.
 - Artifacts are written to `test-results/` and the HTML report to `playwright-report/`. The E2E agent copies relevant artifacts into `.cursornext/logs/e2e-testing/{feature}/{timestamp}/`.
 
+## Setup (must exist before running)
+
+- `@playwright/test` devDependency + browsers installed (`npx playwright install`).
+- `playwright.config.ts` with `testDir: './e2e'`, `baseURL`, failure artifacts, and (optionally) a `webServer` block.
+- If any piece is missing, complete setup first — see `.cursornext/docs/E2E-PLAYWRIGHT.md`.
+
 ## Full steps
 
-See **`.cursornext/agents/agent-11-e2e-testing.md`** for the agent workflow, artifact collection, and reporting format.
+See **`.cursornext/docs/E2E-PLAYWRIGHT.md`** for setup, config, and troubleshooting, and **`.cursornext/agents/agent-11-e2e-testing.md`** for the agent workflow, artifact collection, and reporting format.

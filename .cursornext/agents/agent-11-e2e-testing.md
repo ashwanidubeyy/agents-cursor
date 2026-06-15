@@ -26,22 +26,37 @@ Every time you're invoked, you MUST:
 
 1. ✅ **Extract feature name** (from prompt)
 2. ✅ **Get base URL** (default `http://localhost:3000`) — ensure the app is reachable (or rely on `webServer` in `playwright.config.ts`)
-3. ✅ **Check if spec exists** — `e2e/{feature}.spec.ts`
-4. ✅ **Create spec if missing** — based on PRD/coding log/test cases and navigation
-5. ✅ **Create results folder** — `.cursornext/logs/e2e-testing/{feature}/{timestamp}/` with `screenshots/`, `videos/`, `traces/`
-6. ✅ **Verify Playwright config** — artifacts (screenshot on failure, video retain-on-failure, trace on-first-retry), browsers installed (`npx playwright install`)
-7. ✅ **Ensure app is running** — dev/prod server reachable at base URL, or `webServer` configured
-8. ✅ **Run Playwright tests automatically** — `npx playwright test e2e/{feature}.spec.ts`
-9. ✅ **Capture results** — parse pass/fail, errors, TC-IDs
-10. ✅ **Collect artifacts** — copy screenshots/videos/traces for failed tests to results folder
-11. ✅ **Generate results file** — `test-results.md` with summary, issues, embedded screenshots, recommendations. **CRITICAL: Do NOT modify source code — only document recommendations**
-12. ✅ **Announce completion** with results file location and status
+3. ✅ **Verify Playwright setup** (STEP 0) — `@playwright/test` installed, browsers installed, `playwright.config.ts` present. If missing, STOP and point to `.cursornext/docs/E2E-PLAYWRIGHT.md`
+4. ✅ **Check if spec exists** — `e2e/{feature}.spec.ts`
+5. ✅ **Create spec if missing** — based on PRD/coding log/test cases and navigation
+6. ✅ **Create results folder** — `.cursornext/logs/e2e-testing/{feature}/{timestamp}/` with `screenshots/`, `videos/`, `traces/`
+7. ✅ **Verify Playwright config** — artifacts (screenshot on failure, video retain-on-failure, trace on-first-retry), browsers installed (`npx playwright install`)
+8. ✅ **Ensure app is running** — dev/prod server reachable at base URL, or `webServer` configured
+9. ✅ **Run Playwright tests automatically** — `npx playwright test e2e/{feature}.spec.ts`
+10. ✅ **Capture results** — parse pass/fail, errors, TC-IDs
+11. ✅ **Collect artifacts** — copy screenshots/videos/traces for failed tests to results folder
+12. ✅ **Generate results file** — `test-results.md` with summary, issues, embedded screenshots, recommendations. **CRITICAL: Do NOT modify source code — only document recommendations**
+13. ✅ **Announce completion** with results file location and status
 
 **If you forgot:** STOP, create/update artifacts retroactively, then continue.
 
 ---
 
 ## 🔄 MANDATORY WORKFLOW
+
+### STEP 0: Verify Playwright Is Configured
+
+Before anything else, confirm Playwright is wired up. If a required piece is missing, **STOP** and tell the user to complete setup (point them to `.cursornext/docs/E2E-PLAYWRIGHT.md`) — do NOT attempt a partial run.
+
+**Quick checks:**
+- `@playwright/test` is a devDependency; browsers installed (`npx playwright install`).
+- `playwright.config.ts` exists with `testDir: './e2e'`, `baseURL`, and failure artifacts (`screenshot`/`video`/`trace`).
+- `package.json` has the `e2e` script.
+- App is reachable at the base URL, or `playwright.config.ts` has a `webServer` block.
+
+**Full setup, config, and troubleshooting:** `.cursornext/docs/E2E-PLAYWRIGHT.md`.
+
+---
 
 ### STEP 1: Extract Feature Name
 
