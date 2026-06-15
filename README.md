@@ -1,3 +1,7 @@
+For React Native: https://docs.google.com/document/d/1DB0if_g6tVlS1xhuW0uhhv3OoBF9yXhOKMyFjk00sQY/edit?tab=t.0#heading=h.oj34vq1p6br0
+
+For Next JS: https://docs.google.com/document/d/12rLzhaPYanMHOlRMxeJvsFF3KXl9EzZUhPzqNcAW0UM/edit?tab=t.0
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
@@ -91,7 +95,9 @@ This repo ships two agentic "software factory" systems for Cursor. Each is a set
 | React Native | `.cursor/` | RN + TypeScript | Detox |
 | Next.js | `.cursornext/` | Next.js + TypeScript | Playwright |
 
-> **Quick start:** React Native cheat sheet → `.cursor/USAGE.md`; full guide → `.cursor/README.md`.
+> **Full guides:**
+> - React Native → [`.cursor/README.md`](.cursor/README.md) (cheat sheet: [`.cursor/USAGE.md`](.cursor/USAGE.md))
+> - Next.js → [`.cursornext/README.md`](.cursornext/README.md)
 
 ## Workflow (both systems)
 
@@ -130,10 +136,12 @@ Minimum flow for a designed feature: `@figma-analyzer → @planning-agent → @c
 
 | Doc | Purpose |
 | --- | ------- |
+| `.cursor/README.md` | Full React Native agent-system guide |
+| `.cursornext/README.md` | Full Next.js agent-system guide |
 | `docs/DETOX-INTEGRATION.md` | RN Detox E2E setup (iOS + Android native wiring, troubleshooting, new-project checklist) |
 | `.cursornext/docs/E2E-PLAYWRIGHT.md` | Next.js Playwright E2E setup (config, specs, troubleshooting, new-project checklist) |
 | `.cursor/TOKEN-USAGE.md` | Tips to reduce Cursor token usage (incl. agent-system specifics) |
-| `.cursor/USAGE.md` | One-page command cheat sheet |
+| `.cursor/USAGE.md` | One-page command cheat sheet (React Native) |
 
 ## Scripts
 
@@ -143,12 +151,16 @@ Minimum flow for a designed feature: `@figma-analyzer → @planning-agent → @c
 node scripts/collect-detox-artifacts.js {feature}   # collect failure screenshots/videos → logs
 ```
 
-**Figma export** (`.cursor/scripts/` and `.cursornext/scripts/`) — needs `FIGMA_ACCESS_TOKEN` (copy `.env.example` → `.env`):
+**Figma export** — needs `FIGMA_ACCESS_TOKEN`:
 
 ```sh
-node .cursor/scripts/export-figma-svg.js <nodeId> <name> [fileKey]
+# React Native (.cursor) — token in .env; PNG → Android drawable + iOS Images.xcassets
+node .cursor/scripts/export-figma-svg.js <feature> <nodeId> [fileKey]
 node .cursor/scripts/export-figma-png.js <nodeId> <android_name> <IosImageSet> [fileKey]
-node .cursor/scripts/fetch-figma-nodes.js <fileKey> <nodeIds>
+
+# Next.js (.cursornext) — token in .env.local; raster → public/images
+node .cursornext/scripts/export-figma-svg.js <feature> <nodeId> [fileKey] [outFile]
+node .cursornext/scripts/export-figma-png.js <nodeId> <output-name> <fileKey> [scale]
 ```
 
 ## E2E npm scripts
