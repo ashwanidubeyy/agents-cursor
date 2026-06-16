@@ -32,7 +32,7 @@ src/
 │   ├── titles.js
 │   ├── common.js         # screen dimensions, etc.
 │   └── index.js          # Re-export all
-├── hooks/                # Custom hooks (e.g. useDeviceSyncStatus)
+├── hooks/                # Custom hooks (e.g. useForm — schema-based forms; useDeviceSyncStatus)
 ├── screens/              # One folder per screen: index.js + style.js
 │   ├── ScreenName/
 │   │   ├── index.js
@@ -43,8 +43,10 @@ src/
 │   ├── Common/
 │   ├── Devices/
 │   └── index.js          # combineReducers, appReducer
-└── utility/              # Helpers (deviceDetailUtils, notificationUtils, index.js)
+└── utility/              # Helpers (form-validators, deviceDetailUtils, index.js)
 ```
+
+**Forms:** every form uses the shared schema-based **`useForm`** hook (`@hooks/useForm`) with validators from `@utility/form-validators`. Install via `node .cursor/scripts/setup-useform.js` (TypeScript or JavaScript) — the Project Scaffold Agent does this automatically. See `.cursor/rules/useform-validation.mdc` and build forms with `@useform-builder-agent`.
 
 ## Path Aliases (babel-plugin-module-resolver)
 

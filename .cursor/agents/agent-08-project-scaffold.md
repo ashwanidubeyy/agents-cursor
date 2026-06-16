@@ -84,23 +84,27 @@ npx @react-native-community/cli init <ProjectFolderName> --skip-install
 - **Do not create** a new `package.json`, `app.json`, or full new `index.js`; the CLI already created them.
 - **Update** existing `index.js` (or `index.tsx`): boot from Root — `import Root from './src/Root';` and `AppRegistry.registerComponent(appName, () => Root);`. Replace the default `App` import if present.
 - **Update** existing `babel.config.js`: add `babel-plugin-module-resolver` with aliases (`@`, `@components`, `@screens`, `@constants`, `@store`, `@utility`, `@api`, `@assets`, `@layouts`, `@widgets`, `@hooks` under `./src`). Keep the existing preset.
+- **Update** existing `tsconfig.json` (TypeScript projects): add `baseUrl: "."` and a `paths` map mirroring the babel aliases (e.g. `"@hooks/*": ["src/hooks/*"]`, `"@utility/*": ["src/utility/*"]`), so `tsc` resolves the same imports the bundler does.
 - **Merge** into existing `package.json`: add dependencies — `@react-navigation/native`, `@react-navigation/native-stack`, `react-native-screens`, `react-native-safe-area-context`, `redux`, `react-redux`, `react-native-size-matters`; devDependencies — `babel-plugin-module-resolver` (omit any that already exist).
 - **Create** the `src/` folder structure and all boilerplate files; use the **dynamic App name** in "Welcome to {AppName}" and any display strings.
 
 ```
 src/
-├── api/           (apiEndPoints.js, commonApi.js)
+├── api/           (apiEndPoints, commonApi)
 ├── assets/fonts/  (.gitkeep)
 ├── assets/SVGs/   (.gitkeep)
-├── components/layouts/   (BaseScreen/index.js, style.js)
-├── components/widgets/   (CustomButton/index.js, style.js)
-├── constants/      (colors.js, fonts.js, commonStyles.js, index.js)
-├── hooks/          (index.js)
-├── screens/        (Home/index.js, style.js; index.js barrel)
-├── store/          (Common: actions.js, actionTypes.js, reducers.js; index.js)
-└── utility/        (index.js)
+├── components/layouts/   (BaseScreen/index, style)
+├── components/widgets/   (CustomButton/index, style)
+├── constants/      (colors, fonts, commonStyles, alerts, index)
+├── hooks/          (useForm, index barrel)
+├── screens/        (Home/index, style; index barrel)
+├── store/          (Common: actions, actionTypes, reducers; index)
+└── utility/        (form-validators, index)
 ```
 
+> **File extension:** the Community CLI scaffolds a **TypeScript** project by default, so create boilerplate as `.ts`/`.tsx` (and ensure `tsconfig.json` has `baseUrl` + `paths` mirroring the babel aliases). Only fall back to `.js`/`.jsx` if the created project is JavaScript-only.
+
+- **src/hooks/useForm** + **src/utility/form-validators** — Install the schema-based **`useForm`** hook and its validators so every new project can build validated forms out of the box. Copy from the templates in `.cursor/setup/hooks/useForm.{ts,js}` and `.cursor/setup/utility/form-validators.{ts,js}` (TypeScript when the project is TypeScript, else JavaScript), and export `useForm` from `src/hooks/index`. If the new project still has access to this workspace's `.cursor/`, you may instead run `node .cursor/scripts/setup-useform.js` from the project root. Add a `src/constants/alerts` file with a `VALIDATION` group (e.g. `EMAIL_INVALID`, `PASSWORD_MIN`) for the validator messages. See `.cursor/rules/useform-validation.mdc`.
 - **src/Root.js** — Redux Provider, render AppRouteConfig; createAppStore from @store.
 - **src/AppRouteConfig.js** — NavigationContainer, createNativeStackNavigator; Home from @screens.
 - **src/constants/** — COLORS, fontFamily/fontSize, commonStyles (StyleSheet), index re-export.
@@ -118,12 +122,12 @@ Use path aliases in imports. No raw hex in styles; use COLORS and fontFamily/fon
 ### STEP 5: Save scaffold log
 
 - Create `.cursor/logs/project-scaffold/` if needed.
-- Save **`.cursor/logs/project-scaffold/project-scaffold-{app-name-kebab}-{timestamp}.md`** with: **dynamic** App name, Folder name used for CLI, project root path (outside workspace), **exact CLI command run** (community CLI, no deprecated `react-native init`; TypeScript by default), list of folders/files added, next steps (`cd <path-to-project>`, `npm install`, `cd ios && pod install`).
+- Save **`.cursor/logs/project-scaffold/project-scaffold-{app-name-kebab}-{timestamp}.md`** with: **dynamic** App name, Folder name used for CLI, project root path (outside workspace), **exact CLI command run** (community CLI, no deprecated `react-native init`; TypeScript by default), list of folders/files added (including the **`useForm` hook + `form-validators`**), next steps (`cd <path-to-project>`, `npm install`, `cd ios && pod install`).
 
 ### STEP 6: Report to user
 
 - Confirm: TypeScript React Native app created via CLI **outside** the workspace; folder structure and boilerplate added in the created project. App name used is the **dynamic** value from user input.
-- List project root path (sibling to workspace, e.g. `../<ProjectFolderName>/` or absolute path) and main additions (src/, Root, AppRouteConfig, constants, store, screens, widgets).
+- List project root path (sibling to workspace, e.g. `../<ProjectFolderName>/` or absolute path) and main additions (src/, Root, AppRouteConfig, constants, store, screens, widgets, **hooks/useForm + utility/form-validators**).
 - Next steps: `cd <path-to-project>`, `npm install`, `cd ios && pod install`, then `npm start` / `npm run ios` or `npm run android`.
 
 ---
@@ -164,6 +168,6 @@ Create React Native project react-native-vibe-engineering.
 
 ## BOUNDARIES
 
-- **Does:** **Always** create the project via the **React Native Community CLI** first (use `npx @react-native-community/cli init`; do not use deprecated `npx react-native init`); create the project **outside** the workspace (sibling folder); use **dynamic** App name from user input; then add folder structure and boilerplate in the CLI-created project; update/merge index.js, babel.config.js, package.json; save scaffold log.
+- **Does:** **Always** create the project via the **React Native Community CLI** first (use `npx @react-native-community/cli init`; do not use deprecated `npx react-native init`); create the project **outside** the workspace (sibling folder); use **dynamic** App name from user input; then add folder structure and boilerplate in the CLI-created project — **including the schema-based `useForm` hook + `form-validators`** (TypeScript by default, JS fallback) so forms work out of the box; update/merge index.js, babel.config.js (aliases incl. `@hooks`/`@utility`), tsconfig.json (`paths`), package.json; save scaffold log.
 - **Does not:** Create the project inside the workspace; create `package.json`, `app.json`, or root `index.js` from scratch; use deprecated `react-native init` or `--template react-native-template-typescript` (TypeScript is default); duplicate the init command in other agents; run `npm install` or `pod install`; create PRD or feature code; run Figma MCP.
 - **Stops when:** CLI has been run (from parent of workspace), folder structure and boilerplate are added in the created project (outside workspace), and log is saved. User runs `npm install` and `pod install`.

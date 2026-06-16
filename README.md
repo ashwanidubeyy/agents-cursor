@@ -127,6 +127,7 @@ Both systems share the **same 12 agents and the same workflow** — only the fra
 | P1 | Figma Analyzer | `@figma-analyzer` | `cache/figma-specs-{feature}.md` + assets |
 | P1 | Planning | `@planning-agent` | `logs/prd-{feature}-{ts}.md` |
 | P1 | Coding | `@coding-agent` | Source + `logs/coding/coding-{feature}.md` |
+| P3 | useForm Builder | `@useform-builder-agent` | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
 | P1 | Fixing | `@fixing-agent` | `logs/fixing/fixing-{feature}.md` |
 | P2 | Test Cases | `@testcases-agent` | `logs/test-cases-{feature}.md` + test file |
 | P2 | E2E Testing | `@detox-testing-agent` (RN) / `@e2e-testing-agent` (Next.js) | `logs/{detox,e2e}-testing/{feature}/{ts}/test-results.md` |
@@ -180,6 +181,18 @@ Implement PRD from .cursor/logs/prd-profile-card-20260615-120000.md
 Test profile-card.
 Testing target: Android Emulator
 ```
+
+**Build a form (any project):** use the **useForm Builder Agent** for validated forms (schema-based `useForm` hook; no Formik/yup).
+
+```
+@useform-builder-agent
+
+Form: login
+Fields: email (required), password (required, min 6)
+Path: src/screens/Login
+```
+
+> Creates `src/screens/Login/index.tsx` + `style.ts` using `useForm`, with `ALERTS`-based validation and a service-layer submit. Installs the hook automatically if missing (`node .cursor/scripts/setup-useform.js`). See `.cursor/rules/useform-validation.mdc`.
 
 ### Next.js example
 

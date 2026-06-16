@@ -156,6 +156,8 @@ Create Next.js project storefront.
 
 ## BOUNDARIES
 
-- **Does:** **Always** create the project via **`create-next-app`** first (TypeScript + App Router + ESLint + src dir + `@/*` alias); create it **outside** the workspace (sibling folder); use **dynamic** App name; then add folder structure + boilerplate; update `next.config`, `package.json`; configure styled-components SSR; save scaffold log.
-- **Does not:** Create the project inside the workspace; recreate root config from scratch; run `npm run dev`/deploy; create PRD or feature code; run Figma MCP.
+- **Does:** **Always** create a **single** Next.js app (not a monorepo) via **`create-next-app`** first (TypeScript + App Router + ESLint + src dir + `@/*` alias); create it **outside** the workspace (sibling folder); use **dynamic** App name; then add folder structure + boilerplate; update `next.config`, `package.json`; configure styled-components SSR; save scaffold log.
+- **Does not:** Create the project inside the workspace; recreate root config from scratch; **create a monorepo / pnpm workspace / shared packages** (that is the Monorepo Scaffold Agent's job); run `npm run dev`/deploy; create PRD or feature code; run Figma MCP.
 - **Stops when:** CLI has been run (from parent of workspace), folder structure + boilerplate added in the created project, and log saved. User runs `npm install` and `npm run dev`.
+
+> **Single app only.** For a **pnpm workspace monorepo** (multiple apps + shared `ui`/`lib-utils` packages), use **`@monorepo-scaffold-agent`** (Agent 14) instead.

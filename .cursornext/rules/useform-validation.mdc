@@ -1,0 +1,102 @@
+---
+description: Schema-based forms with the useForm hook (validation, field handlers, i18n errors). Works in single-app and monorepo layouts.
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+# Forms with `useForm`
+
+Use the project's custom `useForm` hook for every form. Do **not** add Formik, react-hook-form, or yup unless the project already uses them. Validation is schema-driven.
+
+## Where the hook lives
+
+`useForm` is a **shared** hook (not feature-scoped) — it lives in the top-level hooks folder and is reused by every feature's forms.
+
+| Project type | Hook path | Import |
+|---|---|---|
+| **Single app** (default) | `src/hooks/useForm.tsx` | `import { useForm } from "@/hooks/useForm"` |
+| **Monorepo** shared package | `packages/lib-utils/src/hooks/useForm.tsx` | `import { useForm } from "@repo/lib-utils/hooks/useForm"` (or your package name) |
+
+A feature consumes it from inside `src/features/<feature>/components/...`:
+
+```ts
+import { useForm } from "@/hooks/useForm"; // shared hook
+import type { LoginFormValues } from "@/features/auth/types/auth.types";
+```
+
+Install on a fresh project: `pnpm setup:useform` (see `.cursor/setup/hooks/README.md`). A worked example lives in `src/features/example/components/ExampleForm` (run `pnpm setup:example`).
+
+Validators: `src/constants/form-validators.ts` (`is_required`, `get_prop_values`, `is_object`, `is_micro_field_required`).
+
+## 1. Schema (`initialState`)
+
+```ts
+const initialState = {
+  email:    { value: "", error: "", required: true, convertToLang: true },
+  password: { value: "", error: "", required: true },
+  remember: { value: false, error: "", required: false },
+};
+```
+
+- `validator?: { func: (value, values) => boolean; error: string }` — when `func` returns `false`, `error` is shown. Use `convertToLang: true` when `error` is an i18n key.
+- `type?: "boolean" | "TELEPHONE_WITH_EXT" | "NUMBER" | "PERCENTAGE_OBTAINED"` — special required checks.
+
+## 2. Wire the hook
+
+```ts
+const submitHandler = (values: any, errors: any) => {
+  if (errors) return;
+  setLoading(true);
+  authService.login(values)
+    .then((res) => { /* success */ })
+    .catch((err) => notifyError(err?.message))
+    .finally(() => setLoading(false));
+};
+
+const { values, errors, dirty, disable, handleOnChange, handleOnSubmit, setUseFormStates } =
+  useForm(initialState, submitHandler);
+```
+
+Submit callback: `(values | null, errors | null, extraParams?)`.
+
+## 3. Bind fields
+
+```tsx
+<Input
+  name="email"
+  value={values?.email}
+  onChange={handleOnChange}
+  error={dirty?.email ? errors?.email : undefined}
+  label={t(TITLES.FORMS.EMAIL)}
+/>
+<Button onClick={handleOnSubmit} disabled={loading || disable}>Submit</Button>
+```
+
+Show errors only when `dirty?.fieldName` is true.
+
+## 4. Field handlers
+
+| Handler | Use for |
+|---|---|
+| `handleOnChange` | text inputs |
+| `handleOnNumberChange` | number inputs |
+| `handleOnSelection` | single select |
+| `handleOnMultipleSelection` | multi select |
+| `handleOnValueChange` / `handleOnMultiselectChange` | custom controls |
+| `handleOnCheckBoxChange` | boolean checkbox |
+| `handleOnSwitch` | toggle |
+| `handleOnFileUpload` | file upload |
+| `handleOnRadioChange` | radio group |
+
+Helpers: `setUseFormStates`, `setRequired`, `setValidator`, `validateSpecificFields`, `clearStateSchema`, `addUseFormFields`, `removeUseFormFields`.
+
+## 5. Custom validation
+
+Layer on `handleOnChange` + `setUseFormStates`, or put rules in the schema `validator`. Error strings must use i18n keys from `constants/titles.ts` / `constants/alerts.ts` (or your project's string constants).
+
+## 6. Checklist
+
+- [ ] Schema per field; `useForm(initialState, submitHandler)`.
+- [ ] Correct handler + dirty-gated errors.
+- [ ] Submit via `services/` (not raw axios in the component).
+- [ ] No new form libraries introduced.
+- [ ] Invoke `@useform-builder-agent` for full form implementation.

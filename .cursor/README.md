@@ -28,26 +28,34 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   ├── agent-09-prompt-generator.md
 │   ├── agent-10-testcases.md
 │   ├── agent-11-detox-testing.md
-│   └── agent-12-pre-pr-validation.md
+│   ├── agent-12-pre-pr-validation.md
+│   └── agent-13-useform-builder.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-react-native.mdc      # Figma → RN mapping rules
 │   ├── react-native.mdc               # RN best practices (feature-first)
 │   ├── react-native-best-practices.md
 │   ├── coding-standards.md
-│   └── detox-testing.mdc              # Detox E2E config/commands
-├── scripts/           # Node helpers for Figma export (no extra deps)
+│   ├── detox-testing.mdc              # Detox E2E config/commands
+│   └── useform-validation.mdc         # Schema-based forms with the useForm hook
+├── scripts/           # Node helpers (no extra deps)
 │   ├── fetch-figma-nodes.js
 │   ├── figma-get-nodes.js
 │   ├── export-figma-svg.js
-│   └── export-figma-png.js
+│   ├── export-figma-png.js
+│   └── setup-useform.js               # Install useForm hook + validators (TS/JS)
 ├── skills/
 │   └── react-native-architecture/SKILL.md   # App structure, aliases, design system
 ├── setup/
-│   └── business-briefs/               # ~10-min YAML briefs → feature prompts
-│       ├── README.md
-│       ├── business-brief-template.yaml
-│       └── business-brief-template-react-native.yaml
+│   ├── business-briefs/               # ~10-min YAML briefs → feature prompts
+│   │   ├── README.md
+│   │   ├── business-brief-template.yaml
+│   │   └── business-brief-template-react-native.yaml
+│   ├── hooks/                         # useForm hook templates (TS + JS) + example
+│   │   ├── README.md
+│   │   ├── useForm.ts / useForm.js
+│   │   └── useForm.example.tsx / useForm.example.js
+│   └── utility/                       # form-validators.ts / form-validators.js
 ├── cache/             # Agent inputs/intermediate artifacts (created on demand)
 │   ├── figma-specs-{feature}.md
 │   ├── figma-svgs/{feature}/...
@@ -117,7 +125,7 @@ Invoke an agent by typing `@<agent-name>` in Cursor with the required info. Belo
 
 ### Agent 08 — Project Scaffold (`@project-scaffold-agent`)
 - **Input:** App name (e.g. `MyApp`); optional folder name.
-- **Does:** Runs the **React Native Community CLI** (`npx @react-native-community/cli init <Name> --skip-install`) from the **parent of the workspace** (creates the project as a **sibling**, outside the current workspace). Then adds the `src/` folder structure + boilerplate (Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, sample Home screen, Common store slice), and merges navigation/redux deps into `package.json` and aliases into `babel.config.js`.
+- **Does:** Runs the **React Native Community CLI** (`npx @react-native-community/cli init <Name> --skip-install`) from the **parent of the workspace** (creates the project as a **sibling**, outside the current workspace). Then adds the `src/` folder structure + boilerplate (Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, sample Home screen, Common store slice, **the `useForm` hook + `form-validators`**), and merges navigation/redux deps into `package.json`, aliases into `babel.config.js`, and `paths` into `tsconfig.json`.
 - **After running:** A new TypeScript RN project exists outside the workspace with boilerplate; log saved to `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`. **You** then run `npm install` and `cd ios && pod install`.
 - **Does not:** Run `npm install`/`pod install`, create feature code, or touch `package.json`/`index.js` from scratch.
 
@@ -145,6 +153,24 @@ Invoke an agent by typing `@<agent-name>` in Cursor with the required info. Belo
 - **Does:** Reads the PRD, **creates the coding log before writing code**, loads the architecture skill + rules, then implements files under `src/` using path aliases, design tokens (no raw hex/fonts), TITLES/ALERTS constants, IMAGES registry, shadow/elevation, a11y, SafeArea/KeyboardAvoidingView, etc. Runs lint/type checks. If a native dep is added, runs `npm install` (+ `pod install`) and documents rebuild steps.
 - **After running:** Source files created/modified; coding log saved/updated at `logs/coding/coding-{feature}.md` with validation results. Stops; hand off to `@documentation-agent` or `@fixing-agent`.
 - **Does not:** Create a PRD or run E2E.
+
+### Agent 13 — useForm Builder (`@useform-builder-agent`)
+- **Input:** Form/feature name + field list (name, type, required, rules) + target screen/component path.
+- **Does:** Builds or refactors a form with the project's schema-based **`useForm`** hook — RN field handlers (`(name, value)`), `dirty`-gated errors, `ALERTS` validation messages, shared validators in `utility/form-validators`, and a service-layer submit (`.then()/.catch()`). Detects **TypeScript** (`.tsx`, typed with `FormSchema`) vs **JavaScript**. If the hook is missing it runs `node .cursor/scripts/setup-useform.js` (installs `src/hooks/useForm` + `src/utility/form-validators`, TS or JS).
+- **After running:** Form screen/component + styles created; coding log at `logs/coding/coding-{feature}.md`. Stops; hand off to `@documentation-agent` / `@fixing-agent`.
+- **Does not:** Create a PRD, run E2E, or add new form libraries (no Formik/react-hook-form/yup).
+- **Setup:** Hook templates live in `setup/hooks/` (TS + JS); rules in `rules/useform-validation.mdc`. The **Project Scaffold Agent** installs `useForm` automatically for every new project.
+- **Example:**
+
+```
+@useform-builder-agent
+
+Form: login
+Fields: email (required), password (required, min 6)
+Path: src/screens/Login
+```
+
+  → creates `src/screens/Login/index.tsx` + `style.ts` using `useForm` (schema typed with `FormSchema`), `ALERTS.VALIDATION.*` error messages, submit via a service, and a coding log at `logs/coding/coding-login.md`.
 
 ### Agent 03 — Documentation (`@documentation-agent`)
 - **Input:** Files to document (explicit list, or from the coding log).
@@ -256,6 +282,7 @@ flowchart LR
 | 00 Figma | `@figma-analyzer` | Feature, Mobile URL+node-id, Frame, Section | `cache/figma-specs-{feature}.md` + assets |
 | 01 Planning | `@planning-agent` | Prompt/specs path or description | `logs/prd-{feature}-{ts}.md` |
 | 02 Coding | `@coding-agent` | PRD path | `src/...` + `logs/coding/coding-{feature}.md` |
+| 13 useForm | `@useform-builder-agent` | Form name + fields + path | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
 | 03 Docs | `@documentation-agent` | Files or coding log | Documented files + doc log |
 | 10 Test Cases | `@testcases-agent` | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + Jest file |
 | 11 Detox | `@detox-testing-agent` | Feature + testing target | `logs/detox-testing/.../test-results.md` |
@@ -400,6 +427,7 @@ This is the full happy path from a Figma design to a PR document. Each line is a
 - **`react-native.mdc` / `react-native-best-practices.md`** — Feature-first structure, StyleSheet co-location, performance (FlatList/FlashList, memoization), a11y, error handling (glob-scoped to JS/TS files).
 - **`coding-standards.md`** — Naming, import order, DRY, optional chaining, project structure conventions.
 - **`detox-testing.mdc`** — Detox config (`.detoxrc.js`), spec location (`e2e/**/*.e2e.js`), and commands used by the testing agents.
+- **`useform-validation.mdc`** — Schema-based forms with the `useForm` hook: schema shape, RN `(name, value)` handlers, `dirty`-gated errors, validator factories, checklist (glob-scoped to JS/TS files).
 
 > Note: these `.cursor/rules/` files are the **shared knowledge base** the agents read. The repo-level user rules (folder structure, styled-components, i18n, optional chaining, no-comments, etc.) also apply to all generated code.
 
@@ -413,11 +441,15 @@ The canonical reference for **app structure**, **path aliases** (`@`, `@componen
 | `figma-get-nodes.js` | Fetch node(s) → `cache/figma-node-{name}.json` | `node .cursor/scripts/figma-get-nodes.js <nodeId> [fileKey] [name]` |
 | `export-figma-svg.js` | Export a node as SVG → `cache/figma-svgs/{feature}/` | `node .cursor/scripts/export-figma-svg.js <feature> <nodeId> [fileKey]` |
 | `export-figma-png.js` | Export PNG → Android `drawable/` + iOS `Images.xcassets/` | `node .cursor/scripts/export-figma-png.js <nodeId> <android_name> <IosImageSet> [fileKey]` |
+| `setup-useform.js` | Install the `useForm` hook + `form-validators` into `src/` (TS or JS) | `node .cursor/scripts/setup-useform.js [--ts\|--js] [--force]` |
 
-All scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env` or the environment.
+The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env` or the environment. `setup-useform.js` needs no token and no extra deps.
 
 ### Setup (`setup/business-briefs/`)
 A ~10-minute YAML brief that captures business context (purpose, rules, customization, success metrics). Copy `business-brief-template-react-native.yaml` → `business-brief-{feature}.yaml`, fill it, then feed it to `@prompt-generator-agent` (Mode A) to generate a Planning prompt. See that folder's `README.md` for the flow.
+
+### Setup (`setup/hooks/` + `setup/utility/`)
+Templates for the schema-based **`useForm`** hook and its validators, in **TypeScript** and **JavaScript**. Install with `node .cursor/scripts/setup-useform.js` (auto-detects TS via `tsconfig.json`; `--ts`/`--js` to force) — it copies `useForm` into `src/hooks/`, `form-validators` into `src/utility/`, and wires the `src/hooks` barrel. The hook has **no external dependencies** and uses RN `(name, value)` handlers with `ALERTS`-based error messages. The Project Scaffold Agent installs it automatically. Build forms with `@useform-builder-agent` (see `rules/useform-validation.mdc` and `setup/hooks/README.md`).
 
 ---
 

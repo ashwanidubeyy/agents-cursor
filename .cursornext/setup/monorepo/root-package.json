@@ -1,0 +1,17 @@
+{
+  "name": "{{MONOREPO_NAME}}",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter {{PRIMARY_APP}} dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "setup:useform": "node .cursor/scripts/setup-useform.js",
+    "setup:e2e": "node .cursor/scripts/setup-e2e.js",
+    "setup:example": "node .cursor/scripts/setup-example.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

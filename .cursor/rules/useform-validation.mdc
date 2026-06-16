@@ -1,0 +1,100 @@
+---
+description: Schema-based forms with the useForm hook for React Native (validation, field handlers, ALERTS error messages). TypeScript and JavaScript.
+globs: "src/**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+# Forms with `useForm` (React Native)
+
+Use the project's custom **`useForm`** hook for every form. Do **not** add Formik, react-hook-form, or yup. Validation is schema-driven and the hook has **no external dependencies**.
+
+This is the **React Native** variant: field handlers take `(name, value)` (a `TextInput`'s `onChangeText` returns the value directly — there is no DOM event), and error strings come from the project's `ALERTS` constants (no `react-i18next`).
+
+## Where the hook lives
+
+| File | Import |
+|---|---|
+| `src/hooks/useForm.{ts,js}` | `import { useForm } from '@hooks/useForm'` |
+| `src/utility/form-validators.{ts,js}` | `import { emailValidator } from '@utility/form-validators'` |
+
+Install on a fresh project: `node .cursor/scripts/setup-useform.js` (TypeScript when `tsconfig.json` exists, else JavaScript; `--ts` / `--js` to force). The **Project Scaffold Agent** installs it automatically. A worked example lives in `.cursor/setup/hooks/useForm.example.tsx` (and `.js`).
+
+## 1. Schema (`initialState`)
+
+```ts
+import { emailValidator, minLengthValidator, FormSchema } from '@utility/form-validators';
+import { ALERTS } from '@constants/alerts';
+
+const initialState: FormSchema = {
+  email:    { value: '', error: '', required: true, validator: emailValidator(ALERTS.VALIDATION.EMAIL_INVALID) },
+  password: { value: '', error: '', required: true, validator: minLengthValidator(6, ALERTS.VALIDATION.PASSWORD_MIN) },
+  remember: { value: false, error: '', required: false, type: 'boolean' },
+};
+```
+
+Field options: `value`, `error`, `required`, `validator: { func: (value, values) => boolean; error }`, `type: 'boolean'`, `requiredError` (per-field override), `convertToLang` (run `error` through `options.translate`).
+
+Validator factories (in `form-validators`): `emailValidator`, `patternValidator`, `minLengthValidator`, `maxLengthValidator`, `matchFieldValidator`. Add new shared rules there — never inline regexes in screens.
+
+## 2. Wire the hook
+
+```ts
+const submitHandler = (values, validationErrors) => {
+  if (validationErrors || !values) {
+    return;
+  }
+  setLoading(true);
+  authService.login(values)
+    .then((res) => { /* success */ })
+    .catch((err) => { /* notify */ })
+    .finally(() => setLoading(false));
+};
+
+const { values, errors, dirty, disable, handleOnChange, handleOnSubmit } =
+  useForm(initialState, submitHandler);
+```
+
+Submit callback signature: `(values | null, errors | null, extraParams?)`. On success `values` is set and `errors` is `null`; on failure `values` is `null` and `errors` holds the messages.
+
+## 3. Bind fields
+
+```tsx
+<CustomInput
+  label="Email"
+  value={values?.email}
+  onChangeText={(text) => handleOnChange('email', text)}
+  error={dirty?.email ? errors?.email : ''}
+  keyboardType="email-address"
+  autoCapitalize="none"
+/>
+<CustomButton title="Submit" onPress={() => handleOnSubmit()} disabled={loading || disable} />
+```
+
+Show a field's error only when `dirty?.field` is true.
+
+## 4. Field handlers (React Native signatures)
+
+| Handler | Use for |
+|---|---|
+| `handleOnChange(name, value)` | text inputs (`onChangeText`) |
+| `handleOnNumberChange(name, value)` | numeric inputs |
+| `handleOnSelection(name, value)` | single select / picker |
+| `handleOnMultipleSelection(name, values)` | multi select |
+| `handleOnCheckBoxChange(name, checked)` | checkbox (boolean) |
+| `handleOnSwitch(name, value)` | `Switch` toggle |
+| `handleOnValueChange(name, value)` | custom controls |
+
+Helpers: `setUseFormStates`, `setRequired`, `setValidator`, `validateSpecificFields`, `clearStateSchema`, `handleNewSchema`, `addUseFormFields`, `removeUseFormFields`, `validateErrorState`.
+
+## 5. Custom validation
+
+Put reusable rules in the schema `validator` (or `form-validators`). For cross-field rules use `matchFieldValidator('password', ALERTS.VALIDATION.PASSWORD_MISMATCH)` or a custom `func: (value, values) => ...`. Error strings must come from `ALERTS` constants — no hardcoded strings.
+
+## 6. Checklist
+
+- [ ] One schema entry per field; `useForm(initialState, submitHandler)`.
+- [ ] Correct `(name, value)` handler per field + `dirty`-gated errors.
+- [ ] Submit through a service in `src/services/` or `src/api/` (no raw fetch in the screen).
+- [ ] Validator messages from `ALERTS`; shared rules in `form-validators`.
+- [ ] No new form libraries; no try/catch (use `.then()/.catch()`).
+- [ ] TypeScript: type the schema with `FormSchema`; aliases resolve via `tsconfig` `paths`.
+- [ ] Invoke `@useform-builder-agent` for full form implementation.

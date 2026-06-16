@@ -71,16 +71,28 @@ alwaysApply: true
 - **Does not:** Fix/refactor code, create PRD, implement/scaffold, or create/commit/submit/merge a PR.
 - **Stops when:** Report saved and verdict announced. Invoke: `@pre-pr-validation-agent` (optional base branch). Run **before** `@pr-orchestrator-agent`; hand off fixes to `@fixing-agent` / `@coding-agent`.
 
+### Agent 13: useForm Builder Agent
+- **Does:** Build or refactor a form using the project's schema-based **`useForm`** hook — field handlers, dirty-gated errors, i18n error messages (`ALERTS`/`TITLES`), shared validators in `constants/form-validators`, service-layer submit (`.then()/.catch()`). Installs the hook via `pnpm setup:useform` (or `node .cursor/scripts/setup-useform.js`) if missing. Updates coding log at `.cursornext/logs/coding/coding-{feature}.md`.
+- **Does not:** Create PRD, run E2E, or add new form libraries (no Formik/react-hook-form/yup).
+- **Stops when:** Form works, typecheck/lint pass, coding log updated. Invoke: `@useform-builder-agent` with form name + fields + target path. See `.cursornext/rules/useform-validation.mdc`; hook templates in `.cursornext/setup/hooks/`.
+
+### Agent 14: Monorepo Scaffold Agent
+- **Does:** Create a **new pnpm workspace monorepo** (apps + shared `ui`/`lib-utils` packages) via `node .cursornext/scripts/setup-monorepo.js`. Uses **pnpm workspaces only** (no Turborepo unless `USE_TURBO=true`). Creates each Next.js app via `create-next-app`, copies the kit into the new repo as `.cursor/`, installs `useForm` into `packages/lib-utils`, installs the example module into the primary app, runs `pnpm install`. Saves log to `.cursornext/logs/monorepo-scaffold/monorepo-{name}-{timestamp}.md`.
+- **Does not:** Build features, create PRD, deploy, or run Figma MCP. **Not** for single apps — use `@project-scaffold-agent` for one app.
+- **Stops when:** Monorepo created, `pnpm install` succeeds, log saved. Invoke: `@monorepo-scaffold-agent` with monorepo name (+ optional apps/packages/turbo).
+
 ---
 
 ## Workflow Sequence
 
-0. **Project Scaffold Agent** (optional) → New Next.js project with app name + folder structure + boilerplate → `.cursornext/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`
+0. **Project Scaffold Agent** (optional) → New **single** Next.js app with app name + folder structure + boilerplate → `.cursornext/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`
+0b. **Monorepo Scaffold Agent** (optional, instead of 0 for multi-app) → New pnpm workspace monorepo (apps + shared packages) → `.cursornext/logs/monorepo-scaffold/monorepo-{name}-{timestamp}.md`
 1. **Figma Analyzer** → `.cursornext/cache/figma-specs-{feature}.md`
 1b. **Business brief** (developer fills) → `.cursornext/setup/business-briefs/business-brief-{feature}.yaml`
 1c. **Prompt Generator Agent** (optional) → Reads brief + Figma specs → `.cursornext/cache/prompt-{feature}.md` (use this as input to Planning Agent)
 2. **Planning Agent** → `.cursornext/logs/prd-{feature}-{timestamp}.md`
 3. **Coding Agent** → Code + `.cursornext/logs/coding/coding-{feature}.md`
+3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 4. **Documentation Agent** → Comments + doc log
 5. **Test Case Authoring Agent** (optional) → `.cursornext/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.tsx`
 6. **Playwright E2E Testing Agent** (optional) → E2E tests + artifacts (screenshots/, videos/, traces/, test-results.md) at `.cursornext/logs/e2e-testing/{feature}/{timestamp}/`
@@ -96,11 +108,13 @@ Each step requires manual invocation except where an agent explicitly calls anot
 
 ## Invocation (Explicit)
 
-- `@project-scaffold-agent` — App name (e.g. MyApp, DashboardPro) — Creates project with folder structure + boilerplate
+- `@project-scaffold-agent` — App name (e.g. MyApp, DashboardPro) — Creates a **single** project with folder structure + boilerplate
+- `@monorepo-scaffold-agent` — Monorepo name (+ optional apps/packages/turbo) — Creates a pnpm workspace monorepo (apps + shared packages)
 - `@prompt-generator-agent` — Feature name (mode A) or project name + "TypeScript and boilerplate" (mode B)
 - `@figma-analyzer` — Feature name, Figma URL + Frame, Section
 - `@planning-agent` — Use prompt or path to specs/PRD
 - `@coding-agent` — Implement PRD from [prd-file]
+- `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@documentation-agent` — Document the code
 - `@fixing-agent` — Feature name or description of what to fix
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

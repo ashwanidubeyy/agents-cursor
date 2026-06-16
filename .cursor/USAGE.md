@@ -88,6 +88,7 @@ For already-designed features:
 | Figma Analyzer     | Extract Figma specifications      | Design specification        |
 | Planning           | Create PRD                        | PRD document                |
 | Coding             | Implement feature                 | Source code                 |
+| useForm Builder    | Build a form with `useForm`       | Form + coding log           |
 | Documentation      | Generate documentation            | Documented code             |
 | Test Cases         | Generate test cases               | QA & Jest tests             |
 | E2E Testing        | Run Detox tests                   | E2E reports                 |
@@ -243,6 +244,24 @@ Implement PRD from:
 
 .cursor/logs/prd-forgot-password-screen-20260202-143000.md
 ```
+
+---
+
+## useForm Builder Agent
+
+### Build a Validated Form
+
+```text
+@useform-builder-agent
+
+Form: login
+Fields: email (email, required), password (password, required, min 6)
+Path: src/screens/Login
+Service: authService.login
+```
+
+> Installs the hook automatically if missing (`node .cursor/scripts/setup-useform.js`).
+> TypeScript when `tsconfig.json` exists, otherwise JavaScript. Rules: `.cursor/rules/useform-validation.mdc`.
 
 ---
 

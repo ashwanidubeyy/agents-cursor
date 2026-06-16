@@ -71,6 +71,11 @@ alwaysApply: true
 - **Does not:** Fix/refactor code, create PRD, implement/scaffold, or create/commit/submit/merge a PR.
 - **Stops when:** Report saved and verdict announced. Invoke: `@pre-pr-validation-agent` (optional base branch). Run **before** `@pr-orchestrator-agent`; hand off fixes to `@fixing-agent` / `@coding-agent`.
 
+### Agent 13: useForm Builder Agent
+- **Does:** Build or refactor a form using the project's schema-based **`useForm`** hook — RN field handlers (`(name, value)`), `ALERTS` error messages, shared validators in `utility/form-validators`, service-layer submit (`.then()/.catch()`). Detects TypeScript (`.tsx`, typed with `FormSchema`) vs JavaScript. Installs the hook via `node .cursor/scripts/setup-useform.js` if missing. Updates coding log at `.cursor/logs/coding/coding-{feature}.md`.
+- **Does not:** Create PRD, run E2E, or add new form libraries (no Formik/react-hook-form/yup).
+- **Stops when:** Form works, tsc/lint pass, coding log updated. Invoke: `@useform-builder-agent` with form name + fields + target path. See `.cursor/rules/useform-validation.mdc`; hook templates in `.cursor/setup/hooks/`.
+
 ---
 
 ## Workflow Sequence
@@ -81,6 +86,7 @@ alwaysApply: true
 1c. **Prompt Generator Agent** (optional) → Reads brief + Figma specs → `.cursor/cache/prompt-{feature}.md` (use this as input to Planning Agent)
 2. **Planning Agent** → `.cursor/logs/prd-{feature}-{timestamp}.md`
 3. **Coding Agent** → Code + `.cursor/logs/coding/coding-{feature}.md`
+3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 4. **Documentation Agent** → Comments + doc log
 5. **Test Case Authoring Agent** (optional) → `.cursor/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.js`
 6. **Detox Testing Agent** (optional) → Detox E2E tests + artifacts (ss/, video/, test-results.md) at `.cursor/logs/detox-testing/{feature}/{timestamp}/`
@@ -101,6 +107,7 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@figma-analyzer` — Feature name, Mobile URL + Frame, Section
 - `@planning-agent` — Use prompt or path to specs/PRD
 - `@coding-agent` — Implement PRD from [prd-file]
+- `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@documentation-agent` — Document the code
 - `@fixing-agent` — Feature name or description of what to fix
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

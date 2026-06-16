@@ -1,9 +1,10 @@
 # `.cursornext/` — Next.js Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 12 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 14 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
-> - **New project?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B).
+> - **New single app?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B). **Monorepo?** Use `@monorepo-scaffold-agent`.
+> - **Forms?** Use `@useform-builder-agent` (schema-based `useForm` hook; no Formik/yup).
 > - **New feature/module?** Go `@figma-analyzer` → `@planning-agent` → `@coding-agent` → `@documentation-agent` → `@testcases-agent` → `@e2e-testing-agent` → `@fixing-agent` → `@code-scanning-agent` → `@vulnerability-agent` → `@pre-pr-validation-agent` → `@pr-orchestrator-agent`.
 > - Every agent **reads inputs from files, writes outputs to files** (mostly under `.cursornext/logs/` and `.cursornext/cache/`), then **stops**. Nothing auto-runs the next agent.
 >
@@ -15,7 +16,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 
 ```
 .cursornext/
-├── agents/            # The 12 agent definitions (the "who does what")
+├── agents/            # The 14 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -28,28 +29,40 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── agent-09-prompt-generator.md
 │   ├── agent-10-testcases.md
 │   ├── agent-11-e2e-testing.md
-│   └── agent-12-pre-pr-validation.md
+│   ├── agent-12-pre-pr-validation.md
+│   ├── agent-13-useform-builder.md    # Build forms with the useForm hook
+│   └── agent-14-monorepo-scaffold.md  # Create a pnpm workspace monorepo
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-nextjs.mdc            # Figma → Next.js mapping rules
 │   ├── nextjs.mdc                     # Next.js best practices (App Router)
 │   ├── nextjs-best-practices.md
 │   ├── coding-standards.md
-│   └── e2e-testing.mdc                # Playwright E2E config/commands
-├── scripts/           # Node helpers for Figma export (no extra deps)
+│   ├── e2e-testing.mdc                # Playwright E2E config/commands
+│   └── useform-validation.mdc         # Schema-based forms with the useForm hook
+├── scripts/           # Node helpers (no extra deps)
 │   ├── fetch-figma-nodes.js
 │   ├── figma-get-nodes.js
 │   ├── export-figma-svg.js
-│   └── export-figma-png.js
+│   ├── export-figma-png.js
+│   ├── setup-useform.js               # Install useForm hook + validators
+│   ├── setup-example.js               # Install the example feature module
+│   ├── setup-e2e.js                   # Bootstrap Playwright E2E
+│   └── setup-monorepo.js              # Scaffold a pnpm workspace monorepo
 ├── skills/
 │   └── nextjs-architecture/SKILL.md   # App structure, aliases, design system
 ├── docs/
 │   └── E2E-PLAYWRIGHT.md              # Playwright E2E setup, config, troubleshooting
 ├── setup/
-│   └── business-briefs/               # ~10-min YAML briefs → feature prompts
-│       ├── README.md
-│       ├── business-brief-template.yaml
-│       └── business-brief-template-nextjs.yaml
+│   ├── business-briefs/               # ~10-min YAML briefs → feature prompts
+│   │   ├── README.md
+│   │   ├── business-brief-template.yaml
+│   │   └── business-brief-template-nextjs.yaml
+│   ├── hooks/                         # useForm + useTranslation hook templates
+│   ├── constants/                     # form-validators + strings/language stubs
+│   ├── e2e/                           # Playwright config + example spec
+│   ├── example-module/                # Feature-first example module (form + list)
+│   └── monorepo/                      # Monorepo root/workspace/package templates
 ├── cache/             # Agent inputs/intermediate artifacts (created on demand)
 │   ├── figma-specs-{feature}.md
 │   ├── figma-svgs/{feature}/...
@@ -121,7 +134,13 @@ Invoke an agent by typing `@<agent-name>` in Cursor with the required info. Belo
 - **Input:** App name (e.g. `MyApp`); optional folder name.
 - **Does:** Runs **`create-next-app`** (`npx create-next-app@latest <name> --ts --app --eslint --src-dir --import-alias "@/*" --use-npm --no-tailwind`) from the **parent of the workspace** (creates the project as a **sibling**, outside the current workspace). Then adds the `src/` folder structure + boilerplate (App Router layout/page, theme COLORS/TYPOGRAPHY/spacing, constants, store slice, sample route), and merges deps into `package.json`.
 - **After running:** A new TypeScript Next.js project exists outside the workspace with boilerplate; log saved to `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`. **You** then run `npm install` and `npm run dev`.
-- **Does not:** Recreate `package.json`/`next.config.js`/`tsconfig.json` from scratch, create feature code, or use Tailwind unless that's the project standard.
+- **Does not:** Recreate `package.json`/`next.config.js`/`tsconfig.json` from scratch, create feature code, use Tailwind unless that's the project standard, or **create a monorepo** (use `@monorepo-scaffold-agent` for that).
+
+### Agent 14 — Monorepo Scaffold (`@monorepo-scaffold-agent`)
+- **Input:** Monorepo name; optional apps (default `web`), packages (default `ui`, `lib-utils`), `USE_TURBO`.
+- **Does:** Creates a **pnpm workspace monorepo** as a sibling folder via `node .cursornext/scripts/setup-monorepo.js`: root `package.json` + `pnpm-workspace.yaml`, `apps/*` (each via `create-next-app`), `packages/ui` + `packages/lib-utils`, copies this kit into the new repo as `.cursor/`, installs `useForm` into `packages/lib-utils`, installs the example module into the primary app, runs `pnpm install`. No Turborepo unless `USE_TURBO=true`.
+- **After running:** New monorepo outside the workspace; log saved to `logs/monorepo-scaffold/monorepo-{name}-{timestamp}.md`. **You** then `cd` in and run `pnpm dev`.
+- **Does not:** Build features, deploy, or create a single app (use `@project-scaffold-agent` for one app).
 
 ### Agent 09 — Prompt Generator (`@prompt-generator-agent`)
 - **Two modes:**
@@ -147,6 +166,22 @@ Invoke an agent by typing `@<agent-name>` in Cursor with the required info. Belo
 - **Does:** Reads the PRD, **creates the coding log before writing code**, loads the architecture skill + rules, then implements files under `src/` (App Router routes/layouts, Server/Client Components, styled-components in `styles.ts`, design tokens — no raw hex/fonts, TITLES/ALERTS/ROUTES constants, services/api layer, typed Redux). Runs lint/type checks.
 - **After running:** Source files created/modified; coding log saved/updated at `logs/coding/coding-{feature}.md` with validation results. Stops; hand off to `@documentation-agent` or `@fixing-agent`.
 - **Does not:** Create a PRD or run E2E.
+
+### Agent 13 — useForm Builder (`@useform-builder-agent`)
+- **Input:** Form/feature name + field list (name, type, required, rules) + target component path.
+- **Does:** Builds or refactors a form with the project's schema-based **`useForm`** hook — `initialState` schema, correct field handlers, dirty-gated errors, i18n error messages, shared validators in `constants/form-validators`, and a service-layer submit. If the hook is missing it runs `pnpm setup:useform` (`node .cursor/scripts/setup-useform.js`).
+- **After running:** Form component (`index.tsx` + `styles.ts`) + constants/i18n keys created; coding log at `logs/coding/coding-{feature}.md`. Stops; hand off to `@documentation-agent` / `@fixing-agent`.
+- **Does not:** Create a PRD, run E2E, or add new form libraries (no Formik/react-hook-form/yup).
+- **Setup:** Hook templates live in `setup/hooks/`; validators in `setup/constants/`; rules in `rules/useform-validation.mdc`. The Project Scaffold and Monorepo Scaffold agents install `useForm` automatically.
+- **Example:**
+
+```
+@useform-builder-agent
+
+Form: login
+Fields: email (required), password (required, min 6)
+Path: src/features/auth/components/LoginForm
+```
 
 ### Agent 03 — Documentation (`@documentation-agent`)
 - **Input:** Files to document (explicit list, or from the coding log).
@@ -211,6 +246,16 @@ npm install   &&   npm run dev
 proceed to the per-feature sequence below for each route/module
 ```
 
+**Monorepo instead of a single app?** Use the Monorepo Scaffold Agent:
+
+```
+@monorepo-scaffold-agent  "Create monorepo AcmePlatform with apps web and admin"
+   → ../acme-platform/ (sibling): apps/* + packages/ui + packages/lib-utils,
+     kit copied as .cursor/, useForm installed in lib-utils, example module in the primary app
+        ↓  (you run)
+cd ../acme-platform   &&   pnpm dev
+```
+
 ### 5.2 Sequence for a new module / feature
 
 ```
@@ -219,6 +264,7 @@ proceed to the per-feature sequence below for each route/module
 1c. @prompt-generator-agent  → cache/prompt-{feature}.md           (optional, Mode A)
 2.  @planning-agent          → logs/prd-{feature}-{timestamp}.md
 3.  @coding-agent            → src/... + logs/coding/coding-{feature}.md
+3b. @useform-builder-agent   → form built with useForm + coding log              (optional, for forms)
 4.  @documentation-agent     → JSDoc/comments + (optional) doc log
 5.  @testcases-agent         → logs/test-cases-{feature}.md + __tests__/{Feature}.test.tsx   (optional)
 6.  @e2e-testing-agent       → logs/e2e-testing/{feature}/{timestamp}/test-results.md          (optional)
@@ -253,11 +299,13 @@ flowchart LR
 
 | Agent | Invoke | Provide | Output |
 |-------|--------|---------|--------|
-| 08 Scaffold | `@project-scaffold-agent` | App name (+ optional folder) | New Next.js project (sibling) + scaffold log |
+| 08 Scaffold | `@project-scaffold-agent` | App name (+ optional folder) | New **single** Next.js project (sibling) + scaffold log |
+| 14 Monorepo | `@monorepo-scaffold-agent` | Monorepo name (+ apps/packages/turbo) | New pnpm monorepo (sibling) + monorepo log |
 | 09 Prompt Gen | `@prompt-generator-agent` | Feature+brief (A) or project name (B) | `cache/prompt-*.md` |
 | 00 Figma | `@figma-analyzer` | Feature, URL+node-id, Frame, Section | `cache/figma-specs-{feature}.md` + assets |
 | 01 Planning | `@planning-agent` | Prompt/specs path or description | `logs/prd-{feature}-{ts}.md` |
 | 02 Coding | `@coding-agent` | PRD path | `src/...` + `logs/coding/coding-{feature}.md` |
+| 13 useForm | `@useform-builder-agent` | Form name + fields + path | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
 | 03 Docs | `@documentation-agent` | Files or coding log | Documented files + doc log |
 | 10 Test Cases | `@testcases-agent` | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + test file |
 | 11 E2E | `@e2e-testing-agent` | Feature + base URL | `logs/e2e-testing/.../test-results.md` |
@@ -400,6 +448,7 @@ This is the full happy path from a Figma design to a PR document. Each line is a
 - **`nextjs.mdc` / `nextjs-best-practices.md`** — App Router structure, Server vs Client Components, data fetching, styled-components co-location, performance (`next/image`, dynamic import, caching), a11y (glob-scoped to TS/TSX files).
 - **`coding-standards.md`** — Naming, import order, DRY, optional chaining, project structure conventions.
 - **`e2e-testing.mdc`** — Playwright config (`playwright.config.ts`), spec location (`e2e/**/*.spec.ts`), and commands used by the testing agents. Full setup: `docs/E2E-PLAYWRIGHT.md`.
+- **`useform-validation.mdc`** — Schema-based forms with the `useForm` hook: `initialState` schema, field handlers, dirty-gated errors, validators, checklist (glob-scoped to TS/TSX files).
 
 > Note: these `.cursornext/rules/` files are the **shared knowledge base** the agents read. The repo-level user rules (folder structure, styled-components, i18n, optional chaining, no-comments, etc.) also apply to all generated code.
 
@@ -416,11 +465,20 @@ The canonical reference for **app structure** (`src/app` App Router), **path ali
 | `figma-get-nodes.js` | Fetch node(s) → `cache/figma-node-{name}.json` | `node .cursornext/scripts/figma-get-nodes.js <nodeId> [fileKey] [name]` |
 | `export-figma-svg.js` | Export a node as SVG → `cache/figma-svgs/{feature}/` (then into `src/assets/icons`) | `node .cursornext/scripts/export-figma-svg.js <feature> <nodeId> [fileKey] [outFile]` |
 | `export-figma-png.js` | Export raster → `public/images/` (for `next/image`) | `node .cursornext/scripts/export-figma-png.js <nodeId> <output-name> <fileKey> [scale]` |
+| `setup-useform.js` | Install `useForm` + `useTranslation` + `form-validators` into a project | `node .cursor/scripts/setup-useform.js` (run inside the generated project) |
+| `setup-example.js` | Install the feature-first example module (`features/example` + `/example` route) | `node .cursor/scripts/setup-example.js` (inside the project) |
+| `setup-e2e.js` | Bootstrap Playwright (config + smoke spec + scripts) | `node .cursor/scripts/setup-e2e.js` (inside the project) |
+| `setup-monorepo.js` | Scaffold a pnpm workspace monorepo (sibling folder) | `MONOREPO_NAME=my-platform node .cursornext/scripts/setup-monorepo.js` |
 
-All scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env.local` or the environment.
+The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env.local` or the environment. The `setup-*` scripts need no token. `setup-monorepo.js` runs **from this kit**; `setup-useform/example/e2e` are designed to run **inside a generated project** (where the kit is copied as `.cursor/`), and the monorepo scaffold invokes them automatically.
 
-### Setup (`setup/business-briefs/`)
-A ~10-minute YAML brief that captures business context (purpose, rules, customization, success metrics). Copy `business-brief-template-nextjs.yaml` → `business-brief-{feature}.yaml`, fill it, then feed it to `@prompt-generator-agent` (Mode A) to generate a Planning prompt. See that folder's `README.md` for the flow.
+### Setup (`setup/`)
+- **`business-briefs/`** — A ~10-minute YAML brief that captures business context (purpose, rules, customization, success metrics). Copy `business-brief-template-nextjs.yaml` → `business-brief-{feature}.yaml`, fill it, then feed it to `@prompt-generator-agent` (Mode A) to generate a Planning prompt.
+- **`hooks/`** — `useForm` + `useTranslation` hook templates (installed by `setup-useform.js`; see `setup/hooks/README.md`).
+- **`constants/`** — `form-validators.ts` plus `strings`/`language` stubs the hook depends on.
+- **`e2e/`** — Playwright config + example spec (installed by `setup-e2e.js`).
+- **`example-module/`** — Feature-first example module (form + list + service + store) installed by `setup-example.js`.
+- **`monorepo/`** — Root `package.json`, `pnpm-workspace.yaml`, and package templates used by `setup-monorepo.js`.
 
 ---
 
@@ -432,6 +490,7 @@ A ~10-minute YAML brief that captures business context (purpose, rules, customiz
 | Prompt Generator | `cache/prompt-{feature}.md` or `cache/prompt-project-create-{name}.md` |
 | Planning | `logs/prd-{feature}-{timestamp}.md` |
 | Coding | `src/...` + `logs/coding/coding-{feature}.md` |
+| useForm Builder | form component (`index.tsx` + `styles.ts`) + `logs/coding/coding-{feature}.md` |
 | Documentation | updated source files + `logs/documentation/documentation-{feature}.md` |
 | Test Cases | `logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.tsx` |
 | Playwright E2E | `logs/e2e-testing/{feature}/{timestamp}/test-results.md` (+ screenshots/videos/traces) |
@@ -440,7 +499,8 @@ A ~10-minute YAML brief that captures business context (purpose, rules, customiz
 | Vulnerability | `logs/vulnerability/vulnerability-{date}.md` |
 | Pre-PR Validation | `logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md` (READY / NOT READY verdict) |
 | PR Orchestrator | `logs/pr/pr-{feature}-{timestamp}.md` |
-| Project Scaffold | new sibling project + `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md` |
+| Project Scaffold | new sibling **single app** + `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md` |
+| Monorepo Scaffold | new sibling **monorepo** + `logs/monorepo-scaffold/monorepo-{name}-{timestamp}.md` |
 
 ---
 
