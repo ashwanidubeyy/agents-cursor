@@ -593,25 +593,14 @@ logs/pr/pr-forgot-password-screen.md
 
 ## Figma Setup
 
-1. Copy:
+1. Create **`.env`** in the project root (do not use `.env.local` or `.env.example`):
 
 ```text
-.env.example
+FIGMA_ACCESS_TOKEN=your-token-here
+API_BASE_URL=
 ```
 
-to:
-
-```text
-.env
-```
-
-2. Add:
-
-```env
-FIGMA_ACCESS_TOKEN=your-token
-```
-
-3. Never commit the token.
+2. Never commit `.env`.
 
 ---
 

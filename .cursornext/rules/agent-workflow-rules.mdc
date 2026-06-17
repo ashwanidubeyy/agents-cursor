@@ -7,7 +7,7 @@ alwaysApply: true
 
 ### Agent 00: Figma Analyzer
 - **Does:** Accept Figma URL + Frame name, use Figma MCP to extract specs, save to `.cursornext/cache/figma-specs-{feature}.md`. Extract hierarchy, measurements, colors, typography, spacing; map to Next.js (COLORS, TYPOGRAPHY/FONTS, spacing). When icons/vectors are present, export required SVGs (via Figma MCP export or Figma REST API with `FIGMA_ACCESS_TOKEN`) to `.cursornext/cache/figma-svgs/{feature}/` so development can use them directly (as SVG React components or in `public/`).
-- **Setup:** Set `FIGMA_ACCESS_TOKEN` in environment (e.g. copy `.env.example` to `.env.local` and add your token; never commit the token). See agent-00-figma-analyzer.md for details.
+- **Setup:** Set `FIGMA_ACCESS_TOKEN` in **`.env`** in the project root (never `.env.local` or `.env.example`; never commit the token). See agent-00-figma-analyzer.md for details.
 - **Does not:** Create PRD, write code, or proceed to next agent automatically.
 - **Stops when:** Specs file is saved. Invoke: `@figma-analyzer` with Feature name, Figma URL + Frame, Section.
 
@@ -47,7 +47,7 @@ alwaysApply: true
 - **Stops when:** PR document saved. Invoke: `@pr-orchestrator-agent`.
 
 ### Agent 08: Project Scaffold Agent
-- **Does:** Create a new Next.js project with **given app name** via `create-next-app` (TypeScript, App Router, ESLint), then add **folder structure + boilerplate**. Scaffolds src/ (app, components/layouts, components/widgets, constants, theme, hooks, services, api, store, types, utils, styles, assets/icons), theme tokens (COLORS/TYPOGRAPHY/spacing), root layout + providers, one sample route (Home), one Redux slice (common). Saves log to `.cursornext/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
+- **Does:** Create a new Next.js project with **given app name** via `create-next-app` (TypeScript, App Router, ESLint), then add **folder structure + boilerplate**. Scaffolds src/ (app, components/layouts, components/widgets, constants, theme, hooks, services, lib, api, store, types, utils, styles, assets/icons), theme tokens (COLORS/TYPOGRAPHY/spacing), root layout + providers, one sample route (Home), one Redux slice (common), **`.env`** (only env file — no `.env.local` / `.env.example`), and the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free) via `pnpm setup:fetch`. **No axios.** Saves log to `.cursornext/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
 - **Does not:** Deploy; does not create the project inside the workspace (creates sibling folder).
 - **Stops when:** Project created via CLI and boilerplate added; log saved. Invoke: `@project-scaffold-agent` with app name.
 
@@ -77,9 +77,14 @@ alwaysApply: true
 - **Stops when:** Form works, typecheck/lint pass, coding log updated. Invoke: `@useform-builder-agent` with form name + fields + target path. See `.cursornext/rules/useform-validation.mdc`; hook templates in `.cursornext/setup/hooks/`.
 
 ### Agent 14: Monorepo Scaffold Agent
-- **Does:** Create a **new pnpm workspace monorepo** (apps + shared `ui`/`lib-utils` packages) via `node .cursornext/scripts/setup-monorepo.js`. Uses **pnpm workspaces only** (no Turborepo unless `USE_TURBO=true`). Creates each Next.js app via `create-next-app`, copies the kit into the new repo as `.cursor/`, installs `useForm` into `packages/lib-utils`, installs the example module into the primary app, runs `pnpm install`. Saves log to `.cursornext/logs/monorepo-scaffold/monorepo-{name}-{timestamp}.md`.
+- **Does:** Create a **new pnpm workspace monorepo** (apps + shared `ui`/`lib-utils` packages) via `node .cursornext/scripts/setup-monorepo.js`. Uses **pnpm workspaces only** (no Turborepo unless `USE_TURBO=true`). Creates each Next.js app via `create-next-app`, copies the kit into the new repo as `.cursor/`, creates root **`.env`** (only env file), installs `useForm` and the **dependency-free fetch client** (`packages/lib-utils/src/lib/fetch-client.ts`, axios-free) into `packages/lib-utils`, installs the example module into the primary app, runs `pnpm install`. Saves log to `.cursornext/logs/monorepo-scaffold/monorepo-{name}-{timestamp}.md`.
 - **Does not:** Build features, create PRD, deploy, or run Figma MCP. **Not** for single apps — use `@project-scaffold-agent` for one app.
 - **Stops when:** Monorepo created, `pnpm install` succeeds, log saved. Invoke: `@monorepo-scaffold-agent` with monorepo name (+ optional apps/packages/turbo).
+
+### Agent 15: Fetch Client Setup Agent
+- **Does:** Install and wire the **dependency-free `fetch`-based HTTP client** (axios-free) into a project or shared package via `pnpm setup:fetch` (`FETCH_TARGET=packages/lib-utils` for monorepos). Configures `baseURL` (`NEXT_PUBLIC_API_BASE_URL`) + request/response interceptors (auth token, language, 401/403), points services at `@/lib/fetch-client` (`http`), converts direct axios usage (incl. uploads → `uploadFile`) to the client, and removes axios from `package.json` where unused. The client mirrors the axios response/error shape so `.then()/.catch()` services keep working. Saves coding log to `.cursornext/logs/coding/coding-fetch-client.md`.
+- **Does not:** Create PRD, implement product features, add a third-party HTTP library, or run E2E.
+- **Stops when:** Fetch client installed + wired, axios removed where unused, validation passes, log saved. Invoke: `@fetch-client-agent` (optional target + interceptor needs). See `.cursornext/agents/agent-15-fetch-client.md`.
 
 ---
 
@@ -93,6 +98,7 @@ alwaysApply: true
 2. **Planning Agent** → `.cursornext/logs/prd-{feature}-{timestamp}.md`
 3. **Coding Agent** → Code + `.cursornext/logs/coding/coding-{feature}.md`
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
+3c. **Fetch Client Setup Agent** (optional; scaffold agents already install it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursornext/logs/coding/coding-fetch-client.md`
 4. **Documentation Agent** → Comments + doc log
 5. **Test Case Authoring Agent** (optional) → `.cursornext/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.tsx`
 6. **Playwright E2E Testing Agent** (optional) → E2E tests + artifacts (screenshots/, videos/, traces/, test-results.md) at `.cursornext/logs/e2e-testing/{feature}/{timestamp}/`
@@ -115,6 +121,7 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@planning-agent` — Use prompt or path to specs/PRD
 - `@coding-agent` — Implement PRD from [prd-file]
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
+- `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios; configure interceptors
 - `@documentation-agent` — Document the code
 - `@fixing-agent` — Feature name or description of what to fix
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

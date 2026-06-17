@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
  * Export a Figma node as SVG to .cursornext/cache/figma-svgs/{feature-name}/{out}.svg
- * Loads FIGMA_ACCESS_TOKEN from .env.local or .env in project root if present.
+ * Loads FIGMA_ACCESS_TOKEN from `.env` in project root if present.
  *
  * Usage:
  *   node .cursornext/scripts/export-figma-svg.js <feature-name> <node-id> [file-key] [output-filename]
- *   (Ensure .env.local exists with FIGMA_ACCESS_TOKEN=your-token, or set env var.)
+ *   (Ensure `.env` exists with FIGMA_ACCESS_TOKEN=your-token, or set env var.)
  * Example:
  *   node .cursornext/scripts/export-figma-svg.js app-header 196:8815 <fileKey> icon-back.svg
  *
@@ -16,22 +16,20 @@
 const fs = require('fs');
 const path = require('path');
 
-// Load .env.local then .env from project root if they exist (no dotenv dependency)
-['.env.local', '.env'].forEach((file) => {
-  const envPath = path.join(process.cwd(), file);
-  if (fs.existsSync(envPath)) {
-    try {
-      fs.readFileSync(envPath, 'utf8').split('\n').forEach((line) => {
-        const match = line.match(/^\s*([^#=]+)=(.*)$/);
-        if (match) {
-          const key = match[1].trim();
-          const value = match[2].trim().replace(/^["']|["']$/g, '');
-          if (!process.env[key]) process.env[key] = value;
-        }
-      });
-    } catch (_) {}
-  }
-});
+// Load `.env` from project root if present (no dotenv dependency)
+const envPath = path.join(process.cwd(), ".env");
+if (fs.existsSync(envPath)) {
+  try {
+    fs.readFileSync(envPath, "utf8").split("\n").forEach((line) => {
+      const match = line.match(/^\s*([^#=]+)=(.*)$/);
+      if (match) {
+        const key = match[1].trim();
+        const value = match[2].trim().replace(/^["']|["']$/g, "");
+        if (!process.env[key]) process.env[key] = value;
+      }
+    });
+  } catch (_) {}
+}
 
 const token = process.env.FIGMA_ACCESS_TOKEN || process.env.FIGMA_TOKEN;
 const featureName = process.argv[2];
@@ -41,7 +39,7 @@ const outFileName = process.argv[5] || 'icon.svg';
 
 if (!token) {
   console.error('Missing FIGMA_ACCESS_TOKEN.');
-  console.error('  1. Copy .env.example to .env.local and set FIGMA_ACCESS_TOKEN=your-token');
+  console.error('  1. Create `.env` in the project root and set FIGMA_ACCESS_TOKEN=your-token');
   console.error('  2. Or run: FIGMA_ACCESS_TOKEN=<token> node .cursornext/scripts/export-figma-svg.js <feature> <node-id> <file-key>');
   process.exit(1);
 }

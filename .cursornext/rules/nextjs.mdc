@@ -144,7 +144,7 @@ Use App Router file-based routing. Navigate with `next/link` and `useRouter`/`re
 ## 6. Data Fetching, API & Services
 
 - Fetch in Server Components with `fetch` (set `cache`/`next.revalidate`) or server SDKs.
-- Centralize client API logic in `services/` using the axios instance in `api/network.ts`; use `API_PATHS`. Do not scatter API calls inside UI components.
+- Centralize client API logic in `services/` using the dependency-free fetch client `http` in `lib/fetch-client.ts` (axios-free); use `API_PATHS`. Do not scatter API calls inside UI components.
 - Route handlers (`app/api/.../route.ts`) for server endpoints; validate inputs; keep secrets server-side.
 
 ---

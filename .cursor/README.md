@@ -1,6 +1,6 @@
 # `.cursor/` — React Native Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 12 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 15 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New project?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B).
@@ -15,7 +15,7 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 
 ```
 .cursor/
-├── agents/            # The 12 agent definitions (the "who does what")
+├── agents/            # The 15 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -29,7 +29,8 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   ├── agent-10-testcases.md
 │   ├── agent-11-detox-testing.md
 │   ├── agent-12-pre-pr-validation.md
-│   └── agent-13-useform-builder.md
+│   ├── agent-13-useform-builder.md
+│   └── agent-14-fetch-client.md    # Install/wire the axios-free fetch HTTP client
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-react-native.mdc      # Figma → RN mapping rules
@@ -43,7 +44,8 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   ├── figma-get-nodes.js
 │   ├── export-figma-svg.js
 │   ├── export-figma-png.js
-│   └── setup-useform.js               # Install useForm hook + validators (TS/JS)
+│   ├── setup-useform.js               # Install useForm hook + validators (TS/JS)
+│   └── setup-fetch.js                 # Install dependency-free fetch HTTP client (axios-free)
 ├── skills/
 │   └── react-native-architecture/SKILL.md   # App structure, aliases, design system
 ├── setup/
@@ -99,11 +101,12 @@ This gives you a reproducible, auditable pipeline: each stage leaves a file behi
 The project has **no Figma MCP**, so Figma extraction/export uses the **Figma REST API**, which needs a token.
 
 1. Get a token: Figma → **Settings → Account → Personal access tokens**.
-2. Copy `.env.example` → `.env` in the project root and add:
+2. Create **`.env`** in the project root and add:
    ```
    FIGMA_ACCESS_TOKEN=your-token-here
+   API_BASE_URL=
    ```
-3. **Never commit** the token. All scripts auto-load `.env` (no `dotenv` dependency needed).
+3. **Never commit** `.env`. All scripts auto-load `.env` only (no `dotenv` dependency needed).
 
 Without a token, Agent 00 still produces a spec but **lists assets instead of exporting them**, with a note to set the token and re-run.
 
@@ -125,7 +128,7 @@ Invoke an agent by typing `@<agent-name>` in Cursor with the required info. Belo
 
 ### Agent 08 — Project Scaffold (`@project-scaffold-agent`)
 - **Input:** App name (e.g. `MyApp`); optional folder name.
-- **Does:** Runs the **React Native Community CLI** (`npx @react-native-community/cli init <Name> --skip-install`) from the **parent of the workspace** (creates the project as a **sibling**, outside the current workspace). Then adds the `src/` folder structure + boilerplate (Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, sample Home screen, Common store slice, **the `useForm` hook + `form-validators`**), and merges navigation/redux deps into `package.json`, aliases into `babel.config.js`, and `paths` into `tsconfig.json`.
+- **Does:** Runs the **React Native Community CLI** (`npx @react-native-community/cli init <Name> --skip-install`) from the **parent of the workspace** (creates the project as a **sibling**, outside the current workspace). Then adds the `src/` folder structure + boilerplate (Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, sample Home screen, Common store slice, **the `useForm` hook + `form-validators`**, and the **dependency-free fetch client** `src/lib/fetch-client.ts` via `node .cursor/scripts/setup-fetch.js` — **no axios**), and merges navigation/redux deps into `package.json`, aliases into `babel.config.js`, and `paths` into `tsconfig.json`.
 - **After running:** A new TypeScript RN project exists outside the workspace with boilerplate; log saved to `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`. **You** then run `npm install` and `cd ios && pod install`.
 - **Does not:** Run `npm install`/`pod install`, create feature code, or touch `package.json`/`index.js` from scratch.
 
@@ -171,6 +174,12 @@ Path: src/screens/Login
 ```
 
   → creates `src/screens/Login/index.tsx` + `style.ts` using `useForm` (schema typed with `FormSchema`), `ALERTS.VALIDATION.*` error messages, submit via a service, and a coding log at `logs/coding/coding-login.md`.
+
+### Agent 14 — Fetch Client (`@fetch-client-agent`)
+- **Input:** Optional interceptor needs (auth token, 401 handling); optional migration from axios/raw `commonApi`.
+- **Does:** Installs `src/lib/fetch-client.ts` via `node .cursor/scripts/setup-fetch.js`; configures `baseURL` + request/response interceptors; wires `@lib` alias; points services at `http`; removes axios where unused. The client is **dependency-free** and mirrors the axios response/error shape.
+- **After running:** Fetch client installed + wired; coding log at `logs/coding/coding-fetch-client.md`. Stops.
+- **Does not:** Create PRD, implement features, or add a third-party HTTP library.
 
 ### Agent 03 — Documentation (`@documentation-agent`)
 - **Input:** Files to document (explicit list, or from the coding log).
@@ -283,6 +292,7 @@ flowchart LR
 | 01 Planning | `@planning-agent` | Prompt/specs path or description | `logs/prd-{feature}-{ts}.md` |
 | 02 Coding | `@coding-agent` | PRD path | `src/...` + `logs/coding/coding-{feature}.md` |
 | 13 useForm | `@useform-builder-agent` | Form name + fields + path | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
+| 14 Fetch Client | `@fetch-client-agent` | (optional interceptors / migrate axios) | `src/lib/fetch-client.ts` + coding log |
 | 03 Docs | `@documentation-agent` | Files or coding log | Documented files + doc log |
 | 10 Test Cases | `@testcases-agent` | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + Jest file |
 | 11 Detox | `@detox-testing-agent` | Feature + testing target | `logs/detox-testing/.../test-results.md` |
@@ -442,14 +452,15 @@ The canonical reference for **app structure**, **path aliases** (`@`, `@componen
 | `export-figma-svg.js` | Export a node as SVG → `cache/figma-svgs/{feature}/` | `node .cursor/scripts/export-figma-svg.js <feature> <nodeId> [fileKey]` |
 | `export-figma-png.js` | Export PNG → Android `drawable/` + iOS `Images.xcassets/` | `node .cursor/scripts/export-figma-png.js <nodeId> <android_name> <IosImageSet> [fileKey]` |
 | `setup-useform.js` | Install the `useForm` hook + `form-validators` into `src/` (TS or JS) | `node .cursor/scripts/setup-useform.js [--ts\|--js] [--force]` |
+| `setup-fetch.js` | Install the dependency-free fetch HTTP client (axios-free) into `src/lib/` | `node .cursor/scripts/setup-fetch.js [--force]` |
 
-The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env` or the environment. `setup-useform.js` needs no token and no extra deps.
+The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env` or the environment. `setup-useform.js` and `setup-fetch.js` need no token and no extra deps.
 
 ### Setup (`setup/business-briefs/`)
 A ~10-minute YAML brief that captures business context (purpose, rules, customization, success metrics). Copy `business-brief-template-react-native.yaml` → `business-brief-{feature}.yaml`, fill it, then feed it to `@prompt-generator-agent` (Mode A) to generate a Planning prompt. See that folder's `README.md` for the flow.
 
-### Setup (`setup/hooks/` + `setup/utility/`)
-Templates for the schema-based **`useForm`** hook and its validators, in **TypeScript** and **JavaScript**. Install with `node .cursor/scripts/setup-useform.js` (auto-detects TS via `tsconfig.json`; `--ts`/`--js` to force) — it copies `useForm` into `src/hooks/`, `form-validators` into `src/utility/`, and wires the `src/hooks` barrel. The hook has **no external dependencies** and uses RN `(name, value)` handlers with `ALERTS`-based error messages. The Project Scaffold Agent installs it automatically. Build forms with `@useform-builder-agent` (see `rules/useform-validation.mdc` and `setup/hooks/README.md`).
+### Setup (`setup/hooks/` + `setup/utility/` + `setup/lib/`)
+Templates for the schema-based **`useForm`** hook and its validators, in **TypeScript** and **JavaScript**, plus the **dependency-free fetch HTTP client** (`setup/lib/fetch-client.ts`, axios-free). Install with `node .cursor/scripts/setup-useform.js` and `node .cursor/scripts/setup-fetch.js`. The Project Scaffold Agent installs both automatically for every new project. Build forms with `@useform-builder-agent`; wire networking with `@fetch-client-agent` (see `rules/useform-validation.mdc`, `agents/agent-14-fetch-client.md`, and `setup/hooks/README.md`).
 
 ---
 

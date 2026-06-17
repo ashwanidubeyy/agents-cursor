@@ -7,8 +7,9 @@ import type {
  * Example feature service.
  *
  * This template uses an in-memory mock so the scaffolded module runs out of the
- * box. Replace these with real calls through the axios client in `@/lib`
- * (e.g. `import { api } from "@/lib/network"`) and your API paths.
+ * box. Replace these with real calls through the dependency-free fetch client in
+ * `@/lib/fetch-client` (e.g. `import { http } from "@/lib/fetch-client"`) and
+ * your API paths, using `.then()/.catch()`.
  */
 
 let MEMORY: ExampleItem[] = [

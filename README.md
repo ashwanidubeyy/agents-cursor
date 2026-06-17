@@ -88,14 +88,23 @@ You've successfully run and modified your React Native App. :partying_face:
 
 # Cursor AI Agent Systems
 
-This repo ships **two** agentic "software factory" systems for Cursor. Each is a set of **12 specialized agents** that do one job, write output to a file, then stop and hand off to the next agent (a human approves each step).
+This repo ships **two** agentic "software factory" systems for Cursor. Each is a set of specialized agents that do one job, write output to a file, then stop and hand off to the next agent (a human approves each step).
 
-| System | Folder | Stack | E2E | Full guide |
-| ------ | ------ | ----- | --- | ---------- |
-| **React Native** | `.cursor/` | RN + TypeScript | Detox | [`.cursor/README.md`](.cursor/README.md) · [cheat sheet](.cursor/USAGE.md) |
-| **Next.js** | `.cursornext/` | Next.js + TypeScript | Playwright | [`.cursornext/README.md`](.cursornext/README.md) |
+| System | Folder | Stack | Agents | E2E | Full guide |
+| ------ | ------ | ----- | ------ | --- | ---------- |
+| **React Native** | `.cursor/` | RN + TypeScript | 15 (00–14) | Detox | [`.cursor/README.md`](.cursor/README.md) · [cheat sheet](.cursor/USAGE.md) |
+| **Next.js** | `.cursornext/` | Next.js + TypeScript | 16 (00–15) | Playwright | [`.cursornext/README.md`](.cursornext/README.md) |
 
-Both systems share the **same 12 agents and the same workflow** — only the framework details differ. Pick the folder for your stack; the agents auto-load that folder's rules.
+Both systems share the **same workflow** — only the framework details differ. Pick the folder for your stack; the agents auto-load that folder's rules.
+
+### HTTP client: fetch over axios
+
+New projects scaffold a **dependency-free `fetch` client** (`src/lib/fetch-client.ts`) instead of axios:
+
+- **Project-owned** — full control, easy to audit and extend; no black-box HTTP library.
+- **Zero dependencies** — no transitive CVEs or version bumps to chase.
+- **Axios-compatible shape** — `{ data, status, ... }` responses and `error.response` errors, so existing `.then()/.catch()` service code keeps working.
+- **Install:** `pnpm setup:fetch` (Next.js) or `node .cursor/scripts/setup-fetch.js` (React Native). Invoke `@fetch-client-agent` to wire interceptors or migrate off axios.
 
 ---
 
@@ -110,7 +119,7 @@ Both systems share the **same 12 agents and the same workflow** — only the fra
 | Figma assets (Agent 00) | SVG → `src/assets/icons`; PNG → Android `drawable/` + iOS `Images.xcassets/` | SVG → `src/assets/icons`; raster → `public/images/` |
 | E2E (Agent 11) | **Detox** — `@detox-testing-agent`, needs **testing target** (iOS/Android) | **Playwright** — `@e2e-testing-agent`, needs **base URL** |
 | Unit/component tests | Jest + React Native Testing Library | Jest/Vitest + React Testing Library |
-| Figma token file | `.env` | `.env.local` |
+| Figma token file | `.env` | `.env` |
 | Rules folder | `react-native.mdc`, `figma-to-react-native.mdc`, `detox-testing.mdc` | `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc` |
 | E2E setup doc | [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) |
 
@@ -136,7 +145,8 @@ Both systems share the **same 12 agents and the same workflow** — only the fra
 | P3 | Documentation | `@documentation-agent` | Documented code |
 | P3 | Code Scanning | `@code-scanning-agent` | `logs/code-scanning/...` |
 | P3 | Vulnerability | `@vulnerability-agent` | `logs/vulnerability/...` |
-| P3 | Project Scaffold | `@project-scaffold-agent` | New project + boilerplate |
+| P3 | Project Scaffold | `@project-scaffold-agent` | New project + boilerplate (incl. fetch client) |
+| P3 | Fetch Client | `@fetch-client-agent` | `src/lib/fetch-client.ts` wired (axios-free) |
 | P3 | Prompt Generator | `@prompt-generator-agent` | Planning/project prompt |
 
 ---
@@ -284,7 +294,7 @@ Base URL: http://localhost:3000
 node .cursor/scripts/export-figma-svg.js <feature> <nodeId> [fileKey]
 node .cursor/scripts/export-figma-png.js <nodeId> <android_name> <IosImageSet> [fileKey]
 
-# Next.js (.cursornext) — token in .env.local; raster → public/images
+# Next.js (.cursornext) — token in .env; raster → public/images
 node .cursornext/scripts/export-figma-svg.js <feature> <nodeId> [fileKey] [outFile]
 node .cursornext/scripts/export-figma-png.js <nodeId> <output-name> <fileKey> [scale]
 ```

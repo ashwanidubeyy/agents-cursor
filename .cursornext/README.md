@@ -1,10 +1,11 @@
 # `.cursornext/` — Next.js Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 14 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 16 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New single app?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B). **Monorepo?** Use `@monorepo-scaffold-agent`.
 > - **Forms?** Use `@useform-builder-agent` (schema-based `useForm` hook; no Formik/yup).
+> - **HTTP / API?** Projects use the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free). Scaffold agents install it; use `@fetch-client-agent` to wire interceptors or migrate off axios.
 > - **New feature/module?** Go `@figma-analyzer` → `@planning-agent` → `@coding-agent` → `@documentation-agent` → `@testcases-agent` → `@e2e-testing-agent` → `@fixing-agent` → `@code-scanning-agent` → `@vulnerability-agent` → `@pre-pr-validation-agent` → `@pr-orchestrator-agent`.
 > - Every agent **reads inputs from files, writes outputs to files** (mostly under `.cursornext/logs/` and `.cursornext/cache/`), then **stops**. Nothing auto-runs the next agent.
 >
@@ -16,7 +17,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 
 ```
 .cursornext/
-├── agents/            # The 14 agent definitions (the "who does what")
+├── agents/            # The 16 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -31,7 +32,8 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── agent-11-e2e-testing.md
 │   ├── agent-12-pre-pr-validation.md
 │   ├── agent-13-useform-builder.md    # Build forms with the useForm hook
-│   └── agent-14-monorepo-scaffold.md  # Create a pnpm workspace monorepo
+│   ├── agent-14-monorepo-scaffold.md  # Create a pnpm workspace monorepo
+│   └── agent-15-fetch-client.md       # Install/wire the axios-free fetch HTTP client
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-nextjs.mdc            # Figma → Next.js mapping rules
@@ -46,6 +48,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── export-figma-svg.js
 │   ├── export-figma-png.js
 │   ├── setup-useform.js               # Install useForm hook + validators
+│   ├── setup-fetch.js                 # Install dependency-free fetch HTTP client (axios-free)
 │   ├── setup-example.js               # Install the example feature module
 │   ├── setup-e2e.js                   # Bootstrap Playwright E2E
 │   └── setup-monorepo.js              # Scaffold a pnpm workspace monorepo
@@ -62,6 +65,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── constants/                     # form-validators + strings/language stubs
 │   ├── e2e/                           # Playwright config + example spec
 │   ├── example-module/                # Feature-first example module (form + list)
+│   ├── lib/                           # fetch-client.ts template (axios-free)
 │   └── monorepo/                      # Monorepo root/workspace/package templates
 ├── cache/             # Agent inputs/intermediate artifacts (created on demand)
 │   ├── figma-specs-{feature}.md
@@ -106,11 +110,12 @@ This gives you a reproducible, auditable pipeline: each stage leaves a file behi
 The project has **no Figma MCP**, so Figma extraction/export uses the **Figma REST API**, which needs a token.
 
 1. Get a token: Figma → **Settings → Account → Personal access tokens**.
-2. Copy `.env.example` → `.env.local` in the project root and add:
+2. Create **`.env`** in the project root and add:
    ```
    FIGMA_ACCESS_TOKEN=your-token-here
+   NEXT_PUBLIC_API_BASE_URL=
    ```
-3. **Never commit** the token. All scripts auto-load `.env.local` then `.env` (no `dotenv` dependency needed).
+3. **Never commit** `.env`. All scripts auto-load `.env` only (no `dotenv` dependency needed).
 
 Without a token, Agent 00 still produces a spec but **lists assets instead of exporting them**, with a note to set the token and re-run.
 
@@ -120,7 +125,7 @@ Without a token, Agent 00 still produces a spec but **lists assets instead of ex
 |------|---------|---------------|
 | **ESLint** | `@code-scanning-agent` | `create-next-app` adds ESLint; ensure a `lint` script in `package.json`. |
 | **SonarQube** | `@code-scanning-agent` | Add `sonar-project.properties` + set `SONAR_HOST_URL`, `SONAR_TOKEN`. |
-| **Snyk** | `@vulnerability-agent` | `npx snyk auth` or set `SNYK_TOKEN` in `.env.local`. |
+| **Snyk** | `@vulnerability-agent` | `npx snyk auth` or set `SNYK_TOKEN` in `.env`. |
 | **Playwright** | `@fixing-agent` (test mode), `@e2e-testing-agent` | `playwright.config.ts`, `e2e/**/*.spec.ts`, `npm run e2e`. See `docs/E2E-PLAYWRIGHT.md`. |
 | **Jest/Vitest + RTL** | `@testcases-agent`, `@fixing-agent` | Test config + `__tests__/*.test.tsx` (React Testing Library). |
 
@@ -132,15 +137,21 @@ Invoke an agent by typing `@<agent-name>` in Cursor with the required info. Belo
 
 ### Agent 08 — Project Scaffold (`@project-scaffold-agent`)
 - **Input:** App name (e.g. `MyApp`); optional folder name.
-- **Does:** Runs **`create-next-app`** (`npx create-next-app@latest <name> --ts --app --eslint --src-dir --import-alias "@/*" --use-npm --no-tailwind`) from the **parent of the workspace** (creates the project as a **sibling**, outside the current workspace). Then adds the `src/` folder structure + boilerplate (App Router layout/page, theme COLORS/TYPOGRAPHY/spacing, constants, store slice, sample route), and merges deps into `package.json`.
+- **Does:** Runs **`create-next-app`** (`npx create-next-app@latest <name> --ts --app --eslint --src-dir --import-alias "@/*" --use-npm --no-tailwind`) from the **parent of the workspace** (creates the project as a **sibling**, outside the current workspace). Then adds the `src/` folder structure + boilerplate (App Router layout/page, theme COLORS/TYPOGRAPHY/spacing, constants, store slice, sample route), merges deps into `package.json`, and installs the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free) via `pnpm setup:fetch`. **No axios.**
 - **After running:** A new TypeScript Next.js project exists outside the workspace with boilerplate; log saved to `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`. **You** then run `npm install` and `npm run dev`.
 - **Does not:** Recreate `package.json`/`next.config.js`/`tsconfig.json` from scratch, create feature code, use Tailwind unless that's the project standard, or **create a monorepo** (use `@monorepo-scaffold-agent` for that).
 
 ### Agent 14 — Monorepo Scaffold (`@monorepo-scaffold-agent`)
 - **Input:** Monorepo name; optional apps (default `web`), packages (default `ui`, `lib-utils`), `USE_TURBO`.
-- **Does:** Creates a **pnpm workspace monorepo** as a sibling folder via `node .cursornext/scripts/setup-monorepo.js`: root `package.json` + `pnpm-workspace.yaml`, `apps/*` (each via `create-next-app`), `packages/ui` + `packages/lib-utils`, copies this kit into the new repo as `.cursor/`, installs `useForm` into `packages/lib-utils`, installs the example module into the primary app, runs `pnpm install`. No Turborepo unless `USE_TURBO=true`.
+- **Does:** Creates a **pnpm workspace monorepo** as a sibling folder via `node .cursornext/scripts/setup-monorepo.js`: root `package.json` + `pnpm-workspace.yaml`, `apps/*` (each via `create-next-app`), `packages/ui` + `packages/lib-utils`, copies this kit into the new repo as `.cursor/`, installs `useForm` and the **dependency-free fetch client** into `packages/lib-utils` (no axios), installs the example module into the primary app, runs `pnpm install`. No Turborepo unless `USE_TURBO=true`.
 - **After running:** New monorepo outside the workspace; log saved to `logs/monorepo-scaffold/monorepo-{name}-{timestamp}.md`. **You** then `cd` in and run `pnpm dev`.
 - **Does not:** Build features, deploy, or create a single app (use `@project-scaffold-agent` for one app).
+
+### Agent 15 — Fetch Client (`@fetch-client-agent`)
+- **Input:** Optional target (`FETCH_TARGET=packages/lib-utils` for monorepos); optional interceptor needs (auth token, 401 handling); optional axios migration.
+- **Does:** Installs `src/lib/fetch-client.ts` via `pnpm setup:fetch`; configures `NEXT_PUBLIC_API_BASE_URL` + request/response interceptors; points services at `http` from `@/lib/fetch-client`; converts direct axios usage (incl. uploads → `uploadFile`); removes axios from `package.json` where unused. The client is **dependency-free** and mirrors the axios response/error shape.
+- **After running:** Fetch client installed + wired; coding log at `logs/coding/coding-fetch-client.md`. Stops.
+- **Does not:** Create PRD, implement features, or add a third-party HTTP library.
 
 ### Agent 09 — Prompt Generator (`@prompt-generator-agent`)
 - **Two modes:**
@@ -301,6 +312,7 @@ flowchart LR
 |-------|--------|---------|--------|
 | 08 Scaffold | `@project-scaffold-agent` | App name (+ optional folder) | New **single** Next.js project (sibling) + scaffold log |
 | 14 Monorepo | `@monorepo-scaffold-agent` | Monorepo name (+ apps/packages/turbo) | New pnpm monorepo (sibling) + monorepo log |
+| 15 Fetch Client | `@fetch-client-agent` | (optional target / interceptors / migrate axios) | `src/lib/fetch-client.ts` + coding log |
 | 09 Prompt Gen | `@prompt-generator-agent` | Feature+brief (A) or project name (B) | `cache/prompt-*.md` |
 | 00 Figma | `@figma-analyzer` | Feature, URL+node-id, Frame, Section | `cache/figma-specs-{feature}.md` + assets |
 | 01 Planning | `@planning-agent` | Prompt/specs path or description | `logs/prd-{feature}-{ts}.md` |
@@ -458,7 +470,7 @@ The canonical reference for **app structure** (`src/app` App Router), **path ali
 ### Docs (`docs/`)
 - **`E2E-PLAYWRIGHT.md`** — Playwright E2E setup (install, `playwright.config.ts`, specs, selectors/test ids, artifacts, commands, troubleshooting, and a new-project checklist). Referenced by the E2E, Fixing, and Test Case agents.
 
-### Scripts (`scripts/`) — run from project root, auto-load `.env.local` then `.env`
+### Scripts (`scripts/`) — run from project root, auto-load `.env`
 | Script | Purpose | Example |
 |--------|---------|---------|
 | `fetch-figma-nodes.js` | Save a node's full document JSON to cache | `node .cursornext/scripts/fetch-figma-nodes.js <fileKey> <nodeId> [outfile]` |
@@ -466,11 +478,20 @@ The canonical reference for **app structure** (`src/app` App Router), **path ali
 | `export-figma-svg.js` | Export a node as SVG → `cache/figma-svgs/{feature}/` (then into `src/assets/icons`) | `node .cursornext/scripts/export-figma-svg.js <feature> <nodeId> [fileKey] [outFile]` |
 | `export-figma-png.js` | Export raster → `public/images/` (for `next/image`) | `node .cursornext/scripts/export-figma-png.js <nodeId> <output-name> <fileKey> [scale]` |
 | `setup-useform.js` | Install `useForm` + `useTranslation` + `form-validators` into a project | `node .cursor/scripts/setup-useform.js` (run inside the generated project) |
+| `setup-fetch.js` | Install the dependency-free fetch HTTP client (axios-free) into `src/lib/` or a shared package | `pnpm setup:fetch` or `FETCH_TARGET=packages/lib-utils pnpm setup:fetch` |
 | `setup-example.js` | Install the feature-first example module (`features/example` + `/example` route) | `node .cursor/scripts/setup-example.js` (inside the project) |
 | `setup-e2e.js` | Bootstrap Playwright (config + smoke spec + scripts) | `node .cursor/scripts/setup-e2e.js` (inside the project) |
 | `setup-monorepo.js` | Scaffold a pnpm workspace monorepo (sibling folder) | `MONOREPO_NAME=my-platform node .cursornext/scripts/setup-monorepo.js` |
 
-The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env.local` or the environment. The `setup-*` scripts need no token. `setup-monorepo.js` runs **from this kit**; `setup-useform/example/e2e` are designed to run **inside a generated project** (where the kit is copied as `.cursor/`), and the monorepo scaffold invokes them automatically.
+The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in **`.env`** or the environment. The `setup-*` scripts need no token. `setup-monorepo.js` runs **from this kit**; `setup-useform` / `setup-fetch` / `setup-example` / `setup-e2e` are designed to run **inside a generated project** (where the kit is copied as `.cursor/`), and the scaffold agents invoke them automatically.
+
+### Why fetch over axios
+
+Scaffolded projects use a **custom, dependency-free `fetch` client** instead of axios:
+
+- **Project-owned** — full control; easy to audit, extend, and debug.
+- **Zero dependencies** — no transitive CVEs or version bumps to chase.
+- **Axios-compatible API** — `{ data, status, ... }` responses, `error.response` errors, interceptors, and `.then()/.catch()` services keep working unchanged.
 
 ### Setup (`setup/`)
 - **`business-briefs/`** — A ~10-minute YAML brief that captures business context (purpose, rules, customization, success metrics). Copy `business-brief-template-nextjs.yaml` → `business-brief-{feature}.yaml`, fill it, then feed it to `@prompt-generator-agent` (Mode A) to generate a Planning prompt.
@@ -478,6 +499,7 @@ The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in `.env.local
 - **`constants/`** — `form-validators.ts` plus `strings`/`language` stubs the hook depends on.
 - **`e2e/`** — Playwright config + example spec (installed by `setup-e2e.js`).
 - **`example-module/`** — Feature-first example module (form + list + service + store) installed by `setup-example.js`.
+- **`lib/`** — `fetch-client.ts` template (dependency-free HTTP client, axios-free) installed by `setup-fetch.js`.
 - **`monorepo/`** — Root `package.json`, `pnpm-workspace.yaml`, and package templates used by `setup-monorepo.js`.
 
 ---

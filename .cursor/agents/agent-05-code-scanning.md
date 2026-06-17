@@ -23,7 +23,7 @@ model: fast
 ### SonarQube (optional; run when configured)
 - If **SonarQube** is configured (e.g. `sonar-project.properties` in project root and **`SONAR_HOST_URL` + `SONAR_TOKEN`** set in env), run the scan when the user requests a full/code scan: **`npm run sonar`** (or `npx @sonar/scan`). Include **SonarQube quality gate and findings** in the report (bugs, vulnerabilities, code smells, duplication).
 - If SonarQube is **not** configured (missing `sonar-project.properties`, or env vars not set, or scan fails), note "SonarQube not configured" in the report and skip; rely on ESLint + manual checklist.
-- **Required for SonarQube:** `.env` (or CI) must set `SONAR_HOST_URL` and `SONAR_TOKEN`; otherwise the scanner cannot report to the server. See `.env.example` and `docs/SONARQUBE-SNYK.md`.
+- **Required for SonarQube:** `.env` (or CI) must set `SONAR_HOST_URL` and `SONAR_TOKEN`; otherwise the scanner cannot report to the server. See `docs/SONARQUBE-SNYK.md`.
 
 ### Adding ESLint / SonarQube to the project (for reports)
 - **ESLint:** If the project has no lint script, the report can recommend: `npm install -D eslint @react-native/eslint-config` (or `@react-native-community/eslint-config`), add `"lint": "eslint ."` (or `eslint src/`) to `package.json`, and create `.eslintrc.js` extending the React Native config. Then re-run this agent to include ESLint results.

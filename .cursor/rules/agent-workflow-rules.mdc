@@ -7,7 +7,7 @@ alwaysApply: true
 
 ### Agent 00: Figma Analyzer
 - **Does:** Accept Figma URL + Mobile Frame name, use Figma MCP to extract specs (mobile only), save to `.cursor/cache/figma-specs-{feature}.md`. Extract hierarchy, measurements, colors, typography, spacing; map to React Native (ColorCode, FONTS). When icons/vectors are present, export required SVGs (via Figma MCP export or Figma REST API with `FIGMA_ACCESS_TOKEN`) to `.cursor/cache/figma-svgs/{feature}/` so development can use them directly.
-- **Setup:** Set `FIGMA_ACCESS_TOKEN` in environment (e.g. copy `.env.example` to `.env` and add your token; never commit the token). See agent-00-figma-analyzer.md for details.
+- **Setup:** Set `FIGMA_ACCESS_TOKEN` in **`.env`** in the project root (never `.env.local` or `.env.example`; never commit the token). See agent-00-figma-analyzer.md for details.
 - **Does not:** Create PRD, write code, or proceed to next agent automatically.
 - **Stops when:** Specs file is saved. Invoke: `@figma-analyzer` with Feature name, Mobile URL + Frame, Section.
 
@@ -47,7 +47,7 @@ alwaysApply: true
 - **Stops when:** PR document saved. Invoke: `@pr-orchestrator-agent`.
 
 ### Agent 08: Project Scaffold Agent
-- **Does:** Create a new React Native project with **given app name** and **sample folder structure with boilerplate**. Scaffolds src/ (api, components/layouts, components/widgets, constants, hooks, screens, store, utility), Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, one sample screen (Home), one store slice (Common). Saves log to `.cursor/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
+- **Does:** Create a new React Native project with **given app name** and **sample folder structure with boilerplate**. Scaffolds src/ (api, lib, components/layouts, components/widgets, constants, hooks, screens, store, utility), Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, one sample screen (Home), one store slice (Common), **`.env`** (only env file — no `.env.local` / `.env.example`), the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free) via `node .cursor/scripts/setup-fetch.js`, and the `useForm` hook. **No axios.** Saves log to `.cursor/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
 - **Does not:** Run React Native CLI or npm install; does not create ios/android (user runs CLI separately if needed).
 - **Stops when:** All files/folders created and log saved. Invoke: `@project-scaffold-agent` with app name; optional "in new folder" to create sibling directory.
 
@@ -76,6 +76,11 @@ alwaysApply: true
 - **Does not:** Create PRD, run E2E, or add new form libraries (no Formik/react-hook-form/yup).
 - **Stops when:** Form works, tsc/lint pass, coding log updated. Invoke: `@useform-builder-agent` with form name + fields + target path. See `.cursor/rules/useform-validation.mdc`; hook templates in `.cursor/setup/hooks/`.
 
+### Agent 14: Fetch Client Setup Agent
+- **Does:** Install and wire the **dependency-free `fetch`-based HTTP client** (axios-free) into a React Native project via `node .cursor/scripts/setup-fetch.js`. Configures `baseURL` + request/response interceptors (auth token, language, 401/403), adds `@lib` path alias, points services at `@lib/fetch-client` (`http`), converts direct axios/raw-fetch usage (incl. uploads → `uploadFile`) to the client, and removes axios from `package.json` where unused. The client mirrors the axios response/error shape so `.then()/.catch()` services keep working. Saves coding log to `.cursor/logs/coding/coding-fetch-client.md`.
+- **Does not:** Create PRD, implement product features, add a third-party HTTP library, or run E2E.
+- **Stops when:** Fetch client installed + wired, axios removed where unused, validation passes, log saved. Invoke: `@fetch-client-agent` (optional interceptor needs). See `.cursor/agents/agent-14-fetch-client.md`.
+
 ---
 
 ## Workflow Sequence
@@ -87,6 +92,7 @@ alwaysApply: true
 2. **Planning Agent** → `.cursor/logs/prd-{feature}-{timestamp}.md`
 3. **Coding Agent** → Code + `.cursor/logs/coding/coding-{feature}.md`
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
+3c. **Fetch Client Setup Agent** (optional; scaffold agent already installs it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursor/logs/coding/coding-fetch-client.md`
 4. **Documentation Agent** → Comments + doc log
 5. **Test Case Authoring Agent** (optional) → `.cursor/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.js`
 6. **Detox Testing Agent** (optional) → Detox E2E tests + artifacts (ss/, video/, test-results.md) at `.cursor/logs/detox-testing/{feature}/{timestamp}/`
@@ -108,6 +114,7 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@planning-agent` — Use prompt or path to specs/PRD
 - `@coding-agent` — Implement PRD from [prd-file]
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
+- `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios/raw fetch; configure interceptors
 - `@documentation-agent` — Document the code
 - `@fixing-agent` — Feature name or description of what to fix
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

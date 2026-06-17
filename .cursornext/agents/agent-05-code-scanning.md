@@ -69,7 +69,7 @@ Score each category. Total = 100.
 #### **5. State & data (10 points)**
 - [ ] useState for local UI; Redux Toolkit for shared state per architecture
 - [ ] Optional chaining for nested/optional data
-- [ ] Services used for API; no axios/fetch scattered in UI components inappropriately
+- [ ] Services used for API (over `@/lib/fetch-client`); no axios/raw fetch scattered in UI components inappropriately
 
 #### **6. Accessibility (10 points)**
 - [ ] Semantic HTML; `aria-*` where needed

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Export a Figma node as a raster image (PNG/WebP) into public/images/ for use with next/image.
- * Loads FIGMA_ACCESS_TOKEN from .env.local or .env in project root if present.
+ * Loads FIGMA_ACCESS_TOKEN from `.env` in project root if present.
  *
  * Usage: node .cursornext/scripts/export-figma-png.js <node-id> <output-name> <file-key> [scale]
  * Example: node .cursornext/scripts/export-figma-png.js 372:2801 hero-bg <fileKey> 2
@@ -13,21 +13,19 @@
 const fs = require('fs');
 const path = require('path');
 
-['.env.local', '.env'].forEach((file) => {
-  const envPath = path.join(process.cwd(), file);
-  if (fs.existsSync(envPath)) {
-    try {
-      fs.readFileSync(envPath, 'utf8').split('\n').forEach((line) => {
-        const match = line.match(/^\s*([^#=]+)=(.*)$/);
-        if (match) {
-          const key = match[1].trim();
-          const value = match[2].trim().replace(/^["']|["']$/g, '');
-          if (!process.env[key]) process.env[key] = value;
-        }
-      });
-    } catch (_) {}
-  }
-});
+const envPath = path.join(process.cwd(), ".env");
+if (fs.existsSync(envPath)) {
+  try {
+    fs.readFileSync(envPath, "utf8").split("\n").forEach((line) => {
+      const match = line.match(/^\s*([^#=]+)=(.*)$/);
+      if (match) {
+        const key = match[1].trim();
+        const value = match[2].trim().replace(/^["']|["']$/g, "");
+        if (!process.env[key]) process.env[key] = value;
+      }
+    });
+  } catch (_) {}
+}
 
 const token = process.env.FIGMA_ACCESS_TOKEN || process.env.FIGMA_TOKEN;
 const nodeId = process.argv[2];

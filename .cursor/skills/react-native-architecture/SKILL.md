@@ -6,9 +6,10 @@ Reference for Planning and Coding agents. Adapt paths to your project.
 
 ```
 src/
-├── api/                  # API clients and endpoints
-│   ├── apiEndPoints.js
-│   └── commonApi.js
+├── api/                  # API path constants
+│   └── apiEndPoints.js
+├── lib/                  # Dependency-free fetch HTTP client (axios-free)
+│   └── fetch-client.ts   # http instance + interceptors (axios-like response/error)
 ├── AppRouteConfig.js      # Navigation: Stack + Tab navigators, screen registration
 ├── Root.js                # Root: Provider, KeyboardProvider, AppRouteConfig
 ├── assets/                # Fonts, SVGs (as components), images, gifs
@@ -61,13 +62,20 @@ Use these in imports; do not use deep relative paths.
 | `@store`    | `./src/store`           |
 | `@utility`  | `./src/utility`        |
 | `@api`      | `./src/api`             |
+| `@lib`      | `./src/lib`             |
 | `@assets`   | `./src/assets`          |
 | `@layouts`  | `./src/components/layouts` |
 | `@widgets`  | `./src/components/widgets` |
 
 Example: `import { COLORS } from '@constants/colors';`  
 Example: `import CustomButton from '@widgets/CustomButton';`  
-Example: `import { login } from '@store/Auth/actions';`
+Example: `import { login } from '@store/Auth/actions';`  
+Example: `import { http } from '@lib/fetch-client';`
+
+## Data Fetching & Services
+
+- Use `services/` (or `api/` modules) which call the dependency-free fetch client `http` in `lib/fetch-client.ts` (axios-free). Screens call services, never the client or raw `fetch` directly.
+- Handle promises with `.then()/.catch()`; use optional chaining (`response?.data?.items`) for API responses.
 
 ## Design System
 

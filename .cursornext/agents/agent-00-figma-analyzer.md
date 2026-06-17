@@ -22,7 +22,7 @@ model: fast
 
 **Setup (required for asset export when no Figma MCP):** If the project has **no Figma MCP**, for Step 2.5 (SVG) and Step 2.6 (PNG) to run you **must** set **`FIGMA_ACCESS_TOKEN`** (or **`FIGMA_TOKEN`**) so the agent can use the Figma REST API to (1) get the frame's children and (2) export icons/images.
 
-- **Where to set:** Copy `.env.example` to `.env.local` in the project root and set `FIGMA_ACCESS_TOKEN=<your-token>`. Or set in Cursor/IDE environment variables. **Never hardcode the token in repo or in agent files.**
+- **Where to set:** Create **`.env`** in the project root and set `FIGMA_ACCESS_TOKEN=<your-token>`. Or set in Cursor/IDE environment variables. **Never** use `.env.local` or `.env.example`. **Never hardcode the token in repo or in agent files.**
 - **Get token:** Figma → Settings → Account → Personal access tokens.
 - **Usage:** When present, the agent uses the token for `GET https://api.figma.com/v1/files/{fileKey}/nodes?ids={nodeId}` (to get hierarchy/children) and `GET https://api.figma.com/v1/images/{fileKey}?ids={nodeIds}&format=svg|png` for export. Do not store the actual token in any agent or config committed to version control.
 

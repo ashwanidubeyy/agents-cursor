@@ -94,7 +94,11 @@ function main() {
 
   write(
     path.join(root, ".gitignore"),
-    "node_modules\n.next\n.turbo\ndist\n.env*.local\nplaywright-report\ntest-results\n"
+    "node_modules\n.next\n.turbo\ndist\n.env\nplaywright-report\ntest-results\n"
+  );
+  write(
+    path.join(root, ".env"),
+    "# API (used by packages/lib-utils/src/lib/fetch-client.ts)\nNEXT_PUBLIC_API_BASE_URL=\n\n# Figma (optional)\nFIGMA_ACCESS_TOKEN=\n"
   );
 
   if (USE_TURBO) {
@@ -229,6 +233,13 @@ function main() {
   execSync("node .cursor/scripts/setup-useform.js", {
     cwd: root,
     env: { ...process.env, USEFORM_TARGET: "packages/lib-utils" },
+    stdio: "inherit",
+  });
+
+  console.log("\nInstalling fetch client into packages/lib-utils...");
+  execSync("node .cursor/scripts/setup-fetch.js", {
+    cwd: root,
+    env: { ...process.env, FETCH_TARGET: "packages/lib-utils" },
     stdio: "inherit",
   });
 

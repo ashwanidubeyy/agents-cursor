@@ -17,8 +17,9 @@ Use in conjunction with agent-workflow and figma-to-nextjs rules.
 - **src/components/widgets** — Reusable UI (Button, Input, Badge, Avatar).
 - **src/theme** — colors.ts (COLORS), typography.ts (TYPOGRAPHY/FONTS), spacing.ts, index.ts (theme object).
 - **src/constants** — titles.ts (TITLES), alerts.ts (ALERTS), routes.ts (ROUTES), keys.ts, index.ts.
-- **src/services** — Business logic + API calls; components/pages call services, not axios directly.
-- **src/api** — network.ts (axios instance + interceptors), apiPaths.ts (API_PATHS).
+- **src/services** — Business logic + API calls; components/pages call services, not the HTTP client directly.
+- **src/lib** — fetch-client.ts (dependency-free HTTP client, axios-free; `http` + interceptors).
+- **src/api** — apiPaths.ts (API_PATHS) only.
 - **src/store** — Redux Toolkit slices (`slices/`), `index.ts` (configureStore), `hooks.ts` (typed hooks).
 - **src/hooks** — Custom hooks (`useXxx`).
 - **src/types** — Type definitions (`[module].types.ts`); re-export via index.ts.
@@ -76,7 +77,7 @@ Use aliases instead of deep relative paths: `@/theme`, `@/store`, `@/components`
 
 ## Data Fetching, Lists, Images
 
-- Server Components: fetch with `fetch` (with `cache`/`revalidate`) or server SDKs. Client/shared logic: use `services/` over the axios instance in `api/network.ts`; use `API_PATHS`.
+- Server Components: fetch with `fetch` (with `cache`/`revalidate`) or server SDKs. Client/shared logic: use `services/` over `http` from `lib/fetch-client.ts` (axios-free); use `API_PATHS`.
 - Handle promises with `.then()/.catch()` in services; expose loading/error states in UI.
 - Lists: virtualize large lists (`@tanstack/react-virtual`) where needed; always provide stable unique `key` (never array index).
 - Images: use `next/image` for `public/` raster assets (with `width`/`height` or `fill` + `sizes`); SVGs as React components from `@/assets/icons`.
@@ -89,7 +90,7 @@ Use aliases instead of deep relative paths: `@/theme`, `@/store`, `@/components`
 
 - Per-route `metadata` (or `generateMetadata`) export for SEO.
 - Route handlers (`app/api/.../route.ts`) for server endpoints; validate inputs; never leak secrets to the client.
-- Environment variables: server-only secrets without `NEXT_PUBLIC_`; only expose client-safe values with `NEXT_PUBLIC_` prefix. Never commit `.env.local`.
+- Environment variables: server-only secrets without `NEXT_PUBLIC_`; only expose client-safe values with `NEXT_PUBLIC_` prefix. Use **`.env`** only; never `.env.local` or `.env.example`. Never commit `.env`.
 - Use `next/link` for navigation and `next/font` for fonts.
 
 For full structure and path aliases, see `.cursornext/skills/nextjs-architecture/SKILL.md`.

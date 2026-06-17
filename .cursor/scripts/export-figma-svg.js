@@ -37,7 +37,7 @@ const outFileName = process.argv[5] || 'icon-back.svg';
 
 if (!token) {
   console.error('Missing FIGMA_ACCESS_TOKEN.');
-  console.error('  1. Copy .env.example to .env and set FIGMA_ACCESS_TOKEN=your-token');
+  console.error('  1. Create `.env` in the project root and set FIGMA_ACCESS_TOKEN=your-token');
   console.error('  2. Or run: FIGMA_ACCESS_TOKEN=<token> node .cursor/scripts/export-figma-svg.js <feature> <node-id>');
   process.exit(1);
 }

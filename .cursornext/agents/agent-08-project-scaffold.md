@@ -74,7 +74,13 @@ npx create-next-app@latest <project-folder-name> --ts --app --eslint --src-dir -
 - **Do not** recreate root config; the CLI created `package.json`, `tsconfig.json`, `next.config.js`, `.eslintrc`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`.
 - **Update `next.config.js`** (or `.mjs`): enable styled-components SWC: `compiler: { styledComponents: true }`.
 - **Update `tsconfig.json`** if needed so `@/*` → `./src/*` (create-next-app sets this with `--import-alias`).
-- **Merge into `package.json`:** add dependencies — `styled-components`, `@reduxjs/toolkit`, `react-redux`, `axios`; devDependencies — `@types/styled-components` (if needed). (Skip styled-components deps if using Tailwind.)
+- **Merge into `package.json`:** add dependencies — `styled-components`, `@reduxjs/toolkit`, `react-redux`; devDependencies — `@types/styled-components` (if needed). (Skip styled-components deps if using Tailwind.) **No axios** — networking uses the dependency-free fetch client (see below).
+- **Create `.env`** at the project root (the **only** env file — do **not** create `.env.local` or `.env.example`). Add placeholders the scaffold needs:
+  ```
+  NEXT_PUBLIC_API_BASE_URL=
+  FIGMA_ACCESS_TOKEN=
+  ```
+  Ensure `.gitignore` lists `.env` (remove `.env*.local` / `.env.example` entries if the CLI added them).
 - **Create** the `src/` folder structure and boilerplate; use the **dynamic App name** in the home page and metadata.
 
 ```
@@ -91,7 +97,8 @@ src/
 ├── styles/               (commonStyles.ts, StyledComponentsRegistry.tsx)
 ├── hooks/                (index.ts)
 ├── services/             (example.service.ts)
-├── api/                  (network.ts axios instance, apiPaths.ts API_PATHS)
+├── lib/                  (fetch-client.ts — dependency-free HTTP client, axios-free)
+├── api/                  (apiPaths.ts API_PATHS)
 ├── store/                (slices/commonSlice.ts, hooks.ts, index.ts, Provider component)
 ├── types/                (index.ts)
 ├── utils/                (index.ts)
@@ -107,8 +114,9 @@ public/
 - **src/store/** — `commonSlice` (e.g. `appReady` state), `configureStore` in `index.ts`, typed `useAppDispatch`/`useAppSelector` in `hooks.ts`, a client `Providers` component (`'use client'`) wrapping `react-redux` Provider.
 - **src/components/widgets/Button/** — Client Component button using COLORS/TYPOGRAPHY; props typed.
 - **src/components/layouts/Header/** — header with app name + nav.
-- **src/api/** — `network.ts` (axios instance + interceptors), `apiPaths.ts` (API_PATHS).
-- **src/services/** — example service using the axios instance with `.then()/.catch()`.
+- **src/lib/** — `fetch-client.ts`, the **dependency-free** fetch HTTP client (axios-free) with `baseURL`, request/response interceptors, and an axios-like response/error shape. Install it with `pnpm setup:fetch` (`node .cursor/scripts/setup-fetch.js`) and set `NEXT_PUBLIC_API_BASE_URL` in **`.env`** (project root). **Do not add axios.** Do not use `.env.local` or `.env.example`.
+- **src/api/** — `apiPaths.ts` (API_PATHS) only.
+- **src/services/** — example service importing `{ http }` from `@/lib/fetch-client` and calling `http.get/post` with `.then()/.catch()`.
 - **src/constants/** — TITLES, ALERTS, ROUTES, index re-export.
 - **src/app/page.tsx** — Home: "Welcome to {AppName}" using tokens and the Button widget.
 
@@ -122,8 +130,8 @@ Use path aliases (`@/*`) in imports. No raw hex in styles; use COLORS and TYPOGR
 ### STEP 6: Report to user
 
 - Confirm: TypeScript Next.js app created via CLI **outside** the workspace; folder structure + boilerplate added.
-- List project root path and main additions (app/layout + providers, theme, store, components, services, api, constants).
-- Next steps: `cd <path-to-project>`, `npm install`, `npm run dev` (then open http://localhost:3000).
+- List project root path and main additions (app/layout + providers, theme, store, components, services, **lib/fetch-client (axios-free)**, api, constants).
+- Next steps: `cd <path-to-project>`, fill in **`.env`**, `npm install`, `npm run dev` (then open http://localhost:3000).
 
 ---
 
@@ -156,7 +164,7 @@ Create Next.js project storefront.
 
 ## BOUNDARIES
 
-- **Does:** **Always** create a **single** Next.js app (not a monorepo) via **`create-next-app`** first (TypeScript + App Router + ESLint + src dir + `@/*` alias); create it **outside** the workspace (sibling folder); use **dynamic** App name; then add folder structure + boilerplate; update `next.config`, `package.json`; configure styled-components SSR; save scaffold log.
+- **Does:** **Always** create a **single** Next.js app (not a monorepo) via **`create-next-app`** first (TypeScript + App Router + ESLint + src dir + `@/*` alias); create it **outside** the workspace (sibling folder); use **dynamic** App name; then add folder structure + boilerplate; create **`.env`** only (no `.env.local` / `.env.example`); **install the dependency-free fetch client (`src/lib/fetch-client.ts`) via `pnpm setup:fetch` — no axios**; update `next.config`, `package.json`; configure styled-components SSR; save scaffold log.
 - **Does not:** Create the project inside the workspace; recreate root config from scratch; **create a monorepo / pnpm workspace / shared packages** (that is the Monorepo Scaffold Agent's job); run `npm run dev`/deploy; create PRD or feature code; run Figma MCP.
 - **Stops when:** CLI has been run (from parent of workspace), folder structure + boilerplate added in the created project, and log saved. User runs `npm install` and `npm run dev`.
 

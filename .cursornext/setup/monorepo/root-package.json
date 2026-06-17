@@ -7,6 +7,7 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "setup:useform": "node .cursor/scripts/setup-useform.js",
+    "setup:fetch": "node .cursor/scripts/setup-fetch.js",
     "setup:e2e": "node .cursor/scripts/setup-e2e.js",
     "setup:example": "node .cursor/scripts/setup-example.js"
   },

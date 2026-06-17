@@ -97,6 +97,6 @@ Layer on `handleOnChange` + `setUseFormStates`, or put rules in the schema `vali
 
 - [ ] Schema per field; `useForm(initialState, submitHandler)`.
 - [ ] Correct handler + dirty-gated errors.
-- [ ] Submit via `services/` (not raw axios in the component).
+- [ ] Submit via `services/` (over `@/lib/fetch-client`, not raw fetch/axios in the component).
 - [ ] No new form libraries introduced.
 - [ ] Invoke `@useform-builder-agent` for full form implementation.

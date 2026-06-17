@@ -105,7 +105,7 @@ Use this to make PRD sections concrete (file paths, alias names, token usage).
    - **Design tokens:** Map to COLORS, TYPOGRAPHY/FONTS, spacing, commonStyles. No raw hex or hardcoded fonts.
    - **Component structure:** Reuse from `@/widgets` and `@/layouts`; one folder per component (index.tsx + styles.ts).
    - **State:** Local (useState/useReducer) vs Redux Toolkit (`@/store`); which slice or new slice. Server state via Server Components/route handlers or TanStack Query if needed.
-   - **Data fetching:** Server Component `fetch` (with cache/revalidate) or services over the axios instance. Use `.then()/.catch()` in services.
+   - **Data fetching:** Server Component `fetch` (with cache/revalidate) or services over the dependency-free fetch client (`@/lib/fetch-client`, axios-free). Use `.then()/.catch()` in services.
    - **Error handling:** optional chaining; `error.tsx`/`not-found.tsx` where relevant; user-facing error UI.
    - **a11y:** semantic HTML, `aria-*`, labeled inputs, keyboard nav, focus states.
    - **Responsive:** breakpoints, rem/clamp, flex/grid.

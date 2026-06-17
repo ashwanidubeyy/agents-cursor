@@ -178,7 +178,7 @@ Use React Navigation. Define navigators and screens under `navigation/` (e.g. `A
 
 ## 6. API and Services
 
-Centralize API logic in a service layer (e.g. `services/authService.ts`) using axios or fetch. Do not scatter API calls inside UI components.
+Centralize API logic in a service layer (e.g. `services/auth.service.ts`) using the dependency-free fetch client `http` from `lib/fetch-client.ts` (axios-free). Do not scatter API calls or raw `fetch` inside UI components.
 
 ---
 

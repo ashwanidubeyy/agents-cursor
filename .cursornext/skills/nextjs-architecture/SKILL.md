@@ -38,8 +38,9 @@ src/
 │   └── index.ts           # theme object for styled-components ThemeProvider
 ├── hooks/                 # Custom hooks (e.g. useDebounce, useMediaQuery)
 ├── services/              # Business logic + API calls (auth.service.ts, home.service.ts)
-├── api/                   # Axios instance + API path constants
-│   ├── network.ts         # axios instance + interceptors
+├── lib/                   # Dependency-free fetch HTTP client (axios-free)
+│   └── fetch-client.ts    # http instance + interceptors (axios-like response/error)
+├── api/                   # API path constants
 │   └── apiPaths.ts        # API_PATHS endpoint constants
 ├── store/                 # Redux Toolkit by domain (slices)
 │   ├── slices/
@@ -109,7 +110,7 @@ Example: `import { login } from '@/store/slices/authSlice';`
 ## Data Fetching & Services
 
 - Server Components: fetch directly (async component with `fetch`/server SDK) using `cache`/`revalidate` options.
-- Client/shared logic: use `services/` which call the axios instance in `api/network.ts`; use `API_PATHS` from `api/apiPaths.ts`. Components/pages call services, never axios directly.
+- Client/shared logic: use `services/` which call the dependency-free fetch client `http` in `lib/fetch-client.ts` (axios-free); use `API_PATHS` from `api/apiPaths.ts`. Components/pages call services, never the client directly.
 - Use optional chaining (`obj?.value`) for API responses.
 
 ## File and Folder Conventions

@@ -10,7 +10,7 @@ src/features/example/
 │   ├── ExampleForm/   index.tsx + styles.ts   (uses @/hooks/useForm)
 │   └── ExampleList/   index.tsx + styles.ts
 ├── hooks/             useExample.ts            (data hook; service-backed)
-├── services/          example.service.ts       (mock; swap for @/lib axios)
+├── services/          example.service.ts       (mock; swap for @/lib/fetch-client)
 ├── types/             example.types.ts
 └── store/             exampleSlice.ts          (optional Redux Toolkit slice)
 
@@ -41,6 +41,6 @@ Source → destination mapping is handled by `.cursor/scripts/setup-example.js`:
 ## Use it as a blueprint
 
 Copy `features/example/` to `features/<your-feature>/`, rename symbols, and:
-- Replace the mock `example.service.ts` with real calls via `@/lib`.
+- Replace the mock `example.service.ts` with real calls via `@/lib/fetch-client` (the dependency-free, axios-free HTTP client).
 - Register `exampleSlice` in `@/store` if you want Redux instead of local state.
 - Move any UI that a second feature needs into `@/components/ui`.

@@ -36,7 +36,7 @@ MONOREPO_NAME=my-platform node .cursornext/scripts/setup-monorepo.js
 MONOREPO_NAME=my-platform MONOREPO_APPS=web,admin USE_TURBO=true node .cursornext/scripts/setup-monorepo.js
 ```
 
-The script scaffolds the workspace, copies this kit into the new repo as a standard `.cursor/` folder, creates each Next.js app via `create-next-app`, installs `useForm` into `packages/lib-utils`, installs the example module into the primary app, and runs `pnpm install`. Then open the new folder and run `pnpm dev`.
+The script scaffolds the workspace, copies this kit into the new repo as a standard `.cursor/` folder, creates each Next.js app via `create-next-app`, installs `useForm` and the **dependency-free fetch client** into `packages/lib-utils` (no axios), installs the example module into the primary app, and runs `pnpm install`. Then open the new folder and run `pnpm dev`.
 
 > Inside the **generated** monorepo the kit is named `.cursor`, so its own scripts run as `node .cursor/scripts/setup-useform.js` and the root `package.json` exposes `pnpm setup:useform` / `pnpm setup:example`.
 
@@ -55,7 +55,8 @@ The script scaffolds the workspace, copies this kit into the new repo as a stand
 my-platform/
 ├── package.json          # private, scripts: dev, build, lint, typecheck
 ├── pnpm-workspace.yaml   # packages: ['apps/*', 'packages/*']
-├── .gitignore
+├── .env                  # only env file (NEXT_PUBLIC_API_BASE_URL, FIGMA_ACCESS_TOKEN, etc.)
+├── .gitignore            # must include .env (not .env.local / .env.example)
 ├── .npmrc                # optional
 ├── apps/
 │   └── web/              # create-next-app output
@@ -72,7 +73,8 @@ my-platform/
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "setup:useform": "node .cursor/scripts/setup-useform.js"
+    "setup:useform": "node .cursor/scripts/setup-useform.js",
+    "setup:fetch": "node .cursor/scripts/setup-fetch.js"
   }
 }
 ```
@@ -120,15 +122,16 @@ Per app:
 
 Minimal `src/` in each package per `.cursornext/skills/nextjs-architecture/SKILL.md` (constants, theme, hooks, components/widgets).
 
-### STEP 5 — Install useForm + example module
+### STEP 5 — Install useForm + fetch client + example module
 
 ```bash
 cd <monorepo-root>
 USEFORM_TARGET=packages/lib-utils pnpm setup:useform
+FETCH_TARGET=packages/lib-utils pnpm setup:fetch
 EXAMPLE_TARGET=apps/<primary-app> pnpm setup:example
 ```
 
-`setup:useform` installs the hook into the shared package; `setup:example` installs the feature-first sample module (`features/example` + `/example` route) into the primary app. The `.cursor/` kit is copied into the new repo by `setup:monorepo`.
+`setup:useform` installs the hook into the shared package; `setup:fetch` installs the **dependency-free fetch client** (`packages/lib-utils/src/lib/fetch-client.ts`, axios-free) into the shared package; `setup:example` installs the feature-first sample module (`features/example` + `/example` route) into the primary app. The `.cursor/` kit is copied into the new repo by `setup:monorepo`.
 
 ### STEP 6 — Install & verify
 
@@ -157,7 +160,7 @@ packages/ui/src/            → cross-app shared components (Button, Input, ...)
 packages/lib-utils/src/
   hooks/useForm.tsx
   constants/form-validators.ts, titles.ts, alerts.ts, routes.ts
-  lib/ (axios client), store/, theme/
+  lib/fetch-client.ts (dependency-free HTTP client, axios-free), store/, theme/
 ```
 
 Within each app, organize by **feature** (`features/<name>/{components,hooks,services,types,store}`). Promote anything reused across apps into `packages/ui` or `packages/lib-utils`.
@@ -185,7 +188,7 @@ Use Turborepo: no
 
 ## BOUNDARY
 
-- **Does:** pnpm workspace monorepo, Next.js apps via CLI, shared packages, optional turbo, useForm install, log.
+- **Does:** pnpm workspace monorepo, Next.js apps via CLI, shared packages, optional turbo, useForm + fetch client install (axios-free), log.
 - **Does not:** Feature implementation, PRD, deploy, Figma.
 - **Stops when:** Monorepo created, `pnpm install` succeeds, log saved.
 

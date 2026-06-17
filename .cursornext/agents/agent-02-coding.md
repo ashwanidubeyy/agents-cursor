@@ -149,7 +149,7 @@ I am STOPPED and waiting for PRD.
 3. **Use design system only** — COLORS, TYPOGRAPHY/FONTS, spacing, commonStyles from `@/theme` and `@/styles`; no raw hex or hardcoded font values.
 4. **styled-components in styles.ts** — Each component folder has index.tsx + styles.ts; export styles as a named object (`export const ComponentNameStyles = { ... }`); use `ComponentNameStyles.Container` (no destructuring). Never inline styles.
 5. **Server/Client components** — Pages/layouts and static UI are Server Components; mark interactive leaves with `'use client'`. Do not use hooks/handlers in Server Components; do not import server-only code into Client Components.
-6. **Data fetching** — In Server Components use `fetch` (with `cache`/`next.revalidate`) or server SDKs; in client/shared logic use `services/` over the axios instance in `api/network.ts` with `API_PATHS`. Handle promises with `.then()/.catch()`; expose loading/error states.
+6. **Data fetching** — In Server Components use `fetch` (with `cache`/`next.revalidate`) or server SDKs; in client/shared logic use `services/` over the dependency-free fetch client `http` in `@/lib/fetch-client` (axios-free) with `API_PATHS` from `api/apiPaths.ts`. Handle promises with `.then()/.catch()`; expose loading/error states. **Do not add axios.**
 7. **State** — useState/useReducer for local UI; Redux Toolkit (`@/store`) for shared state per PRD (slices in `store/slices`, typed hooks). Use optional chaining when reading state.
 8. **Lists** — virtualize large lists; provide stable unique keys (never index).
 9. **Images & fonts** — `next/image` for `public/` raster; SVG icons as components; `next/font` for fonts.
@@ -163,7 +163,7 @@ I am STOPPED and waiting for PRD.
     - For styled-components SSR, ensure `StyledComponentsRegistry` is in the root layout and `compiler.styledComponents` is enabled in `next.config.js`.
     - **Document in coding log:** any new dependency, config change, and the command that worked.
 
-15. **Environment variables** — server-only secrets without `NEXT_PUBLIC_`; only client-safe values with `NEXT_PUBLIC_`. Add placeholders to `.env.example`; never commit `.env.local`.
+15. **Environment variables** — server-only secrets without `NEXT_PUBLIC_`; only client-safe values with `NEXT_PUBLIC_`. Add values to **`.env`** only (never `.env.local` or `.env.example`); ensure `.env` is in `.gitignore`.
 
 **Track while coding:** Files created/modified, decisions, deviations from PRD, problems. Note in log.
 
