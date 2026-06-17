@@ -1,6 +1,6 @@
 # `.cursornext/` — Next.js Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 16 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 19 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New single app?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B). **Monorepo?** Use `@monorepo-scaffold-agent`.
@@ -17,7 +17,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 
 ```
 .cursornext/
-├── agents/            # The 16 agent definitions (the "who does what")
+├── agents/            # The 19 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -33,7 +33,10 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── agent-12-pre-pr-validation.md
 │   ├── agent-13-useform-builder.md    # Build forms with the useForm hook
 │   ├── agent-14-monorepo-scaffold.md  # Create a pnpm workspace monorepo
-│   └── agent-15-fetch-client.md       # Install/wire the axios-free fetch HTTP client
+│   ├── agent-15-fetch-client.md       # Install/wire the axios-free fetch HTTP client
+│   ├── agent-16-user-story-testcases.md
+│   ├── agent-17-unit-test-analysis.md
+│   └── agent-18-npm-audit-auto-fix.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-nextjs.mdc            # Figma → Next.js mapping rules
@@ -51,7 +54,10 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── setup-fetch.js                 # Install dependency-free fetch HTTP client (axios-free)
 │   ├── setup-example.js               # Install the example feature module
 │   ├── setup-e2e.js                   # Bootstrap Playwright E2E
-│   └── setup-monorepo.js              # Scaffold a pnpm workspace monorepo
+│   ├── setup-monorepo.js              # Scaffold a pnpm workspace monorepo
+│   └── npm-audit-auto-fix.js          # Semver-safe npm audit auto-fix
+├── hooks/
+│   └── npm-audit-after-install.js     # afterShellExecution hook for npm install
 ├── skills/
 │   └── nextjs-architecture/SKILL.md   # App structure, aliases, design system
 ├── docs/
@@ -80,6 +86,8 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
     ├── fixing/fixing-{feature}.md
     ├── code-scanning/code-scanning-{feature}-{timestamp}.md
     ├── vulnerability/vulnerability-{date}.md
+    ├── vulnerability/npm-audit-auto-fix-{timestamp}.md
+    ├── unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md
     ├── e2e-testing/{feature}/{timestamp}/...
     ├── project-scaffold/project-scaffold-{name}-{timestamp}.md
     ├── pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md
@@ -206,6 +214,18 @@ Path: src/features/auth/components/LoginForm
 - **After running:** Test-cases file (+ test file) created; tells you `@fixing-agent` can now run "Test {feature}". Stops.
 - **Does not:** Run Playwright E2E or fix code.
 
+### Agent 16 — User Story Test Cases (`@user-story-testcases-agent`)
+- **Input:** Feature name + user story text (inline or file path); optional acceptance criteria, PRD/coding log for enrichment.
+- **Does:** Generates flow-based **manual QA test cases** from a user story alone (no PRD or coding log required). Saves to `logs/test-cases-{feature}.md` with TC-IDs, flows, `data-testid` selectors, and Jest/Playwright mapping hints.
+- **After running:** Test-cases file created; hand off to `@coding-agent`, `@testcases-agent`, `@fixing-agent`, or `@e2e-testing-agent`. Stops.
+- **Does not:** Write feature code, run tests, or create Jest/Playwright files.
+
+### Agent 17 — Unit Test Analysis (`@unit-test-analysis-agent`)
+- **Input:** Target page/component/feature name; optional scope (`analysis only` | `analysis + tests` | `analysis + tests + run`).
+- **Does:** **Code-driven** analysis — inventories inputs, events, validations; builds coverage matrix; detects bugs; generates Jest + RTL tests. Saves report to `logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md`.
+- **After running:** Analysis report (+ Jest file unless opted out) created; hand off to `@fixing-agent` for BUG-IDs. Stops.
+- **Does not:** Fix production code or run Playwright E2E.
+
 ### Agent 11 — Playwright E2E Testing (`@e2e-testing-agent`)
 - **Input:** Feature name (or "entire app") + **base URL** (default `http://localhost:3000`).
 - **Setup:** Full Playwright setup (config, specs, troubleshooting, new-project checklist) is in **`docs/E2E-PLAYWRIGHT.md`**. The agent verifies setup (STEP 0) before running and stops if a piece is missing.
@@ -229,6 +249,12 @@ Path: src/features/auth/components/LoginForm
 - **Input:** Project root (default) or feature context.
 - **Does:** Runs `npm audit` (and **Snyk** if configured), categorizes by severity → P1–P4 with remediation.
 - **After running:** Report saved to `logs/vulnerability/vulnerability-{date}.md` + chat summary. Stops. **Does not apply fixes.**
+
+### Agent 18 — npm Audit Auto-Fix (`@npm-audit-auto-fix-agent`)
+- **Input:** Project root (`package.json`, lockfile). Also runs automatically after `npm install` / `npm ci` via hook.
+- **Does:** Scans and **auto-fixes** npm vulnerabilities via `node .cursornext/scripts/npm-audit-auto-fix.js`.
+- **After running:** Report saved to `logs/vulnerability/npm-audit-auto-fix-{timestamp}.md` + chat notification. Stops.
+- **Does not:** Replace Agent 06 documentation-only scans.
 
 ### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
 - **Input:** Current branch / working tree; optional base branch (default `main`), feature name, or file scope.
@@ -277,16 +303,19 @@ cd ../acme-platform   &&   pnpm dev
 3.  @coding-agent            → src/... + logs/coding/coding-{feature}.md
 3b. @useform-builder-agent   → form built with useForm + coding log              (optional, for forms)
 4.  @documentation-agent     → JSDoc/comments + (optional) doc log
+4a. @user-story-testcases-agent → logs/test-cases-{feature}.md              (optional, story-only)
 5.  @testcases-agent         → logs/test-cases-{feature}.md + __tests__/{Feature}.test.tsx   (optional)
+5b. @unit-test-analysis-agent → logs/unit-test-analysis/... + __tests__/{Feature}.test.tsx  (optional)
 6.  @e2e-testing-agent       → logs/e2e-testing/{feature}/{timestamp}/test-results.md          (optional)
 7.  @fixing-agent            → fixes + logs/fixing/fixing-{feature}.md
 8.  @code-scanning-agent     → logs/code-scanning/code-scanning-{feature}-{timestamp}.md
 9.  @vulnerability-agent     → logs/vulnerability/vulnerability-{date}.md
+9b. @npm-audit-auto-fix-agent → logs/vulnerability/npm-audit-auto-fix-{timestamp}.md        (optional; auto on npm install)
 10. @pre-pr-validation-agent → logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md   (before raising the PR)
 11. @pr-orchestrator-agent   → logs/pr/pr-{feature}-{timestamp}.md
 ```
 
-Each step is **manually invoked** and **stops** when done. Skip optional steps (1b/1c, 5, 6) if you don't need them. The minimum viable path for a designed feature is: **Figma → Planning → Coding → Fixing**.
+Each step is **manually invoked** and **stops** when done. Skip optional steps (1b/1c, 4a, 5, 5b, 6, 9b) if you don't need them. The minimum viable path for a designed feature is: **Figma → Planning → Coding → Fixing**.
 
 ```mermaid
 flowchart LR
@@ -319,11 +348,14 @@ flowchart LR
 | 02 Coding | `@coding-agent` | PRD path | `src/...` + `logs/coding/coding-{feature}.md` |
 | 13 useForm | `@useform-builder-agent` | Form name + fields + path | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
 | 03 Docs | `@documentation-agent` | Files or coding log | Documented files + doc log |
+| 16 User Story TCs | `@user-story-testcases-agent` | Feature + user story | `logs/test-cases-{feature}.md` |
 | 10 Test Cases | `@testcases-agent` | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + test file |
+| 17 Unit Test Analysis | `@unit-test-analysis-agent` | Target name + optional scope | `logs/unit-test-analysis/...` + Jest file |
 | 11 E2E | `@e2e-testing-agent` | Feature + base URL | `logs/e2e-testing/.../test-results.md` |
 | 04 Fixing | `@fixing-agent` | "Fix X" or "Test {feature}" + base URL | `logs/fixing/fixing-{feature}.md` |
 | 05 Scan | `@code-scanning-agent` | Feature or scope | `logs/code-scanning/...md` |
 | 06 Vuln | `@vulnerability-agent` | (project root) | `logs/vulnerability/vulnerability-{date}.md` |
+| 18 npm Audit Fix | `@npm-audit-auto-fix-agent` | (auto after npm install) | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
 | 12 Pre-PR | `@pre-pr-validation-agent` | (optional base branch) | `logs/pre-pr/pre-pr-{branch-or-feature}-{ts}.md` + verdict |
 | 07 PR | `@pr-orchestrator-agent` | Feature | `logs/pr/pr-{feature}-{ts}.md` |
 
@@ -482,6 +514,7 @@ The canonical reference for **app structure** (`src/app` App Router), **path ali
 | `setup-example.js` | Install the feature-first example module (`features/example` + `/example` route) | `node .cursor/scripts/setup-example.js` (inside the project) |
 | `setup-e2e.js` | Bootstrap Playwright (config + smoke spec + scripts) | `node .cursor/scripts/setup-e2e.js` (inside the project) |
 | `setup-monorepo.js` | Scaffold a pnpm workspace monorepo (sibling folder) | `MONOREPO_NAME=my-platform node .cursornext/scripts/setup-monorepo.js` |
+| `npm-audit-auto-fix.js` | Semver-safe npm audit scan + fix | `node .cursornext/scripts/npm-audit-auto-fix.js --trigger agent` |
 
 The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in **`.env`** or the environment. The `setup-*` scripts need no token. `setup-monorepo.js` runs **from this kit**; `setup-useform` / `setup-fetch` / `setup-example` / `setup-e2e` are designed to run **inside a generated project** (where the kit is copied as `.cursor/`), and the scaffold agents invoke them automatically.
 
@@ -519,6 +552,8 @@ Scaffolded projects use a **custom, dependency-free `fetch` client** instead of 
 | Fixing | `logs/fixing/fixing-{feature}.md` |
 | Code Scanning | `logs/code-scanning/code-scanning-{feature}-{timestamp}.md` |
 | Vulnerability | `logs/vulnerability/vulnerability-{date}.md` |
+| npm Audit Auto-Fix | `logs/vulnerability/npm-audit-auto-fix-{timestamp}.md` |
+| Unit Test Analysis | `logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md` + `__tests__/{Feature}.test.tsx` |
 | Pre-PR Validation | `logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md` (READY / NOT READY verdict) |
 | PR Orchestrator | `logs/pr/pr-{feature}-{timestamp}.md` |
 | Project Scaffold | new sibling **single app** + `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md` |
@@ -531,6 +566,6 @@ Scaffolded projects use a **custom, dependency-free `fetch` client** instead of 
 - **Do agents run automatically one after another?** No. You invoke each one and approve its output. Agents only *suggest* the next step.
 - **What if an input file is missing?** Agents stop and tell you exactly what's needed (e.g. Coding stops if no PRD; Fixing-test stops if no test-cases file or base URL).
 - **Where do agents save things?** Inputs/intermediate → `.cursornext/cache/`; outputs/audit trail → `.cursornext/logs/`; generated app code → `src/`, `__tests__/`, `e2e/`, `public/images/`.
-- **Can I skip steps?** Yes. Optional steps are 1b/1c (brief/prompt), 5 (test cases), 6 (Playwright E2E). Minimum designed-feature path: Figma → Planning → Coding → Fixing.
+- **Can I skip steps?** Yes. Optional steps are 1b/1c (brief/prompt), 4a (user-story test cases), 5 (test cases), 5b (unit test analysis), 6 (Playwright E2E), 9b (npm audit auto-fix). Minimum designed-feature path: Figma → Planning → Coding → Fixing.
 - **What about React Native?** The sibling `.cursor/` folder mirrors this system for React Native (Figma → RN rules, Detox instead of Playwright).
 ```

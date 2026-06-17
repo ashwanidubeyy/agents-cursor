@@ -86,6 +86,21 @@ alwaysApply: true
 - **Does not:** Create PRD, implement product features, add a third-party HTTP library, or run E2E.
 - **Stops when:** Fetch client installed + wired, axios removed where unused, validation passes, log saved. Invoke: `@fetch-client-agent` (optional target + interceptor needs). See `.cursornext/agents/agent-15-fetch-client.md`.
 
+### Agent 16: User Story Test Case Generator
+- **Does:** Generate flow-based manual QA test cases from a **user story description** alone (no PRD or coding log required). Saves to `.cursornext/logs/test-cases-{feature}.md` with TC-IDs, priorities, flows, `data-testid` selectors, and Jest/Playwright mapping hints for downstream agents.
+- **Does not:** Write feature code, run tests, or create Jest/Playwright files (use Agent 10 for Jest; Agent 11 for Playwright).
+- **Stops when:** Test cases file is saved. Invoke: `@user-story-testcases-agent` with feature name + user story text (or path). See `.cursornext/agents/agent-16-user-story-testcases.md`.
+
+### Agent 17: Unit Test Analysis Agent
+- **Does:** Perform **code-driven** unit test analysis on an implemented Next.js page, component, or feature module — inventory inputs/events/validations, build coverage matrix, detect bugs, and generate production-ready Jest + React Testing Library tests. Saves report to `.cursornext/logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md` and Jest file to `__tests__/{Feature}.test.tsx` (unless `analysis only`).
+- **Does not:** Fix production code, run Playwright E2E, or create PRD.
+- **Stops when:** Report saved, Jest file written (unless opted out), and summary posted. Invoke: `@unit-test-analysis-agent` with target name + optional scope. See `.cursornext/agents/agent-17-unit-test-analysis.md`.
+
+### Agent 18: npm Audit Auto-Fix Agent
+- **Does:** Automatically scan and fix npm vulnerabilities (low, moderate, high, critical) via `node .cursornext/scripts/npm-audit-auto-fix.js`. Triggered by the `afterShellExecution` hook after `npm install` / `npm ci`, or invoked manually. Saves report to `.cursornext/logs/vulnerability/npm-audit-auto-fix-{timestamp}.md`.
+- **Does not:** Replace Agent 06 documentation-only scans; does not implement product features.
+- **Stops when:** Audit + fix run complete and report saved. Invoke: `@npm-audit-auto-fix-agent` (or automatic after `npm install`). See `.cursornext/agents/agent-18-npm-audit-auto-fix.md`.
+
 ---
 
 ## Workflow Sequence
@@ -100,11 +115,14 @@ alwaysApply: true
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 3c. **Fetch Client Setup Agent** (optional; scaffold agents already install it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursornext/logs/coding/coding-fetch-client.md`
 4. **Documentation Agent** → Comments + doc log
+4a. **User Story Test Case Generator** (optional, story-only — no PRD) → `.cursornext/logs/test-cases-{feature}.md`
 5. **Test Case Authoring Agent** (optional) → `.cursornext/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.tsx`
+5b. **Unit Test Analysis Agent** (optional, code-driven) → `.cursornext/logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md` + `__tests__/{Feature}.test.tsx`
 6. **Playwright E2E Testing Agent** (optional) → E2E tests + artifacts (screenshots/, videos/, traces/, test-results.md) at `.cursornext/logs/e2e-testing/{feature}/{timestamp}/`
 7. **Fixing Agent** → Fixes + `.cursornext/logs/fixing/fixing-{feature}.md`
 8. **Code Scanning Agent** → `.cursornext/logs/code-scanning/`
 9. **Vulnerability Agent** → `.cursornext/logs/vulnerability/`
+9b. **npm Audit Auto-Fix Agent** (optional; auto after `npm install`) → `.cursornext/logs/vulnerability/npm-audit-auto-fix-{timestamp}.md`
 10. **Pre-PR Validation Agent** (before PR) → `.cursornext/logs/pre-pr/pre-pr-{feature}-{timestamp}.md`
 11. **PR Orchestrator Agent** → `.cursornext/logs/pr/pr-{feature}-{timestamp}.md`
 
@@ -123,11 +141,14 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios; configure interceptors
 - `@documentation-agent` — Document the code
-- `@fixing-agent` — Feature name or description of what to fix
+- `@user-story-testcases-agent` — Feature name + user story → manual QA test cases (no PRD required)
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests
+- `@unit-test-analysis-agent` — Target page/component name — Code-driven analysis + Jest tests + bug report
 - `@e2e-testing-agent` — Feature name (or "entire app") + base URL — Creates Playwright tests, runs E2E, captures screenshots/videos/traces, generates reports
+- `@fixing-agent` — Feature name or description of what to fix
 - `@code-scanning-agent` — Scan quality for [feature]
 - `@vulnerability-agent` — Scan security
+- `@npm-audit-auto-fix-agent` — Auto-fix npm vulnerabilities (also runs after `npm install` via hook)
 - `@pre-pr-validation-agent` — Validate only changed files before a PR (quality, structure, performance, security, TS/lint/test/build, PR readiness, breaking changes) + READY/NOT READY verdict
 - `@pr-orchestrator-agent` — Create PR for [feature]
 
