@@ -81,6 +81,21 @@ alwaysApply: true
 - **Does not:** Create PRD, implement product features, add a third-party HTTP library, or run E2E.
 - **Stops when:** Fetch client installed + wired, axios removed where unused, validation passes, log saved. Invoke: `@fetch-client-agent` (optional interceptor needs). See `.cursor/agents/agent-14-fetch-client.md`.
 
+### Agent 15: User Story Test Case Generator
+- **Does:** Generate flow-based manual QA test cases from a **user story description** alone (no PRD or coding log required). Saves to `.cursor/logs/test-cases-{feature}.md` with TC-IDs, priorities, flows, testIDs, and Jest/Detox mapping hints for downstream agents.
+- **Does not:** Write feature code, run tests, or create Jest/Detox files (use Agent 10 for Jest; Agent 11 for Detox).
+- **Stops when:** Test cases file is saved. Invoke: `@user-story-testcases-agent` with feature name + user story text (or path). See `.cursor/agents/agent-15-user-story-testcases.md`.
+
+### Agent 16: Unit Test Analysis Agent
+- **Does:** Perform **code-driven** unit test analysis on an implemented React Native screen, component, widget, or layout — inventory inputs/events/validations, build coverage matrix, detect bugs, and generate production-ready Jest + `@testing-library/react-native` tests. Saves report to `.cursor/logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md` and Jest file to `__tests__/{Feature}.test.js` (unless `analysis only`).
+- **Does not:** Fix production code, run Detox E2E, or create PRD.
+- **Stops when:** Report saved, Jest file written (unless opted out), and summary posted. Invoke: `@unit-test-analysis-agent` with target name + optional scope. See `.cursor/agents/agent-16-unit-test-analysis.md`.
+
+### Agent 17: npm Audit Auto-Fix Agent
+- **Does:** Automatically scan and fix npm vulnerabilities (low, moderate, high, critical) via `node .cursor/scripts/npm-audit-auto-fix.js`. Triggered by the `afterShellExecution` hook after `npm install` / `npm ci`, or invoked manually. Saves report to `.cursor/logs/vulnerability/npm-audit-auto-fix-{timestamp}.md`.
+- **Does not:** Replace Agent 06 documentation-only scans; does not implement product features.
+- **Stops when:** Audit + fix run complete and report saved. Invoke: `@npm-audit-auto-fix-agent` (or automatic after `npm install`). See `.cursor/agents/agent-17-npm-audit-auto-fix.md`.
+
 ---
 
 ## Workflow Sequence
@@ -94,11 +109,14 @@ alwaysApply: true
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 3c. **Fetch Client Setup Agent** (optional; scaffold agent already installs it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursor/logs/coding/coding-fetch-client.md`
 4. **Documentation Agent** → Comments + doc log
+4a. **User Story Test Case Generator** (optional, story-only — no PRD) → `.cursor/logs/test-cases-{feature}.md`
 5. **Test Case Authoring Agent** (optional) → `.cursor/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.js`
+5b. **Unit Test Analysis Agent** (optional, code-driven) → `.cursor/logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md` + `__tests__/{Feature}.test.js`
 6. **Detox Testing Agent** (optional) → Detox E2E tests + artifacts (ss/, video/, test-results.md) at `.cursor/logs/detox-testing/{feature}/{timestamp}/`
 7. **Fixing Agent** → Fixes + `.cursor/logs/fixing/fixing-{feature}.md`
 8. **Code Scanning Agent** → `.cursor/logs/code-scanning/`
 9. **Vulnerability Agent** → `.cursor/logs/vulnerability/`
+9b. **npm Audit Auto-Fix Agent** (optional; auto after `npm install`) → `.cursor/logs/vulnerability/npm-audit-auto-fix-{timestamp}.md`
 10. **Pre-PR Validation Agent** (before PR) → `.cursor/logs/pre-pr/pre-pr-{feature}-{timestamp}.md`
 11. **PR Orchestrator Agent** → `.cursor/logs/pr/pr-{feature}-{timestamp}.md`
 
@@ -116,11 +134,14 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios/raw fetch; configure interceptors
 - `@documentation-agent` — Document the code
-- `@fixing-agent` — Feature name or description of what to fix
+- `@user-story-testcases-agent` — Feature name + user story → manual QA test cases (no PRD required)
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests
+- `@unit-test-analysis-agent` — Target screen/component name — Code-driven analysis + Jest tests + bug report
 - `@detox-testing-agent` — Feature name (or "entire app") + testing target (iOS Simulator / Android Emulator / Both) — Creates Detox tests, runs E2E, captures screenshots/videos, generates reports
+- `@fixing-agent` — Feature name or description of what to fix
 - `@code-scanning-agent` — Scan quality for [feature]
 - `@vulnerability-agent` — Scan security
+- `@npm-audit-auto-fix-agent` — Auto-fix npm vulnerabilities (also runs after `npm install` via hook)
 - `@pre-pr-validation-agent` — Validate only changed files before a PR (quality, structure, performance, security, TS/lint/test, PR readiness, breaking changes) + READY/NOT READY verdict
 - `@pr-orchestrator-agent` — Create PR for [feature]
 

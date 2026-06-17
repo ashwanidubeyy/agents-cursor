@@ -1,6 +1,6 @@
 # `.cursor/` — React Native Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 15 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 18 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New project?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B).
@@ -15,7 +15,7 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 
 ```
 .cursor/
-├── agents/            # The 15 agent definitions (the "who does what")
+├── agents/            # The 18 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -30,7 +30,10 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   ├── agent-11-detox-testing.md
 │   ├── agent-12-pre-pr-validation.md
 │   ├── agent-13-useform-builder.md
-│   └── agent-14-fetch-client.md    # Install/wire the axios-free fetch HTTP client
+│   ├── agent-14-fetch-client.md
+│   ├── agent-15-user-story-testcases.md
+│   ├── agent-16-unit-test-analysis.md
+│   └── agent-17-npm-audit-auto-fix.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-react-native.mdc      # Figma → RN mapping rules
@@ -71,6 +74,8 @@ This folder turns Cursor into an **agentic software factory** for a React Native
     ├── fixing/fixing-{feature}.md
     ├── code-scanning/code-scanning-{feature}-{timestamp}.md
     ├── vulnerability/vulnerability-{date}.md
+    ├── vulnerability/npm-audit-auto-fix-{timestamp}.md
+    ├── unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md
     ├── detox-testing/{feature}/{timestamp}/...
     ├── project-scaffold/project-scaffold-{name}-{timestamp}.md
     ├── pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md
@@ -193,6 +198,18 @@ Path: src/screens/Login
 - **After running:** Test-cases file (+ Jest file) created; tells you `@fixing-agent` can now run "Test {feature}". Stops.
 - **Does not:** Run Detox E2E or fix code.
 
+### Agent 15 — User Story Test Cases (`@user-story-testcases-agent`)
+- **Input:** Feature name + user story text (inline or file path); optional acceptance criteria, PRD/coding log for enrichment.
+- **Does:** Generates flow-based **manual QA test cases** from a user story alone (no PRD or coding log required). Saves to `logs/test-cases-{feature}.md` with TC-IDs, flows, testIDs, and Jest/Detox mapping hints.
+- **After running:** Test-cases file created; hand off to `@coding-agent`, `@testcases-agent`, `@fixing-agent`, or `@detox-testing-agent`. Stops.
+- **Does not:** Write feature code, run tests, or create Jest/Detox files.
+
+### Agent 16 — Unit Test Analysis (`@unit-test-analysis-agent`)
+- **Input:** Target screen/component/widget/layout name; optional scope (`analysis only` | `analysis + tests` | `analysis + tests + run`).
+- **Does:** **Code-driven** analysis — inventories inputs, events, validations; builds coverage matrix; detects bugs; generates Jest + RNTL tests. Saves report to `logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md`.
+- **After running:** Analysis report (+ Jest file unless opted out) created; hand off to `@fixing-agent` for BUG-IDs. Stops.
+- **Does not:** Fix production code or run Detox E2E.
+
 ### Agent 11 — Detox Testing (`@detox-testing-agent`)
 - **Input:** Feature name (or "entire app") + **testing target** (iOS Simulator / Android Emulator / Both). Stops and asks if target is missing.
 - **Setup:** Full Detox setup (iOS + Android native wiring, troubleshooting, new-project checklist) is in **`docs/DETOX-INTEGRATION.md`**. The agent verifies setup (STEP 0) before running and stops if a piece is missing.
@@ -216,6 +233,12 @@ Path: src/screens/Login
 - **Input:** Project root (default) or feature context.
 - **Does:** Runs `npm audit` (and **Snyk** if configured), categorizes by severity → P1–P4 with remediation.
 - **After running:** Report saved to `logs/vulnerability/vulnerability-{date}.md` + chat summary. Stops. **Does not apply fixes.**
+
+### Agent 17 — npm Audit Auto-Fix (`@npm-audit-auto-fix-agent`)
+- **Input:** Project root (`package.json`, lockfile). Also runs automatically after `npm install` / `npm ci` via hook.
+- **Does:** Scans and **auto-fixes** npm vulnerabilities via `node .cursor/scripts/npm-audit-auto-fix.js`.
+- **After running:** Report saved to `logs/vulnerability/npm-audit-auto-fix-{timestamp}.md` + chat notification. Stops.
+- **Does not:** Replace Agent 06 documentation-only scans.
 
 ### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
 - **Input:** Current branch / working tree; optional base branch (default `main`), feature name, or file scope.
@@ -253,16 +276,19 @@ proceed to the per-feature sequence below for each screen/module
 2.  @planning-agent          → logs/prd-{feature}-{timestamp}.md
 3.  @coding-agent            → src/... + logs/coding/coding-{feature}.md
 4.  @documentation-agent     → JSDoc/comments + (optional) doc log
+4a. @user-story-testcases-agent → logs/test-cases-{feature}.md              (optional, story-only)
 5.  @testcases-agent         → logs/test-cases-{feature}.md + __tests__/{Feature}.test.js   (optional)
+5b. @unit-test-analysis-agent → logs/unit-test-analysis/... + __tests__/{Feature}.test.js  (optional)
 6.  @detox-testing-agent     → logs/detox-testing/{feature}/{timestamp}/test-results.md       (optional)
 7.  @fixing-agent            → fixes + logs/fixing/fixing-{feature}.md
 8.  @code-scanning-agent     → logs/code-scanning/code-scanning-{feature}-{timestamp}.md
 9.  @vulnerability-agent     → logs/vulnerability/vulnerability-{date}.md
+9b. @npm-audit-auto-fix-agent → logs/vulnerability/npm-audit-auto-fix-{timestamp}.md        (optional; auto on npm install)
 10. @pre-pr-validation-agent → logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md   (before raising the PR)
 11. @pr-orchestrator-agent   → logs/pr/pr-{feature}-{timestamp}.md
 ```
 
-Each step is **manually invoked** and **stops** when done. Skip optional steps (1b/1c, 5, 6) if you don't need them. The minimum viable path for a designed feature is: **Figma → Planning → Coding → Fixing**.
+Each step is **manually invoked** and **stops** when done. Skip optional steps (1b/1c, 4a, 5, 5b, 6, 9b) if you don't need them. The minimum viable path for a designed feature is: **Figma → Planning → Coding → Fixing**.
 
 ```mermaid
 flowchart LR
@@ -294,11 +320,14 @@ flowchart LR
 | 13 useForm | `@useform-builder-agent` | Form name + fields + path | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
 | 14 Fetch Client | `@fetch-client-agent` | (optional interceptors / migrate axios) | `src/lib/fetch-client.ts` + coding log |
 | 03 Docs | `@documentation-agent` | Files or coding log | Documented files + doc log |
+| 15 User Story TCs | `@user-story-testcases-agent` | Feature + user story | `logs/test-cases-{feature}.md` |
 | 10 Test Cases | `@testcases-agent` | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + Jest file |
+| 16 Unit Test Analysis | `@unit-test-analysis-agent` | Target name + optional scope | `logs/unit-test-analysis/...` + Jest file |
 | 11 Detox | `@detox-testing-agent` | Feature + testing target | `logs/detox-testing/.../test-results.md` |
 | 04 Fixing | `@fixing-agent` | "Fix X" or "Test {feature}" + target | `logs/fixing/fixing-{feature}.md` |
 | 05 Scan | `@code-scanning-agent` | Feature or scope | `logs/code-scanning/...md` |
 | 06 Vuln | `@vulnerability-agent` | (project root) | `logs/vulnerability/vulnerability-{date}.md` |
+| 17 npm Audit Fix | `@npm-audit-auto-fix-agent` | (auto after npm install) | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
 | 12 Pre-PR | `@pre-pr-validation-agent` | (optional base branch) | `logs/pre-pr/pre-pr-{branch-or-feature}-{ts}.md` + verdict |
 | 07 PR | `@pr-orchestrator-agent` | Feature | `logs/pr/pr-{feature}-{ts}.md` |
 
@@ -478,6 +507,8 @@ Templates for the schema-based **`useForm`** hook and its validators, in **TypeS
 | Fixing | `logs/fixing/fixing-{feature}.md` |
 | Code Scanning | `logs/code-scanning/code-scanning-{feature}-{timestamp}.md` |
 | Vulnerability | `logs/vulnerability/vulnerability-{date}.md` |
+| npm Audit Auto-Fix | `logs/vulnerability/npm-audit-auto-fix-{timestamp}.md` |
+| Unit Test Analysis | `logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md` + `__tests__/{Feature}.test.js` |
 | Pre-PR Validation | `logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md` (READY / NOT READY verdict) |
 | PR Orchestrator | `logs/pr/pr-{feature}-{timestamp}.md` |
 | Project Scaffold | new sibling project + `logs/project-scaffold/project-scaffold-{name}-{timestamp}.md` |
@@ -489,6 +520,6 @@ Templates for the schema-based **`useForm`** hook and its validators, in **TypeS
 - **Do agents run automatically one after another?** No. You invoke each one and approve its output. Agents only *suggest* the next step.
 - **What if an input file is missing?** Agents stop and tell you exactly what's needed (e.g. Coding stops if no PRD; Fixing-test stops if no test-cases file or testing target).
 - **Where do agents save things?** Inputs/intermediate → `.cursor/cache/`; outputs/audit trail → `.cursor/logs/`; generated app code → `src/`, `__tests__/`, `e2e/`, native asset folders.
-- **Can I skip steps?** Yes. Optional steps are 1b/1c (brief/prompt), 5 (test cases), 6 (Detox). Minimum designed-feature path: Figma → Planning → Coding → Fixing.
+- **Can I skip steps?** Yes. Optional steps are 1b/1c (brief/prompt), 4a (user-story test cases), 5 (test cases), 5b (unit test analysis), 6 (Detox), 9b (npm audit auto-fix). Minimum designed-feature path: Figma → Planning → Coding → Fixing.
 - **What about Next.js?** The sibling `.cursornext/` folder mirrors this system for Next.js (Figma → Next.js rules, generic E2E instead of Detox).
 ```

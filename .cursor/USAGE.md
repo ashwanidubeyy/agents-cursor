@@ -91,8 +91,12 @@ For already-designed features:
 | useForm Builder    | Build a form with `useForm`       | Form + coding log           |
 | Documentation      | Generate documentation            | Documented code             |
 | Test Cases         | Generate test cases               | QA & Jest tests             |
+| User Story TCs     | Test cases from user story only   | QA test cases               |
+| Unit Test Analysis | Code-driven RN test analysis      | Analysis report + Jest      |
 | E2E Testing        | Run Detox tests                   | E2E reports                 |
 | Fixing             | Fix issues                        | Fix report                  |
+| Vulnerability      | Scan dependencies                 | Vulnerability report        |
+| npm Audit Auto-Fix | Auto-fix npm vulnerabilities      | Fix report                  |
 | Pre-PR Validation  | Validate PR readiness             | READY / NOT READY           |
 | PR Orchestrator    | Generate PR document              | PR summary                  |
 
@@ -279,6 +283,36 @@ Document files from:
 
 ---
 
+## User Story Test Cases Agent
+
+### Generate Test Cases from User Story
+
+```text
+@user-story-testcases-agent
+
+Feature: forgot-password-screen
+
+User story:
+As a registered user who forgot my password,
+I want to request a reset link by entering my email,
+So that I can regain access to my account.
+```
+
+---
+
+## Unit Test Analysis Agent
+
+### Analyze Component and Generate Jest Tests
+
+```text
+@unit-test-analysis-agent
+
+Target: Login
+Scope: analysis + tests + run
+```
+
+---
+
 ## Test Cases Agent
 
 ### Generate Test Cases
@@ -336,6 +370,18 @@ Test forgot-password-screen
 Target:
 iOS Simulator
 ```
+
+---
+
+## npm Audit Auto-Fix Agent
+
+### Fix Vulnerabilities Manually
+
+```text
+@npm-audit-auto-fix-agent
+```
+
+> Also runs automatically after `npm install` / `npm ci` via hook.
 
 ---
 
@@ -432,6 +478,23 @@ logs/documentation/documentation-{feature}.md
 ```text
 logs/test-cases-{feature}.md
 __tests__/{Feature}.test.js
+```
+
+---
+
+## Unit Test Analysis
+
+```text
+logs/unit-test-analysis/unit-test-analysis-{feature}-{timestamp}.md
+__tests__/{Feature}.test.js
+```
+
+---
+
+## npm Audit Auto-Fix
+
+```text
+logs/vulnerability/npm-audit-auto-fix-{timestamp}.md
 ```
 
 ---
