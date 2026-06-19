@@ -1,6 +1,6 @@
 # `.cursornext/` — Next.js Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 19 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 20 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch/error-pages setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New single app?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B). **Monorepo?** Use `@monorepo-scaffold-agent`.
@@ -36,7 +36,8 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── agent-15-fetch-client.md       # Install/wire the axios-free fetch HTTP client
 │   ├── agent-16-user-story-testcases.md
 │   ├── agent-17-unit-test-analysis.md
-│   └── agent-18-npm-audit-auto-fix.md
+│   ├── agent-18-npm-audit-auto-fix.md
+│   └── agent-19-error-pages.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-nextjs.mdc            # Figma → Next.js mapping rules
@@ -55,6 +56,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── setup-example.js               # Install the example feature module
 │   ├── setup-e2e.js                   # Bootstrap Playwright E2E
 │   ├── setup-monorepo.js              # Scaffold a pnpm workspace monorepo
+│   ├── setup-error-pages.js           # Connection Lost + Unauthorized error pages
 │   └── npm-audit-auto-fix.js          # Semver-safe npm audit auto-fix
 ├── hooks/
 │   └── npm-audit-after-install.js     # afterShellExecution hook for npm install
@@ -72,6 +74,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── e2e/                           # Playwright config + example spec
 │   ├── example-module/                # Feature-first example module (form + list)
 │   ├── lib/                           # fetch-client.ts template (axios-free)
+│   ├── error-pages/                   # Connection Lost + Unauthorized templates
 │   └── monorepo/                      # Monorepo root/workspace/package templates
 ├── cache/             # Agent inputs/intermediate artifacts (created on demand)
 │   ├── figma-specs-{feature}.md
@@ -255,6 +258,12 @@ Path: src/features/auth/components/LoginForm
 - **Does:** Scans and **auto-fixes** npm vulnerabilities via `node .cursornext/scripts/npm-audit-auto-fix.js`.
 - **After running:** Report saved to `logs/vulnerability/npm-audit-auto-fix-{timestamp}.md` + chat notification. Stops.
 - **Does not:** Replace Agent 06 documentation-only scans.
+
+### Agent 19 — Error Pages (`@error-pages-agent`)
+- **Input:** Project root; optional `ERROR_PAGES_TARGET=apps/web` for monorepo apps.
+- **Does:** Installs **Connection Lost** + **Unauthorized** pages with global offline handling via `node .cursornext/scripts/setup-error-pages.js`. Adds `NetworkGate`, `AppShell`, `/unauthorized` route, browser `useNetworkStatus`, and `handleUnauthorized`. **Runs automatically during project scaffold (Agent 08) and monorepo scaffold (Agent 14).**
+- **After running:** Coding log at `logs/coding/coding-error-pages.md`. Stops.
+- **Does not:** Implement auth/login; run `npm run dev`.
 
 ### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
 - **Input:** Current branch / working tree; optional base branch (default `main`), feature name, or file scope.

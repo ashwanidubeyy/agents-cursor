@@ -1,4 +1,5 @@
 export const ALERTS = {
+  UNAUTHORIZED: 'Your session has expired. Please sign in again.',
   GENERIC_ERROR: 'Something went wrong. Please try again.',
   NETWORK_ERROR: 'Network error. Please check your connection.',
   OFFLINE_ACTION: 'This action is unavailable while offline.',

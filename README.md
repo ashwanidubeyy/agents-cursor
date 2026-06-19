@@ -148,6 +148,7 @@ Full details: [`.cursor/README.md` § UI QA during development](.cursor/README.m
 | Figma token file | `.env` | `.env` |
 | Rules folder | `react-native.mdc`, `figma-to-react-native.mdc`, **`ui-qa-checklist.mdc`**, `detox-testing.mdc` | `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc` |
 | E2E setup doc | [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) |
+| Error pages (Agent 18/19) | Connection Lost + Unauthorized + NetInfo (`@error-pages-agent`) | Connection Lost + Unauthorized + browser online/offline (`@error-pages-agent`) |
 
 **Same across both:** Planning (PRD), Coding, Documentation, Test Cases, Fixing, Code Scanning, Vulnerability, Pre-PR Validation, PR Orchestrator, Prompt Generator — and the "one agent, one task, one stop" contract.
 

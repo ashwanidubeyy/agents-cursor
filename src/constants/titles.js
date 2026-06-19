@@ -88,4 +88,17 @@ export const TITLES = {
     ASSIGNED: 'Assignment changed',
     COMMENT_ADDED: 'Comment added',
   },
+  ERROR_PAGES: {
+    CONNECTION_LOST: {
+      TITLE: 'Connection Lost',
+      MESSAGE: 'Please check your internet connection and try again.',
+      RETRY: 'Try Again',
+    },
+    UNAUTHORIZED: {
+      TITLE: 'Not Authorized',
+      MESSAGE:
+        'You do not have permission to access this page. Please sign in again.',
+      GO_BACK: 'Go Back',
+    },
+  },
 };

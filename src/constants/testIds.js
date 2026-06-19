@@ -13,4 +13,10 @@ export const TEST_IDS = {
     DESCRIPTION_INPUT: 'create-ticket-description-input',
     SUBMIT: 'create-ticket-submit',
   },
+  ERROR_PAGES: {
+    CONNECTION_LOST: 'connection-lost-screen',
+    CONNECTION_LOST_RETRY: 'connection-lost-retry-button',
+    UNAUTHORIZED: 'unauthorized-screen',
+    UNAUTHORIZED_GO_BACK: 'unauthorized-go-back-button',
+  },
 };

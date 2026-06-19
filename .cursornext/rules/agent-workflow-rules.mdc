@@ -47,7 +47,7 @@ alwaysApply: true
 - **Stops when:** PR document saved. Invoke: `@pr-orchestrator-agent`.
 
 ### Agent 08: Project Scaffold Agent
-- **Does:** Create a new Next.js project with **given app name** via `create-next-app` (TypeScript, App Router, ESLint), then add **folder structure + boilerplate**. Scaffolds src/ (app, components/layouts, components/widgets, constants, theme, hooks, services, lib, api, store, types, utils, styles, assets/icons), theme tokens (COLORS/TYPOGRAPHY/spacing), root layout + providers, one sample route (Home), one Redux slice (common), **`.env`** (only env file — no `.env.local` / `.env.example`), and the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free) via `pnpm setup:fetch`. **No axios.** Saves log to `.cursornext/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
+- **Does:** Create a new Next.js project with **given app name** via `create-next-app` (TypeScript, App Router, ESLint), then add **folder structure + boilerplate**. Scaffolds src/ (app, components/layouts, components/widgets, constants, theme, hooks, services, lib, api, store, types, utils, styles, assets/icons), theme tokens (COLORS/TYPOGRAPHY/spacing), root layout + providers, one sample route (Home), one Redux slice (common), **`.env`** (only env file — no `.env.local` / `.env.example`), the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free) via `pnpm setup:fetch`, and **error pages** (Connection Lost + Unauthorized + NetworkGate + AppShell) via `node .cursornext/scripts/setup-error-pages.js`. **No axios.** Saves log to `.cursornext/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
 - **Does not:** Deploy; does not create the project inside the workspace (creates sibling folder).
 - **Stops when:** Project created via CLI and boilerplate added; log saved. Invoke: `@project-scaffold-agent` with app name.
 
@@ -101,6 +101,11 @@ alwaysApply: true
 - **Does not:** Replace Agent 06 documentation-only scans; does not implement product features.
 - **Stops when:** Audit + fix run complete and report saved. Invoke: `@npm-audit-auto-fix-agent` (or automatic after `npm install`). See `.cursornext/agents/agent-18-npm-audit-auto-fix.md`.
 
+### Agent 19: Error Pages Setup Agent
+- **Does:** Install **Connection Lost** and **Unauthorized (Not Authorized)** error pages with global offline handling via `node .cursornext/scripts/setup-error-pages.js`. Adds layouts, `NetworkGate` + `AppShell` in `layout.tsx`, browser `useNetworkStatus`, `/unauthorized` route, `handleUnauthorized`, and constants. **Runs automatically during project scaffold (Agent 08) and monorepo scaffold (Agent 14).** Saves coding log to `.cursornext/logs/coding/coding-error-pages.md`.
+- **Does not:** Create PRD; implement auth/login flow; run `npm run dev`.
+- **Stops when:** Setup complete, wiring verified, log saved. Invoke: `@error-pages-agent`. See `.cursornext/agents/agent-19-error-pages.md`.
+
 ---
 
 ## Workflow Sequence
@@ -114,6 +119,7 @@ alwaysApply: true
 3. **Coding Agent** → Code + `.cursornext/logs/coding/coding-{feature}.md`
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 3c. **Fetch Client Setup Agent** (optional; scaffold agents already install it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursornext/logs/coding/coding-fetch-client.md`
+3d. **Error Pages Setup Agent** (optional; scaffold agents already install it) → Connection Lost + Unauthorized + NetworkGate + AppShell → `.cursornext/logs/coding/coding-error-pages.md`
 4. **Documentation Agent** → Comments + doc log
 4a. **User Story Test Case Generator** (optional, story-only — no PRD) → `.cursornext/logs/test-cases-{feature}.md`
 5. **Test Case Authoring Agent** (optional) → `.cursornext/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.tsx`
@@ -140,6 +146,7 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@coding-agent` — Implement PRD from [prd-file]
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios; configure interceptors
+- `@error-pages-agent` — Install Connection Lost + Unauthorized error pages with global offline handling (browser online/offline events + NetworkGate)
 - `@documentation-agent` — Document the code
 - `@user-story-testcases-agent` — Feature name + user story → manual QA test cases (no PRD required)
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

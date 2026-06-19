@@ -30,4 +30,6 @@ export const SCREEN_NAMES = {
   TICKET_LIST: 'TicketList',
   TICKET_DETAILS: 'TicketDetails',
   CREATE_TICKET: 'CreateTicket',
+  CONNECTION_LOST: 'ConnectionLost',
+  UNAUTHORIZED: 'Unauthorized',
 };

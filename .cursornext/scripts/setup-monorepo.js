@@ -250,6 +250,13 @@ function main() {
     stdio: "inherit",
   });
 
+  console.log(`\nInstalling error pages into apps/${primaryApp}...`);
+  execSync("node .cursor/scripts/setup-error-pages.js", {
+    cwd: root,
+    env: { ...process.env, ERROR_PAGES_TARGET: `apps/${primaryApp}` },
+    stdio: "inherit",
+  });
+
   console.log("\n✅ Monorepo ready:", root);
   console.log("\nNext steps:");
   console.log(`  cd ${root}`);

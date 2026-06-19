@@ -6,6 +6,7 @@ import { createAppStore } from '@store';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import Toast from '@widgets/Toast';
 import AppRouteConfig from '@/AppRouteConfig';
+import NetworkGate from '@layouts/NetworkGate';
 
 const store = createAppStore();
 
@@ -19,7 +20,9 @@ const AppContent = () => {
   useNetworkStatus();
   return (
     <View style={styles.root} testID="app-root">
-      <AppRouteConfig />
+      <NetworkGate>
+        <AppRouteConfig />
+      </NetworkGate>
       <Toast />
     </View>
   );

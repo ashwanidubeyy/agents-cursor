@@ -9,7 +9,8 @@
     "setup:useform": "node .cursor/scripts/setup-useform.js",
     "setup:fetch": "node .cursor/scripts/setup-fetch.js",
     "setup:e2e": "node .cursor/scripts/setup-e2e.js",
-    "setup:example": "node .cursor/scripts/setup-example.js"
+    "setup:example": "node .cursor/scripts/setup-example.js",
+    "setup:error-pages": "node .cursor/scripts/setup-error-pages.js"
   },
   "engines": {
     "node": ">=18"

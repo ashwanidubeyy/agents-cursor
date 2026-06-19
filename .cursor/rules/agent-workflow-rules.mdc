@@ -47,7 +47,7 @@ alwaysApply: true
 - **Stops when:** PR document saved. Invoke: `@pr-orchestrator-agent`.
 
 ### Agent 08: Project Scaffold Agent
-- **Does:** Create a new React Native project with **given app name** and **sample folder structure with boilerplate**. Scaffolds src/ (api, lib, components/layouts, components/widgets, constants, hooks, screens, store, utility), Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, one sample screen (Home), one store slice (Common), **`.env`** (only env file — no `.env.local` / `.env.example`), the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free) via `node .cursor/scripts/setup-fetch.js`, and the `useForm` hook. **No axios.** Saves log to `.cursor/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
+- **Does:** Create a new React Native project with **given app name** and **sample folder structure with boilerplate**. Scaffolds src/ (api, lib, components/layouts, components/widgets, constants, hooks, screens, store, utility), Root.js, AppRouteConfig.js, path aliases, COLORS/fonts/commonStyles, one sample screen (Home), one store slice (Common), **`.env`** (only env file — no `.env.local` / `.env.example`), the **dependency-free fetch client** (`src/lib/fetch-client.ts`, axios-free) via `node .cursor/scripts/setup-fetch.js`, the **`useForm` hook**, and **error pages** (Connection Lost + Unauthorized + NetworkGate + NetInfo) via `node .cursor/scripts/setup-error-pages.js`. **No axios.** Saves log to `.cursor/logs/project-scaffold/project-scaffold-{name}-{timestamp}.md`.
 - **Does not:** Run React Native CLI or npm install; does not create ios/android (user runs CLI separately if needed).
 - **Stops when:** All files/folders created and log saved. Invoke: `@project-scaffold-agent` with app name; optional "in new folder" to create sibling directory.
 
@@ -96,6 +96,11 @@ alwaysApply: true
 - **Does not:** Replace Agent 06 documentation-only scans; does not implement product features.
 - **Stops when:** Audit + fix run complete and report saved. Invoke: `@npm-audit-auto-fix-agent` (or automatic after `npm install`). See `.cursor/agents/agent-17-npm-audit-auto-fix.md`.
 
+### Agent 18: Error Pages Setup Agent
+- **Does:** Install **Connection Lost** and **Unauthorized (Not Authorized)** error pages with global offline handling via `node .cursor/scripts/setup-error-pages.js`. Adds `ConnectionLost` and `Unauthorized` screens, `NetworkGate` (shows Connection Lost when offline), NetInfo-based `useNetworkStatus`, `navigationRef`, `handleUnauthorized`, constants, and `@react-native-community/netinfo`. Wired into `Root.js` and `AppRouteConfig.js`. **Runs automatically during project scaffold (Agent 08).** Saves coding log to `.cursor/logs/coding/coding-error-pages.md`.
+- **Does not:** Create PRD; implement auth/login flow; run `npm install` or `pod install`.
+- **Stops when:** Setup complete, wiring verified, log saved. Invoke: `@error-pages-agent`. See `.cursor/agents/agent-18-error-pages.md`.
+
 ---
 
 ## Workflow Sequence
@@ -108,6 +113,7 @@ alwaysApply: true
 3. **Coding Agent** → Code + `.cursor/logs/coding/coding-{feature}.md`
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 3c. **Fetch Client Setup Agent** (optional; scaffold agent already installs it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursor/logs/coding/coding-fetch-client.md`
+3d. **Error Pages Setup Agent** (optional; scaffold agent already installs it) → Connection Lost + Unauthorized pages + NetworkGate + NetInfo → `.cursor/logs/coding/coding-error-pages.md`
 4. **Documentation Agent** → Comments + doc log
 4a. **User Story Test Case Generator** (optional, story-only — no PRD) → `.cursor/logs/test-cases-{feature}.md`
 5. **Test Case Authoring Agent** (optional) → `.cursor/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.js`
@@ -133,6 +139,7 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@coding-agent` — Implement PRD from [prd-file]
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios/raw fetch; configure interceptors
+- `@error-pages-agent` — Install Connection Lost + Unauthorized error pages with global offline handling (NetInfo + NetworkGate)
 - `@documentation-agent` — Document the code
 - `@user-story-testcases-agent` — Feature name + user story → manual QA test cases (no PRD required)
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

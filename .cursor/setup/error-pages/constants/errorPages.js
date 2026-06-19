@@ -1,0 +1,28 @@
+export const ERROR_PAGES_TITLES = {
+  CONNECTION_LOST: {
+    TITLE: 'Connection Lost',
+    MESSAGE: 'Please check your internet connection and try again.',
+    RETRY: 'Try Again',
+  },
+  UNAUTHORIZED: {
+    TITLE: 'Not Authorized',
+    MESSAGE: 'You do not have permission to access this page. Please sign in again.',
+    GO_BACK: 'Go Back',
+  },
+};
+
+export const ERROR_PAGES_SCREEN_NAMES = {
+  CONNECTION_LOST: 'ConnectionLost',
+  UNAUTHORIZED: 'Unauthorized',
+};
+
+export const ERROR_PAGES_TEST_IDS = {
+  CONNECTION_LOST: 'connection-lost-screen',
+  CONNECTION_LOST_RETRY: 'connection-lost-retry-button',
+  UNAUTHORIZED: 'unauthorized-screen',
+  UNAUTHORIZED_GO_BACK: 'unauthorized-go-back-button',
+};
+
+export const ERROR_PAGES_ALERTS = {
+  UNAUTHORIZED: 'Your session has expired. Please sign in again.',
+};

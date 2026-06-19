@@ -115,6 +115,7 @@ public/
 - **src/components/widgets/Button/** — Client Component button using COLORS/TYPOGRAPHY; props typed.
 - **src/components/layouts/Header/** — header with app name + nav.
 - **src/lib/** — `fetch-client.ts`, the **dependency-free** fetch HTTP client (axios-free) with `baseURL`, request/response interceptors, and an axios-like response/error shape. Install it with `pnpm setup:fetch` (`node .cursor/scripts/setup-fetch.js`) and set `NEXT_PUBLIC_API_BASE_URL` in **`.env`** (project root). **Do not add axios.** Do not use `.env.local` or `.env.example`.
+- **Error pages (Connection Lost + Unauthorized)** — Install global offline and unauthorized error pages so every app shows **Connection Lost** when the browser is offline and can navigate to **Unauthorized** on 401/403. Run `node .cursornext/scripts/setup-error-pages.js` from the project root (or `pnpm setup:error-pages` after the script is wired). Adds `ConnectionLost` and `Unauthorized` layouts, `NetworkGate` + `AppShell` in `layout.tsx`, browser-based `useNetworkStatus`, `/unauthorized` route, and `handleUnauthorized`. See `.cursornext/agents/agent-19-error-pages.md`.
 - **src/api/** — `apiPaths.ts` (API_PATHS) only.
 - **src/services/** — example service importing `{ http }` from `@/lib/fetch-client` and calling `http.get/post` with `.then()/.catch()`.
 - **src/constants/** — TITLES, ALERTS, ROUTES, index re-export.
@@ -164,7 +165,7 @@ Create Next.js project storefront.
 
 ## BOUNDARIES
 
-- **Does:** **Always** create a **single** Next.js app (not a monorepo) via **`create-next-app`** first (TypeScript + App Router + ESLint + src dir + `@/*` alias); create it **outside** the workspace (sibling folder); use **dynamic** App name; then add folder structure + boilerplate; create **`.env`** only (no `.env.local` / `.env.example`); **install the dependency-free fetch client (`src/lib/fetch-client.ts`) via `pnpm setup:fetch` — no axios**; update `next.config`, `package.json`; configure styled-components SSR; save scaffold log.
+- **Does:** **Always** create a **single** Next.js app (not a monorepo) via **`create-next-app`** first (TypeScript + App Router + ESLint + src dir + `@/*` alias); create it **outside** the workspace (sibling folder); use **dynamic** App name; then add folder structure + boilerplate; create **`.env`** only (no `.env.local` / `.env.example`); **install the dependency-free fetch client (`src/lib/fetch-client.ts`) via `pnpm setup:fetch` — no axios**; **install error pages (Connection Lost + Unauthorized + NetworkGate + AppShell) via `node .cursornext/scripts/setup-error-pages.js`**; update `next.config`, `package.json`; configure styled-components SSR; save scaffold log.
 - **Does not:** Create the project inside the workspace; recreate root config from scratch; **create a monorepo / pnpm workspace / shared packages** (that is the Monorepo Scaffold Agent's job); run `npm run dev`/deploy; create PRD or feature code; run Figma MCP.
 - **Stops when:** CLI has been run (from parent of workspace), folder structure + boilerplate added in the created project, and log saved. User runs `npm install` and `npm run dev`.
 

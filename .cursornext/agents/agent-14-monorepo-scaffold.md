@@ -74,7 +74,8 @@ my-platform/
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "setup:useform": "node .cursor/scripts/setup-useform.js",
-    "setup:fetch": "node .cursor/scripts/setup-fetch.js"
+    "setup:fetch": "node .cursor/scripts/setup-fetch.js",
+    "setup:error-pages": "node .cursor/scripts/setup-error-pages.js"
   }
 }
 ```
@@ -122,16 +123,17 @@ Per app:
 
 Minimal `src/` in each package per `.cursornext/skills/nextjs-architecture/SKILL.md` (constants, theme, hooks, components/widgets).
 
-### STEP 5 — Install useForm + fetch client + example module
+### STEP 5 — Install useForm + fetch client + example module + error pages
 
 ```bash
 cd <monorepo-root>
 USEFORM_TARGET=packages/lib-utils pnpm setup:useform
 FETCH_TARGET=packages/lib-utils pnpm setup:fetch
 EXAMPLE_TARGET=apps/<primary-app> pnpm setup:example
+ERROR_PAGES_TARGET=apps/<primary-app> pnpm setup:error-pages
 ```
 
-`setup:useform` installs the hook into the shared package; `setup:fetch` installs the **dependency-free fetch client** (`packages/lib-utils/src/lib/fetch-client.ts`, axios-free) into the shared package; `setup:example` installs the feature-first sample module (`features/example` + `/example` route) into the primary app. The `.cursor/` kit is copied into the new repo by `setup:monorepo`.
+`setup:useform` installs the hook into the shared package; `setup:fetch` installs the **dependency-free fetch client** (`packages/lib-utils/src/lib/fetch-client.ts`, axios-free) into the shared package; `setup:example` installs the feature-first sample module (`features/example` + `/example` route) into the primary app; `setup:error-pages` installs **Connection Lost + Unauthorized** pages with global offline handling into the primary app. The `.cursor/` kit is copied into the new repo by `setup:monorepo`.
 
 ### STEP 6 — Install & verify
 
