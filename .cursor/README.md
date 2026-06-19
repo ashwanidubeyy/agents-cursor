@@ -1,6 +1,6 @@
 # `.cursor/` — React Native Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 19 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 21 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New project?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B).
@@ -15,7 +15,7 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 
 ```
 .cursor/
-├── agents/            # The 19 agent definitions (the "who does what")
+├── agents/            # The 21 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -603,5 +603,588 @@ Templates for the schema-based **`useForm`** hook and its validators, in **TypeS
 - **What if an input file is missing?** Agents stop and tell you exactly what's needed (e.g. Coding stops if no PRD; Fixing-test stops if no test-cases file or testing target).
 - **Where do agents save things?** Inputs/intermediate → `.cursor/cache/`; outputs/audit trail → `.cursor/logs/`; generated app code → `src/`, `__tests__/`, `e2e/`, native asset folders.
 - **Can I skip steps?** Yes. Optional steps are 1b/1c (brief/prompt), 4a (user-story test cases), 5 (test cases), 5b (unit test analysis), 6 (Detox), 9b (npm audit auto-fix). Minimum designed-feature path: Figma → Planning → Coding → Fixing.
-- **What about Next.js?** The sibling `.cursornext/` folder mirrors this system for Next.js (Figma → Next.js rules, generic E2E instead of Detox).
+- **What about Next.js?** Use the **Next.js agents** section under **USAGE** (or [`.cursornext/README.md`](../.cursornext/README.md)). Same `@` names; paths use `.cursornext/`; E2E is Playwright (`@e2e-testing-agent`); Agent 14 is `@monorepo-scaffold-agent`.
+
+---
+
+## USAGE:
+
+Copy-paste examples for **every agent**. Each block is a separate Cursor prompt. Review the saved output file before invoking the next agent.
+
+This repo ships **two agent kits**:
+
+| Kit | Folder | Stack | Logs / cache |
+|-----|--------|-------|----------------|
+| **React Native** | `.cursor/` | Mobile (iOS + Android) | `.cursor/logs/`, `.cursor/cache/` |
+| **Next.js** | `.cursornext/` | Web (App Router) | `.cursornext/logs/`, `.cursornext/cache/` |
+
+Agent **names are the same** (`@coding-agent`, `@figma-analyzer`, …) — use the kit that matches your project. Paths in prompts differ (see each section below).
+
+---
+
+## React Native agents (`.cursor/`)
+
+> Full docs: this file. Rules: `.cursor/rules/`. E2E: **Detox** (`@detox-testing-agent`). Mobile keyboard: **`@keyboard-layout-agent`**.
+
+### Agent 00 — Figma Analyzer (`@figma-analyzer`)
+
 ```
+@figma-analyzer
+
+Feature name: forgot-password-screen
+Mobile URL: https://www.figma.com/design/ABC123/App?node-id=10-8700
+Mobile Frame: M_Forgot_Password_Screen
+Section: Forgot password screen – layout, fields, buttons, copy, icons
+```
+
+→ Output: `.cursor/cache/figma-specs-forgot-password-screen.md`
+
+### Agent 01 — Planning (`@planning-agent`)
+
+```
+@planning-agent
+
+Plan feature: forgot-password-screen from .cursor/cache/figma-specs-forgot-password-screen.md
+```
+
+→ Output: `.cursor/logs/prd-forgot-password-screen-{timestamp}.md`
+
+### Agent 02 — Coding (`@coding-agent`)
+
+```
+@coding-agent
+
+Implement PRD from .cursor/logs/prd-forgot-password-screen-20260202-143000.md
+```
+
+→ Output: `src/...` + `.cursor/logs/coding/coding-forgot-password-screen.md`
+
+### Agent 03 — Documentation (`@documentation-agent`)
+
+```
+@documentation-agent
+
+Document the files from .cursor/logs/coding/coding-forgot-password-screen.md
+```
+
+### Agent 04 — Fixing (`@fixing-agent`)
+
+```
+@fixing-agent
+
+Fix keyboard overlap on CreateTicket screen — input hidden behind keyboard on Android.
+```
+
+```
+@fixing-agent
+
+Test forgot-password-screen.
+Testing target: Android Emulator
+```
+
+→ Output: `.cursor/logs/fixing/fixing-forgot-password-screen.md`
+
+### Agent 05 — Code Scanning (`@code-scanning-agent`)
+
+```
+@code-scanning-agent
+
+Scan quality for forgot-password-screen
+```
+
+### Agent 06 — Vulnerability (`@vulnerability-agent`)
+
+```
+@vulnerability-agent
+
+Scan dependencies for vulnerabilities
+```
+
+### Agent 07 — PR Orchestrator (`@pr-orchestrator-agent`)
+
+```
+@pr-orchestrator-agent
+
+Create the PR document for forgot-password-screen
+```
+
+### Agent 08 — Project Scaffold (`@project-scaffold-agent`)
+
+```
+@project-scaffold-agent
+
+Create project MyApp
+```
+
+```
+@project-scaffold-agent
+
+Create project FitnessTracker in new folder
+```
+
+→ Then: `npm install` && `cd ios && pod install`
+
+### Agent 09 — Prompt Generator (`@prompt-generator-agent`)
+
+```
+@prompt-generator-agent
+
+Mode A: Generate a Planning prompt for feature forgot-password-screen
+from .cursor/setup/business-briefs/business-brief-forgot-password-screen.yaml
+and .cursor/cache/figma-specs-forgot-password-screen.md
+```
+
+```
+@prompt-generator-agent
+
+Mode B: Create project prompt for MyApp with TypeScript and boilerplate
+```
+
+### Agent 10 — Test Case Authoring (`@testcases-agent`)
+
+```
+@testcases-agent
+
+Author test cases for forgot-password-screen
+PRD: .cursor/logs/prd-forgot-password-screen-20260202-143000.md
+Coding log: .cursor/logs/coding/coding-forgot-password-screen.md
+```
+
+### Agent 11 — Detox E2E (`@detox-testing-agent`)
+
+```
+@detox-testing-agent
+
+Run E2E for forgot-password-screen
+Testing target: iOS Simulator
+```
+
+```
+@detox-testing-agent
+
+Run E2E for entire app
+Testing target: Both
+```
+
+### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
+
+```
+@pre-pr-validation-agent
+
+Validate my changes before raising a PR (base: main).
+```
+
+### Agent 13 — useForm Builder (`@useform-builder-agent`)
+
+```
+@useform-builder-agent
+
+Form: login
+Fields: email (required), password (required, min 6)
+Path: src/screens/Login
+```
+
+```
+@useform-builder-agent
+
+Form: create-ticket
+Fields: customerName (required), email (required), subject (required), description (required, multiline)
+Path: src/screens/CreateTicket
+```
+
+### Agent 14 — Fetch Client (`@fetch-client-agent`)
+
+```
+@fetch-client-agent
+
+Install fetch client and wire auth token + 401 interceptors.
+Replace any axios usage in services.
+```
+
+### Agent 15 — User Story Test Cases (`@user-story-testcases-agent`)
+
+```
+@user-story-testcases-agent
+
+Feature: login
+User story: As a user I want to log in with email and password so that I can access my dashboard.
+```
+
+### Agent 16 — Unit Test Analysis (`@unit-test-analysis-agent`)
+
+```
+@unit-test-analysis-agent
+
+Target: ForgotPassword screen
+Scope: analysis + tests
+```
+
+### Agent 17 — npm Audit Auto-Fix (`@npm-audit-auto-fix-agent`)
+
+```
+@npm-audit-auto-fix-agent
+
+Run npm audit auto-fix and save report.
+```
+
+### Agent 18 — Error Pages (`@error-pages-agent`)
+
+```
+@error-pages-agent
+
+Install Connection Lost and Unauthorized error pages with NetworkGate.
+```
+
+### Agent 19 — Socket Setup (`@socket-agent`)
+
+```
+@socket-agent
+
+Setup mode: new-module
+Module name: Chat
+Design source: yourself
+WebSocket URL: wss://api.example.com/ws/chat
+```
+
+```
+@socket-agent
+
+Setup mode: configure-only
+WebSocket URL: wss://api.example.com/ws
+```
+
+### Agent 20 — Keyboard Layout (`@keyboard-layout-agent`) — React Native only
+
+```
+@keyboard-layout-agent
+
+Install keyboard-aware layouts for inputs and chat (iOS + Android).
+```
+
+---
+
+### React Native — typical flows
+
+**New mobile app**
+
+```
+@project-scaffold-agent → Create project MyApp
+→ npm install && cd ios && pod install
+→ per-feature flow below
+```
+
+**New feature (with Figma)**
+
+```
+@figma-analyzer → @planning-agent → @coding-agent → @documentation-agent
+→ @testcases-agent → @detox-testing-agent → @fixing-agent
+→ @pre-pr-validation-agent → @pr-orchestrator-agent
+```
+
+**Form screen**
+
+```
+@useform-builder-agent → @fixing-agent → @pre-pr-validation-agent
+```
+
+**Real-time chat**
+
+```
+@socket-agent (new-module) → @coding-agent → @testcases-agent
+```
+
+**Keyboard hidden behind input**
+
+```
+@keyboard-layout-agent → @fixing-agent Fix keyboard on [ScreenName]
+```
+
+---
+
+## Next.js agents (`.cursornext/`)
+
+> Full docs: [`.cursornext/README.md`](../.cursornext/README.md). Rules: `.cursornext/rules/`. E2E: **Playwright** (`@e2e-testing-agent`). No Detox / no `@keyboard-layout-agent`.
+
+**Note:** Agent numbers differ for setup agents — Next.js has **`@monorepo-scaffold-agent`** (Agent 14) and **`@fetch-client-agent`** (Agent 15). There is no React Native `@keyboard-layout-agent` in this kit.
+
+### Agent 00 — Figma Analyzer (`@figma-analyzer`)
+
+```
+@figma-analyzer
+
+Feature name: forgot-password-page
+Figma URL: https://www.figma.com/design/ABC123/App?node-id=10-8700
+Frame: Forgot_Password_Desktop
+Section: Forgot password page – layout, fields, buttons, copy, icons
+```
+
+→ Output: `.cursornext/cache/figma-specs-forgot-password-page.md`
+
+### Agent 01 — Planning (`@planning-agent`)
+
+```
+@planning-agent
+
+Plan feature: forgot-password-page from .cursornext/cache/figma-specs-forgot-password-page.md
+```
+
+→ Output: `.cursornext/logs/prd-forgot-password-page-{timestamp}.md`
+
+### Agent 02 — Coding (`@coding-agent`)
+
+```
+@coding-agent
+
+Implement PRD from .cursornext/logs/prd-forgot-password-page-20260202-143000.md
+```
+
+→ Output: `src/app/...` or `src/features/...` + `.cursornext/logs/coding/coding-forgot-password-page.md`
+
+### Agent 03 — Documentation (`@documentation-agent`)
+
+```
+@documentation-agent
+
+Document the files from .cursornext/logs/coding/coding-forgot-password-page.md
+```
+
+### Agent 04 — Fixing (`@fixing-agent`)
+
+```
+@fixing-agent
+
+Fix form validation error on login page — submit button stays disabled.
+```
+
+```
+@fixing-agent
+
+Test forgot-password-page.
+Base URL: http://localhost:3000
+```
+
+→ Output: `.cursornext/logs/fixing/fixing-forgot-password-page.md`
+
+### Agent 05 — Code Scanning (`@code-scanning-agent`)
+
+```
+@code-scanning-agent
+
+Scan quality for forgot-password-page
+```
+
+### Agent 06 — Vulnerability (`@vulnerability-agent`)
+
+```
+@vulnerability-agent
+
+Scan dependencies for vulnerabilities
+```
+
+### Agent 07 — PR Orchestrator (`@pr-orchestrator-agent`)
+
+```
+@pr-orchestrator-agent
+
+Create the PR document for forgot-password-page
+```
+
+### Agent 08 — Project Scaffold (`@project-scaffold-agent`)
+
+```
+@project-scaffold-agent
+
+Create project MyDashboard
+```
+
+→ Then: `npm install` && `npm run dev`
+
+### Agent 09 — Prompt Generator (`@prompt-generator-agent`)
+
+```
+@prompt-generator-agent
+
+Mode A: Generate a Planning prompt for feature forgot-password-page
+from .cursornext/setup/business-briefs/business-brief-forgot-password-page.yaml
+and .cursornext/cache/figma-specs-forgot-password-page.md
+```
+
+```
+@prompt-generator-agent
+
+Mode B: Create project prompt for MyDashboard with TypeScript and boilerplate
+```
+
+### Agent 10 — Test Case Authoring (`@testcases-agent`)
+
+```
+@testcases-agent
+
+Author test cases for forgot-password-page
+PRD: .cursornext/logs/prd-forgot-password-page-20260202-143000.md
+Coding log: .cursornext/logs/coding/coding-forgot-password-page.md
+```
+
+### Agent 11 — Playwright E2E (`@e2e-testing-agent`)
+
+```
+@e2e-testing-agent
+
+Run E2E for forgot-password-page
+Base URL: http://localhost:3000
+```
+
+```
+@e2e-testing-agent
+
+Run E2E for entire app
+Base URL: http://localhost:3000
+```
+
+### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
+
+```
+@pre-pr-validation-agent
+
+Validate my changes before raising a PR (base: main).
+```
+
+### Agent 13 — useForm Builder (`@useform-builder-agent`)
+
+```
+@useform-builder-agent
+
+Form: login
+Fields: email (required), password (required, min 6)
+Path: src/app/login
+```
+
+```
+@useform-builder-agent
+
+Form: contact
+Fields: name (required), email (required), message (required, multiline)
+Path: src/features/contact
+```
+
+### Agent 14 — Monorepo Scaffold (`@monorepo-scaffold-agent`) — Next.js only
+
+```
+@monorepo-scaffold-agent
+
+Create monorepo AcmePlatform with apps web and admin
+```
+
+→ Then: `pnpm install`
+
+### Agent 15 — Fetch Client (`@fetch-client-agent`)
+
+```
+@fetch-client-agent
+
+Install fetch client and wire auth token + 401 interceptors.
+Replace any axios usage in services.
+```
+
+```
+@fetch-client-agent
+
+Configure fetch client with NEXT_PUBLIC_API_BASE_URL from .env only.
+```
+
+### Agent 16 — User Story Test Cases (`@user-story-testcases-agent`)
+
+```
+@user-story-testcases-agent
+
+Feature: login
+User story: As a user I want to log in with email and password so that I can access my dashboard.
+```
+
+### Agent 17 — Unit Test Analysis (`@unit-test-analysis-agent`)
+
+```
+@unit-test-analysis-agent
+
+Target: LoginPage
+Scope: analysis + tests
+```
+
+### Agent 18 — npm Audit Auto-Fix (`@npm-audit-auto-fix-agent`)
+
+```
+@npm-audit-auto-fix-agent
+
+Run npm audit auto-fix and save report.
+```
+
+### Agent 19 — Error Pages (`@error-pages-agent`)
+
+```
+@error-pages-agent
+
+Install Connection Lost and Unauthorized error pages with NetworkGate.
+```
+
+### Agent 20 — Socket Setup (`@socket-agent`)
+
+```
+@socket-agent
+
+Setup mode: new-module
+Module name: Chat
+Design source: yourself
+WebSocket URL: wss://api.example.com/ws/chat
+```
+
+```
+@socket-agent
+
+Setup mode: configure-only
+WebSocket URL: wss://api.example.com/ws
+```
+
+→ Output: `.cursornext/cache/socket-intake-{module}.md` + `.cursornext/logs/coding/coding-socket-{module}.md`
+
+---
+
+### Next.js — typical flows
+
+**New single app**
+
+```
+@project-scaffold-agent → Create project MyDashboard
+→ npm install && npm run dev
+→ per-feature flow below
+```
+
+**New monorepo**
+
+```
+@monorepo-scaffold-agent → Create monorepo AcmePlatform with apps web
+→ pnpm install
+```
+
+**New feature (with Figma)**
+
+```
+@figma-analyzer → @planning-agent → @coding-agent → @documentation-agent
+→ @testcases-agent → @e2e-testing-agent → @fixing-agent
+→ @pre-pr-validation-agent → @pr-orchestrator-agent
+```
+
+**Form page**
+
+```
+@useform-builder-agent → @fixing-agent → @pre-pr-validation-agent
+```
+
+**Real-time feature (WebSocket)**
+
+```
+@socket-agent (new-module) → @coding-agent → @e2e-testing-agent
+```
+
+---
+
+> **One agent per prompt.** Wait for the output file before continuing. See **Section 6** for the React Native invocation table. For Next.js, see **[`.cursornext/README.md`](../.cursornext/README.md)** Section 6.
