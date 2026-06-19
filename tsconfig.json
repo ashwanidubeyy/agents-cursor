@@ -14,7 +14,8 @@
       "@assets/*": ["src/assets/*"],
       "@layouts/*": ["src/components/layouts/*"],
       "@widgets/*": ["src/components/widgets/*"],
-      "@hooks/*": ["src/hooks/*"]
+      "@hooks/*": ["src/hooks/*"],
+      "@services/*": ["src/services/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

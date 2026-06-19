@@ -1,4 +1,9 @@
 export { COLORS } from './colors';
+export {
+  SOCKET_DEFAULTS,
+  SOCKET_EVENTS,
+  SOCKET_ALERTS,
+} from './socket';
 export { fontFamily, fontSize } from './fonts';
 export { commonStyles } from './commonStyles';
 export { TITLES } from './titles';
@@ -32,4 +37,5 @@ export const SCREEN_NAMES = {
   CREATE_TICKET: 'CreateTicket',
   CONNECTION_LOST: 'ConnectionLost',
   UNAUTHORIZED: 'Unauthorized',
+  CUSTOMER: 'Customer',
 };

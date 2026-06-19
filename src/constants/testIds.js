@@ -13,6 +13,12 @@ export const TEST_IDS = {
     DESCRIPTION_INPUT: 'create-ticket-description-input',
     SUBMIT: 'create-ticket-submit',
   },
+  CUSTOMER: {
+    SCREEN: 'customer-screen',
+    MESSAGE_INPUT: 'customer-message-input',
+    SEND_BUTTON: 'customer-send-button',
+    FAB: 'customer-fab',
+  },
   ERROR_PAGES: {
     CONNECTION_LOST: 'connection-lost-screen',
     CONNECTION_LOST_RETRY: 'connection-lost-retry-button',

@@ -92,8 +92,8 @@ This repo ships **two** agentic "software factory" systems for Cursor. Each is a
 
 | System | Folder | Stack | Agents | E2E | Full guide |
 | ------ | ------ | ----- | ------ | --- | ---------- |
-| **React Native** | `.cursor/` | RN + TypeScript | 15 (00–14) | Detox | [`.cursor/README.md`](.cursor/README.md) · [cheat sheet](.cursor/USAGE.md) |
-| **Next.js** | `.cursornext/` | Next.js + TypeScript | 16 (00–15) | Playwright | [`.cursornext/README.md`](.cursornext/README.md) |
+| **React Native** | `.cursor/` | RN + TypeScript | 19 (00–19) | Detox | [`.cursor/README.md`](.cursor/README.md) · [cheat sheet](.cursor/USAGE.md) |
+| **Next.js** | `.cursornext/` | Next.js + TypeScript | 21 (00–20) | Playwright | [`.cursornext/README.md`](.cursornext/README.md) |
 
 Both systems share the **same workflow** — only the framework details differ. Pick the folder for your stack; the agents auto-load that folder's rules.
 
@@ -149,6 +149,7 @@ Full details: [`.cursor/README.md` § UI QA during development](.cursor/README.m
 | Rules folder | `react-native.mdc`, `figma-to-react-native.mdc`, **`ui-qa-checklist.mdc`**, `detox-testing.mdc` | `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc` |
 | E2E setup doc | [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) |
 | Error pages (Agent 18/19) | Connection Lost + Unauthorized + NetInfo (`@error-pages-agent`) | Connection Lost + Unauthorized + browser online/offline (`@error-pages-agent`) |
+| Socket (Agent 19) | WebSocket client + module scaffold (`@socket-agent`) | WebSocket client + feature scaffold (`@socket-agent`) |
 
 **Same across both:** Planning (PRD), Coding, Documentation, Test Cases, Fixing, Code Scanning, Vulnerability, Pre-PR Validation, PR Orchestrator, Prompt Generator — and the "one agent, one task, one stop" contract.
 
@@ -174,6 +175,8 @@ Full details: [`.cursor/README.md` § UI QA during development](.cursor/README.m
 | P3 | Vulnerability | `@vulnerability-agent` | `logs/vulnerability/...` |
 | P3 | Project Scaffold | `@project-scaffold-agent` | New project + boilerplate (incl. fetch client) |
 | P3 | Fetch Client | `@fetch-client-agent` | `src/lib/fetch-client.ts` wired (axios-free) |
+| P3 | Error Pages | `@error-pages-agent` | Connection Lost + Unauthorized + NetworkGate |
+| P3 | Socket Setup | `@socket-agent` | WebSocket infra + optional module scaffold |
 | P3 | Prompt Generator | `@prompt-generator-agent` | Planning/project prompt |
 
 ---

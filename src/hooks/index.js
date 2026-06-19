@@ -3,3 +3,7 @@ export { useNetworkStatus } from './useNetworkStatus';
 export { useAnalyticsPolling } from './useAnalyticsPolling';
 export { useTicketForm } from './useTicketForm';
 export { useForm } from './useForm';
+export { useSocket } from './useSocket';
+export { useCustomerSocket } from './useCustomerSocket';
+export { useKeyboardHeight } from './useKeyboardHeight';
+export { useChatKeyboardInsets } from './useChatKeyboardInsets';

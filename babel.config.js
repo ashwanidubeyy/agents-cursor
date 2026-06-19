@@ -17,6 +17,7 @@ module.exports = {
           '@layouts': './src/components/layouts',
           '@widgets': './src/components/widgets',
           '@hooks': './src/hooks',
+          '@services': './src/services',
         },
       },
     ],

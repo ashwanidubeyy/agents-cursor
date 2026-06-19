@@ -6,3 +6,4 @@ export { default as CreateTicket } from './CreateTicket';
 
 export { default as ConnectionLost } from './ConnectionLost';
 export { default as Unauthorized } from './Unauthorized';
+export { default as Customer } from './Customer';

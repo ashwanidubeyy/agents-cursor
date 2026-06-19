@@ -88,6 +88,17 @@ export const TITLES = {
     ASSIGNED: 'Assignment changed',
     COMMENT_ADDED: 'Comment added',
   },
+  CUSTOMER: {
+    TITLE: 'Customer Chat',
+    CONNECTED: 'Connected',
+    DISCONNECTED: 'Disconnected',
+    CONNECTING: 'Connecting...',
+    MESSAGE_PLACEHOLDER: 'Type a message...',
+    SEND: 'Send',
+    EMPTY: 'No messages yet. Start the conversation.',
+    FAB_LABEL: 'Open customer chat',
+    BACK: 'Back',
+  },
   ERROR_PAGES: {
     CONNECTION_LOST: {
       TITLE: 'Connection Lost',
