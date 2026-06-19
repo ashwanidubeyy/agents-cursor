@@ -101,6 +101,16 @@ alwaysApply: true
 - **Does not:** Create PRD; implement auth/login flow; run `npm install` or `pod install`.
 - **Stops when:** Setup complete, wiring verified, log saved. Invoke: `@error-pages-agent`. See `.cursor/agents/agent-18-error-pages.md`.
 
+### Agent 19: Socket Setup Agent
+- **Does:** Install **WebSocket (socket) infrastructure** via `node .cursor/scripts/setup-socket.js` (runs **`setup-keyboard-layout.js` first**). **Must ask intake first** (via AskQuestion): configure-only vs add-to-existing-module vs create-new-module, module name, and design source (Figma / screenshot / none / yourself). Installs `socketClient`, `useSocket`, `socket.service`, constants; scaffolds **keyboard-safe chat screen** (`ChatKeyboardLayout`) for new-module; **mandatory Step 3b UI QA pass** per `keyboard-layout.mdc`; wires route, env, optional FAB. Saves intake to `.cursor/cache/socket-intake-{module}.md` and coding log to `.cursor/logs/coding/coding-socket-{module}.md`.
+- **Does not:** Create PRD; skip UI QA on new-module screens; run `npm install`.
+- **Stops when:** Setup script complete, Step 3b UI pass done, route wired, intake + log saved. Invoke: `@socket-agent`. See `.cursor/agents/agent-19-socket-setup.md`.
+
+### Agent 20: Keyboard Layout Setup Agent
+- **Does:** Install **cross-platform keyboard-aware layouts** for inputs, textareas, and chat composers via `node .cursor/scripts/setup-keyboard-layout.js`. Adds `KeyboardAwareLayout`, `ChatKeyboardLayout`, `useKeyboardHeight`, `useKeyboardInsets`; patches `BaseScreen` `edges` prop. **Runs automatically during project scaffold (Agent 08)** and **socket setup (Agent 19)**. Saves coding log to `.cursor/logs/coding/coding-keyboard-layout.md`.
+- **Does not:** Create PRD; add npm dependencies; fix Next.js web keyboard (`.cursornext/` separate).
+- **Stops when:** Setup complete, log saved. Invoke: `@keyboard-layout-agent`. See `.cursor/agents/agent-20-keyboard-layout.md` and `.cursor/rules/keyboard-layout.mdc`.
+
 ---
 
 ## Workflow Sequence
@@ -114,6 +124,8 @@ alwaysApply: true
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 3c. **Fetch Client Setup Agent** (optional; scaffold agent already installs it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursor/logs/coding/coding-fetch-client.md`
 3d. **Error Pages Setup Agent** (optional; scaffold agent already installs it) → Connection Lost + Unauthorized pages + NetworkGate + NetInfo → `.cursor/logs/coding/coding-error-pages.md`
+3e. **Socket Setup Agent** (optional) → WebSocket client + hook + optional module scaffold → `.cursor/cache/socket-intake-{module}.md` + `.cursor/logs/coding/coding-socket-{module}.md`
+3f. **Keyboard Layout Setup Agent** (optional; scaffold + socket agents already install it) → `KeyboardAwareLayout` + `ChatKeyboardLayout` for inputs/chat → `.cursor/logs/coding/coding-keyboard-layout.md`
 4. **Documentation Agent** → Comments + doc log
 4a. **User Story Test Case Generator** (optional, story-only — no PRD) → `.cursor/logs/test-cases-{feature}.md`
 5. **Test Case Authoring Agent** (optional) → `.cursor/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.js`
@@ -140,6 +152,8 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios/raw fetch; configure interceptors
 - `@error-pages-agent` — Install Connection Lost + Unauthorized error pages with global offline handling (NetInfo + NetworkGate)
+- `@socket-agent` — Install WebSocket infrastructure; asks configure-only vs existing/new module, module name, and Figma/screenshot design source
+- `@keyboard-layout-agent` — Install keyboard-aware layouts for inputs, textareas, and chat (iOS + Android); run `setup-keyboard-layout.js`
 - `@documentation-agent` — Document the code
 - `@user-story-testcases-agent` — Feature name + user story → manual QA test cases (no PRD required)
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

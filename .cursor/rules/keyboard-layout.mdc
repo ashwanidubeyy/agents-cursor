@@ -1,0 +1,102 @@
+---
+description: Cross-platform keyboard avoidance for TextInput, textarea, and chat composers — use KeyboardAwareLayout / ChatKeyboardLayout (not KeyboardAvoidingView alone).
+globs: "src/screens/**/*.{js,jsx,ts,tsx},src/components/**/*.{js,jsx,ts,tsx}"
+alwaysApply: false
+---
+# Keyboard Layout Rules (React Native — iOS + Android)
+
+Apply whenever a screen or component has **`TextInput`**, **multiline inputs (textarea)**, **chat composers**, or **sticky bottom CTAs** that must stay visible above the keyboard.
+
+**Install kit:** `node .cursor/scripts/setup-keyboard-layout.js` (runs automatically in project scaffold + socket agent).
+
+---
+
+## Required components (do not use KeyboardAvoidingView alone)
+
+| Pattern | Layout | When |
+| ------- | ------ | ---- |
+| **Forms / ScrollView** | `KeyboardAwareLayout` from `@layouts/KeyboardAwareLayout` | Login, Create Ticket, settings, any scrollable form |
+| **Chat / fixed footer** | `ChatKeyboardLayout` from `@layouts/ChatKeyboardLayout` | Socket chat, messaging, composer + FlatList |
+| **Hooks** | `useKeyboardHeight`, `useKeyboardInsets` | Custom layouts only when layouts cannot wrap |
+
+**Do not** rely on `KeyboardAvoidingView` alone for bottom inputs — it fails on Android with native stack + gesture nav.
+
+---
+
+## Form / ScrollView pattern (mandatory)
+
+```javascript
+import BaseScreen from '@layouts/BaseScreen';
+import KeyboardAwareLayout from '@layouts/KeyboardAwareLayout';
+
+<BaseScreen edges={['top', 'left', 'right']}>
+  <KeyboardAwareLayout>
+    {(insets) => (
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        contentContainerStyle={{ paddingBottom: insets.scrollPaddingBottom }}>
+        <TextInput />
+      </ScrollView>
+    )}
+  </KeyboardAwareLayout>
+</BaseScreen>
+```
+
+**Sticky submit footer:**
+
+```javascript
+<KeyboardAwareLayout footer={<PrimaryButton />}>
+  {(insets) => (
+    <ScrollView contentContainerStyle={{ paddingBottom: insets.scrollPaddingBottom }}>
+      <TextInput />
+    </ScrollView>
+  )}
+</KeyboardAwareLayout>
+```
+
+---
+
+## Chat pattern (mandatory)
+
+```javascript
+import ChatKeyboardLayout from '@layouts/ChatKeyboardLayout';
+
+<BaseScreen edges={['top', 'left', 'right']}>
+  <ChatKeyboardLayout footer={composer}>
+    {(insets) => (
+      <FlatList
+        contentContainerStyle={{ paddingBottom: insets.listPaddingBottom }}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={false}
+      />
+    )}
+  </ChatKeyboardLayout>
+</BaseScreen>
+```
+
+---
+
+## How it works (cross-platform)
+
+1. **`useKeyboardHeight`** — uses `endCoordinates.screenY` (accurate on Android + iOS).
+2. **Footer pinned** — `position: 'absolute', bottom: keyboardHeight` (open) or `insets.bottom` (closed).
+3. **Scroll/list padding** — `scrollPaddingBottom` / `listPaddingBottom` = footer height + keyboard/safe-area space.
+4. **`BaseScreen edges={['top','left','right']}`** — bottom inset handled by keyboard layout, not SafeAreaView.
+
+---
+
+## Agent checklist (coding / fixing / socket)
+
+- [ ] `setup-keyboard-layout.js` installed (or run before implementing inputs)
+- [ ] No screen with inputs uses raw `KeyboardAvoidingView` without `KeyboardAwareLayout` / `ChatKeyboardLayout`
+- [ ] `keyboardShouldPersistTaps="handled"` on scroll/list containers
+- [ ] `automaticallyAdjustKeyboardInsets={false}` when using `ChatKeyboardLayout` (manual insets own the layout)
+- [ ] Android `AndroidManifest.xml` has `android:windowSoftInputMode="adjustResize"` (scaffold default)
+
+---
+
+## Out of scope
+
+- Web / Next.js (use `.cursornext/` patterns separately)
+- Modals with inputs — apply same `KeyboardAwareLayout` inside modal content

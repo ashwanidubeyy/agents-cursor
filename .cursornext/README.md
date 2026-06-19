@@ -1,6 +1,6 @@
 # `.cursornext/` — Next.js Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 20 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch/error-pages setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 21 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch/error-pages/socket setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New single app?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B). **Monorepo?** Use `@monorepo-scaffold-agent`.
@@ -17,7 +17,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 
 ```
 .cursornext/
-├── agents/            # The 19 agent definitions (the "who does what")
+├── agents/            # The 21 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -37,7 +37,8 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── agent-16-user-story-testcases.md
 │   ├── agent-17-unit-test-analysis.md
 │   ├── agent-18-npm-audit-auto-fix.md
-│   └── agent-19-error-pages.md
+│   ├── agent-19-error-pages.md
+│   └── agent-20-socket-setup.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-nextjs.mdc            # Figma → Next.js mapping rules
@@ -57,6 +58,7 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── setup-e2e.js                   # Bootstrap Playwright E2E
 │   ├── setup-monorepo.js              # Scaffold a pnpm workspace monorepo
 │   ├── setup-error-pages.js           # Connection Lost + Unauthorized error pages
+│   ├── setup-socket.js                # WebSocket client + optional feature scaffold
 │   └── npm-audit-auto-fix.js          # Semver-safe npm audit auto-fix
 ├── hooks/
 │   └── npm-audit-after-install.js     # afterShellExecution hook for npm install
@@ -75,12 +77,14 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── example-module/                # Feature-first example module (form + list)
 │   ├── lib/                           # fetch-client.ts template (axios-free)
 │   ├── error-pages/                   # Connection Lost + Unauthorized templates
+│   ├── socket/                        # WebSocket client, hook, feature templates
 │   └── monorepo/                      # Monorepo root/workspace/package templates
 ├── cache/             # Agent inputs/intermediate artifacts (created on demand)
 │   ├── figma-specs-{feature}.md
 │   ├── figma-svgs/{feature}/...
 │   ├── prompt-{feature}.md
-│   └── prompt-project-create-{name}.md
+│   ├── prompt-project-create-{name}.md
+│   └── socket-intake-{module}.md
 └── logs/              # Agent outputs (the audit trail)
     ├── prd-{feature}-{timestamp}.md
     ├── coding/coding-{feature}.md
@@ -265,6 +269,30 @@ Path: src/features/auth/components/LoginForm
 - **After running:** Coding log at `logs/coding/coding-error-pages.md`. Stops.
 - **Does not:** Implement auth/login; run `npm run dev`.
 
+### Agent 20 — Socket Setup (`@socket-agent`)
+- **Input:** **Interactive intake required** — setup mode (configure-only | existing-module | new-module), module name (when applicable), design source (Figma | screenshot | none), optional WebSocket URL; optional `SOCKET_TARGET=apps/web` for monorepo.
+- **Does:** Uses **AskQuestion** on first turn unless user pre-fills answers. Installs WebSocket client, `useSocket` hook, socket service, constants via `node .cursornext/scripts/setup-socket.js`. Optionally scaffolds feature hook, service, App Router page, and route. Saves intake to `cache/socket-intake-{module}.md`.
+- **After running:** Socket infra in `src/`; coding log at `logs/coding/coding-socket-{module}.md`. Stops.
+- **Does not:** Create PRD; build full UI without design; run `npm run dev`.
+- **Example:**
+
+```
+@socket-agent
+```
+
+  → Agent asks: configure only vs existing module vs new module, module name, and whether you have Figma or screenshots.
+
+```
+@socket-agent
+
+Setup mode: new-module
+Module name: Chat
+Design source: figma
+WebSocket URL: wss://api.example.com/ws/chat
+```
+
+  → Skips questions, runs setup, recommends `@figma-analyzer` for UI.
+
 ### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
 - **Input:** Current branch / working tree; optional base branch (default `main`), feature name, or file scope.
 - **Does:** Reviews **only the changed files** (`git diff` vs base) plus related dependents for context. Validates seven areas — code quality & best practices, folder-structure compliance, React/Next.js performance, security & insecure patterns, TypeScript/lint/test (scoped), PR readiness, and potential **breaking changes** — then runs scoped ESLint/type check/tests and produces P1/P2/P3 findings with a **READY / NOT READY** verdict.
@@ -365,6 +393,8 @@ flowchart LR
 | 05 Scan | `@code-scanning-agent` | Feature or scope | `logs/code-scanning/...md` |
 | 06 Vuln | `@vulnerability-agent` | (project root) | `logs/vulnerability/vulnerability-{date}.md` |
 | 18 npm Audit Fix | `@npm-audit-auto-fix-agent` | (auto after npm install) | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
+| 19 Error Pages | `@error-pages-agent` | (optional `ERROR_PAGES_TARGET`) | Connection Lost + Unauthorized + coding log |
+| 20 Socket | `@socket-agent` | Interactive: mode + module + design source | Socket infra + `cache/socket-intake-{module}.md` + coding log |
 | 12 Pre-PR | `@pre-pr-validation-agent` | (optional base branch) | `logs/pre-pr/pre-pr-{branch-or-feature}-{ts}.md` + verdict |
 | 07 PR | `@pr-orchestrator-agent` | Feature | `logs/pr/pr-{feature}-{ts}.md` |
 
@@ -523,6 +553,8 @@ The canonical reference for **app structure** (`src/app` App Router), **path ali
 | `setup-example.js` | Install the feature-first example module (`features/example` + `/example` route) | `node .cursor/scripts/setup-example.js` (inside the project) |
 | `setup-e2e.js` | Bootstrap Playwright (config + smoke spec + scripts) | `node .cursor/scripts/setup-e2e.js` (inside the project) |
 | `setup-monorepo.js` | Scaffold a pnpm workspace monorepo (sibling folder) | `MONOREPO_NAME=my-platform node .cursornext/scripts/setup-monorepo.js` |
+| `setup-error-pages.js` | Connection Lost + Unauthorized + NetworkGate + AppShell | `node .cursornext/scripts/setup-error-pages.js` |
+| `setup-socket.js` | WebSocket client + optional feature scaffold | `node .cursornext/scripts/setup-socket.js --mode=new-module --module=Chat` |
 | `npm-audit-auto-fix.js` | Semver-safe npm audit scan + fix | `node .cursornext/scripts/npm-audit-auto-fix.js --trigger agent` |
 
 The Figma scripts require `FIGMA_ACCESS_TOKEN` (or `FIGMA_TOKEN`) in **`.env`** or the environment. The `setup-*` scripts need no token. `setup-monorepo.js` runs **from this kit**; `setup-useform` / `setup-fetch` / `setup-example` / `setup-e2e` are designed to run **inside a generated project** (where the kit is copied as `.cursor/`), and the scaffold agents invoke them automatically.

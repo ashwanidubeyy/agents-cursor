@@ -1,0 +1,204 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  Keyboard,
+  Platform,
+} from 'react-native';
+import { verticalScale } from 'react-native-size-matters';
+import BaseScreen from '@layouts/BaseScreen';
+import ChatKeyboardLayout from '@layouts/ChatKeyboardLayout';
+import { __MODULE___CONSTANTS } from '@constants/__module__';
+import { use__MODULE__Socket } from '@hooks/use__MODULE__Socket';
+import { SOCKET_URL } from '@utility/socketConfig';
+import styles from './style';
+
+const formatPayloadText = (payload) => {
+  if (typeof payload === 'string') {
+    return payload;
+  }
+  if (payload?.text) {
+    return payload.text;
+  }
+  if (payload?.message) {
+    return payload.message;
+  }
+  return JSON.stringify(payload ?? '');
+};
+
+const __MODULE__ = ({ navigation }) => {
+  const listRef = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [draft, setDraft] = useState('');
+  const { isConnected, lastMessage, sendMessage } = use__MODULE__Socket(SOCKET_URL);
+
+  const scrollToBottom = useCallback(() => {
+    if (messages?.length > 0) {
+      listRef.current?.scrollToEnd?.({ animated: true });
+    }
+  }, [messages?.length]);
+
+  useEffect(() => {
+    if (!lastMessage) {
+      return;
+    }
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `in-${Date.now()}-${prev.length}`,
+        text: formatPayloadText(lastMessage),
+        incoming: true,
+      },
+    ]);
+  }, [lastMessage]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages?.length, scrollToBottom]);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const subscription = Keyboard.addListener(showEvent, scrollToBottom);
+    return () => subscription.remove();
+  }, [scrollToBottom]);
+
+  const handleBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleSend = useCallback(() => {
+    const trimmed = draft?.trim?.() ?? '';
+    if (!trimmed) {
+      return;
+    }
+    const payload = {
+      channel: __MODULE___CONSTANTS.SOCKET.CHANNEL,
+      text: trimmed,
+    };
+    sendMessage(payload);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `out-${Date.now()}-${prev.length}`,
+        text: trimmed,
+        incoming: false,
+      },
+    ]);
+    setDraft('');
+  }, [draft, sendMessage]);
+
+  const handleInputFocus = useCallback(() => {
+    scrollToBottom();
+  }, [scrollToBottom]);
+
+  const renderMessage = useCallback(({ item }) => {
+    const isIncoming = item?.incoming;
+    return (
+      <View
+        style={[
+          styles.bubbleRow,
+          isIncoming ? styles.bubbleRowIncoming : styles.bubbleRowOutgoing,
+        ]}>
+        <View
+          style={[
+            styles.bubble,
+            isIncoming ? styles.bubbleIncoming : styles.bubbleOutgoing,
+          ]}>
+          <Text
+            style={[
+              styles.bubbleText,
+              isIncoming ? styles.bubbleTextIncoming : styles.bubbleTextOutgoing,
+            ]}
+            numberOfLines={0}>
+            {item?.text}
+          </Text>
+        </View>
+      </View>
+    );
+  }, []);
+
+  const statusLabel = isConnected
+    ? __MODULE___CONSTANTS.PAGE.CONNECTED
+    : SOCKET_URL
+      ? __MODULE___CONSTANTS.PAGE.CONNECTING
+      : __MODULE___CONSTANTS.PAGE.DISCONNECTED;
+
+  const canSend = Boolean(draft?.trim?.()) && isConnected;
+
+  const composer = (
+    <View style={[styles.composer, { paddingBottom: verticalScale(10, 0.9) }]}>
+      <TextInput
+        style={styles.input}
+        value={draft}
+        onChangeText={setDraft}
+        onFocus={handleInputFocus}
+        placeholder={__MODULE___CONSTANTS.PAGE.MESSAGE_PLACEHOLDER}
+        multiline
+        testID={__MODULE___CONSTANTS.TEST_IDS.MESSAGE_INPUT}
+      />
+      <TouchableOpacity
+        style={[styles.sendButton, canSend ? null : styles.sendButtonDisabled]}
+        onPress={handleSend}
+        disabled={!canSend}
+        accessibilityRole="button"
+        accessibilityLabel={__MODULE___CONSTANTS.PAGE.SEND}
+        testID={__MODULE___CONSTANTS.TEST_IDS.SEND_BUTTON}>
+        <Text style={styles.sendText}>{__MODULE___CONSTANTS.PAGE.SEND}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <BaseScreen edges={['top', 'left', 'right']}>
+      <View style={styles.flex} testID={__MODULE___CONSTANTS.TEST_IDS.SCREEN}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={handleBack}
+            accessibilityRole="button"
+            accessibilityLabel={__MODULE___CONSTANTS.PAGE.BACK}>
+            <Text style={styles.backText}>{__MODULE___CONSTANTS.PAGE.BACK}</Text>
+          </TouchableOpacity>
+          <Text style={styles.title} numberOfLines={1}>
+            {__MODULE___CONSTANTS.PAGE.TITLE}
+          </Text>
+          <View
+            style={[
+              styles.statusBadge,
+              isConnected ? styles.statusConnected : styles.statusDisconnected,
+            ]}>
+            <Text style={styles.statusText} numberOfLines={1}>
+              {statusLabel}
+            </Text>
+          </View>
+        </View>
+        <ChatKeyboardLayout footer={composer}>
+          {(layoutInsets) => (
+            <FlatList
+              ref={listRef}
+              style={styles.list}
+              contentContainerStyle={[
+                styles.listContent,
+                { paddingBottom: layoutInsets.listPaddingBottom },
+              ]}
+              data={messages}
+              keyExtractor={(item) => item?.id}
+              renderItem={renderMessage}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              automaticallyAdjustKeyboardInsets={false}
+              ListEmptyComponent={
+                <Text style={styles.empty}>{__MODULE___CONSTANTS.PAGE.EMPTY}</Text>
+              }
+            />
+          )}
+        </ChatKeyboardLayout>
+      </View>
+    </BaseScreen>
+  );
+};
+
+export default __MODULE__;

@@ -41,10 +41,14 @@ Apply this rule **while implementing or editing UI** (screens, widgets, layouts,
 
 ## 4. Keyboard & forms
 
-- [ ] Screens with `TextInput` / form fields wrap content in `KeyboardAvoidingView` (correct `behavior` for `Platform.OS`: `'padding'` on iOS, `'height'` or `undefined` on Android per project pattern) or the project's shared keyboard wrapper.
-- [ ] Set `keyboardVerticalOffset` when a fixed header or stack header consumes vertical space.
-- [ ] Scroll containers with inputs set `keyboardShouldPersistTaps="handled"` (or `'always'`) and `keyboardDismissMode="on-drag"` where appropriate.
-- [ ] Modals/sheets with inputs use the same keyboard-avoidance pattern.
+**Read:** `.cursor/rules/keyboard-layout.mdc` — **mandatory** for any `TextInput`, textarea, or bottom composer.
+
+- [ ] **Forms / ScrollView:** `KeyboardAwareLayout` from `@layouts/KeyboardAwareLayout` with `contentContainerStyle={{ paddingBottom: insets.scrollPaddingBottom }}` — **not** `KeyboardAvoidingView` alone.
+- [ ] **Chat / fixed footer:** `ChatKeyboardLayout` with `listPaddingBottom` and `automaticallyAdjustKeyboardInsets={false}`.
+- [ ] `BaseScreen edges={['top', 'left', 'right']}` when bottom input/footer is keyboard-aware.
+- [ ] Kit installed: `node .cursor/scripts/setup-keyboard-layout.js` (scaffold / socket agents run this automatically).
+- [ ] Scroll/list containers: `keyboardShouldPersistTaps="handled"`, `keyboardDismissMode="on-drag"` where appropriate.
+- [ ] Modals/sheets with inputs use `KeyboardAwareLayout` inside modal content.
 
 ---
 

@@ -16,10 +16,12 @@ model: fast
 ## BEFORE CODING
 
 1. **`.cursor/rules/useform-validation.mdc`** — schema, handlers, checklist.
+2. **`.cursor/rules/keyboard-layout.mdc`** — wrap form screens in `KeyboardAwareLayout` (iOS + Android).
 2. **`.cursor/skills/react-native-architecture/SKILL.md`** — folder layout, path aliases, COLORS/fonts/commonStyles.
 3. **`.cursor/rules/react-native.mdc`** + repo user rules — styling, constants, services, optional chaining, no comments.
 4. **Detect language:** TypeScript if `tsconfig.json` exists (use `.ts`/`.tsx`, type the schema with `FormSchema`), else JavaScript (`.js`).
 5. **Verify the hook exists:** `src/hooks/useForm.{ts,js}` + `src/utility/form-validators.{ts,js}`. If missing → run `node .cursor/scripts/setup-useform.js` first (it picks TS/JS automatically).
+6. **Verify keyboard layouts exist:** `KeyboardAwareLayout` at `src/components/layouts/KeyboardAwareLayout/`. If missing → run `node .cursor/scripts/setup-keyboard-layout.js`.
 
 ---
 

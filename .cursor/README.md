@@ -1,6 +1,6 @@
 # `.cursor/` — React Native Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 18 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a React Native app. It is a set of 19 specialized agents, supporting rules, a skill, helper scripts, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New project?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B).
@@ -15,7 +15,7 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 
 ```
 .cursor/
-├── agents/            # The 18 agent definitions (the "who does what")
+├── agents/            # The 19 agent definitions (the "who does what")
 │   ├── agent-00-figma-analyzer.md
 │   ├── agent-01-planning.md
 │   ├── agent-02-coding.md
@@ -33,11 +33,15 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   ├── agent-14-fetch-client.md
 │   ├── agent-15-user-story-testcases.md
 │   ├── agent-16-unit-test-analysis.md
-│   └── agent-17-npm-audit-auto-fix.md
+│   ├── agent-17-npm-audit-auto-fix.md
+│   ├── agent-18-error-pages.md
+│   ├── agent-19-socket-setup.md
+│   └── agent-20-keyboard-layout.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-react-native.mdc      # Figma → RN mapping rules
 │   ├── ui-qa-checklist.mdc            # Static UI QA while coding (safe area, keyboard, scroll, nav)
+│   ├── keyboard-layout.mdc            # KeyboardAwareLayout / ChatKeyboardLayout (iOS + Android)
 │   ├── react-native.mdc               # RN best practices (feature-first)
 │   ├── react-native-best-practices.md
 │   ├── coding-standards.md
@@ -49,7 +53,10 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   ├── export-figma-svg.js
 │   ├── export-figma-png.js
 │   ├── setup-useform.js               # Install useForm hook + validators (TS/JS)
-│   └── setup-fetch.js                 # Install dependency-free fetch HTTP client (axios-free)
+│   ├── setup-fetch.js                 # Install dependency-free fetch HTTP client (axios-free)
+│   ├── setup-error-pages.js           # Connection Lost + Unauthorized + NetworkGate
+│   ├── setup-keyboard-layout.js       # KeyboardAwareLayout + ChatKeyboardLayout (inputs/chat)
+│   └── setup-socket.js                # WebSocket client + optional module scaffold
 ├── skills/
 │   └── react-native-architecture/SKILL.md   # App structure, aliases, design system
 ├── setup/
@@ -62,11 +69,15 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   │   ├── useForm.ts / useForm.js
 │   │   └── useForm.example.tsx / useForm.example.js
 │   └── utility/                       # form-validators.ts / form-validators.js
+│   ├── error-pages/                   # Connection Lost + Unauthorized templates
+│   ├── keyboard/                      # KeyboardAwareLayout, ChatKeyboardLayout, hooks
+│   └── socket/                        # WebSocket client, hook, module templates
 ├── cache/             # Agent inputs/intermediate artifacts (created on demand)
 │   ├── figma-specs-{feature}.md
 │   ├── figma-svgs/{feature}/...
 │   ├── prompt-{feature}.md
-│   └── prompt-project-create-{name}.md
+│   ├── prompt-project-create-{name}.md
+│   └── socket-intake-{module}.md
 └── logs/              # Agent outputs (the audit trail)
     ├── prd-{feature}-{timestamp}.md
     ├── coding/coding-{feature}.md
@@ -241,6 +252,42 @@ Path: src/screens/Login
 - **After running:** Report saved to `logs/vulnerability/npm-audit-auto-fix-{timestamp}.md` + chat notification. Stops.
 - **Does not:** Replace Agent 06 documentation-only scans.
 
+### Agent 18 — Error Pages (`@error-pages-agent`)
+- **Input:** Project root; optional `--force`.
+- **Does:** Installs Connection Lost + Unauthorized screens, `NetworkGate`, NetInfo `useNetworkStatus`, `navigationRef`, `handleUnauthorized` via `node .cursor/scripts/setup-error-pages.js`. Runs automatically during project scaffold (Agent 08).
+- **After running:** Error pages wired; coding log at `logs/coding/coding-error-pages.md`. Stops.
+- **Does not:** Create PRD; implement auth flow; run `npm install` / `pod install`.
+
+### Agent 19 — Socket Setup (`@socket-agent`)
+- **Input:** **Interactive intake required** — setup mode (configure-only | existing-module | new-module), module name (when applicable), design source (Figma | screenshot | none), optional WebSocket URL.
+- **Does:** Uses **AskQuestion** on first turn unless user pre-fills answers. Installs WebSocket client, `useSocket` hook, socket service, constants via `node .cursor/scripts/setup-socket.js`. Optionally scaffolds module hook, service, screen, and route. Saves intake to `cache/socket-intake-{module}.md`.
+- **After running:** Socket infra in `src/`; coding log at `logs/coding/coding-socket-{module}.md`. Stops.
+- **Does not:** Create PRD; build full UI without design; run `npm install`.
+- **Example:**
+
+```
+@socket-agent
+```
+
+  → Agent asks: configure only vs existing module vs new module, module name, and whether you have Figma or screenshots.
+
+```
+@socket-agent
+
+Setup mode: new-module
+Module name: Chat
+Design source: figma
+WebSocket URL: wss://api.example.com/ws/chat
+```
+
+  → Skips questions, runs setup, recommends `@figma-analyzer` for UI.
+
+### Agent 20 — Keyboard Layout (`@keyboard-layout-agent`)
+- **Input:** Project root; optional `--force`.
+- **Does:** Installs `KeyboardAwareLayout` (forms/inputs), `ChatKeyboardLayout` (chat), `useKeyboardHeight`, `useKeyboardInsets` via `node .cursor/scripts/setup-keyboard-layout.js`. Runs automatically during project scaffold (Agent 08) and socket setup (Agent 19).
+- **After running:** Cross-platform keyboard layouts in `src/`; rule at `rules/keyboard-layout.mdc`; coding log at `logs/coding/coding-keyboard-layout.md`. Stops.
+- **Does not:** Create PRD; add npm dependencies.
+
 ### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
 - **Input:** Current branch / working tree; optional base branch (default `main`), feature name, or file scope.
 - **Does:** Reviews **only the changed files** (`git diff` vs base) plus related dependents for context. Validates eight areas — code quality & best practices, folder-structure compliance, React/React Native performance, security & insecure patterns, TypeScript/lint/test (scoped), error handling & reliability, **UI static QA (code-level)**, PR readiness, and potential **breaking changes** — then runs scoped ESLint/type check/Jest and produces P1/P2/P3 findings with a **READY / NOT READY** verdict.
@@ -329,6 +376,9 @@ flowchart LR
 | 05 Scan | `@code-scanning-agent` | Feature or scope | `logs/code-scanning/...md` |
 | 06 Vuln | `@vulnerability-agent` | (project root) | `logs/vulnerability/vulnerability-{date}.md` |
 | 17 npm Audit Fix | `@npm-audit-auto-fix-agent` | (auto after npm install) | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
+| 18 Error Pages | `@error-pages-agent` | (optional `--force`) | Connection Lost + Unauthorized + coding log |
+| 19 Socket | `@socket-agent` | Interactive: mode + module + design source | Socket infra + `cache/socket-intake-{module}.md` + coding log |
+| 20 Keyboard | `@keyboard-layout-agent` | Optional `--force` | Keyboard layouts + `keyboard-layout.mdc` + coding log |
 | 12 Pre-PR | `@pre-pr-validation-agent` | (optional base branch) | `logs/pre-pr/pre-pr-{branch-or-feature}-{ts}.md` + verdict |
 | 07 PR | `@pr-orchestrator-agent` | Feature | `logs/pr/pr-{feature}-{ts}.md` |
 

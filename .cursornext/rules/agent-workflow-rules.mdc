@@ -106,6 +106,11 @@ alwaysApply: true
 - **Does not:** Create PRD; implement auth/login flow; run `npm run dev`.
 - **Stops when:** Setup complete, wiring verified, log saved. Invoke: `@error-pages-agent`. See `.cursornext/agents/agent-19-error-pages.md`.
 
+### Agent 20: Socket Setup Agent
+- **Does:** Install **WebSocket (socket) infrastructure** via `node .cursornext/scripts/setup-socket.js`. **Must ask intake first** (via AskQuestion): configure-only vs add-to-existing-module vs create-new-module, module name, and design source (Figma / screenshot / none). Installs `socketClient`, `useSocket`, `socket.service`, constants; optionally scaffolds feature hook, service, App Router page, and route. Supports monorepo via `SOCKET_TARGET`. Saves intake to `.cursornext/cache/socket-intake-{module}.md` and coding log to `.cursornext/logs/coding/coding-socket-{module}.md`.
+- **Does not:** Create PRD; implement full UI without design input; run `npm run dev`.
+- **Stops when:** Setup script complete, wiring documented, intake + log saved. Invoke: `@socket-agent`. See `.cursornext/agents/agent-20-socket-setup.md`.
+
 ---
 
 ## Workflow Sequence
@@ -120,6 +125,7 @@ alwaysApply: true
 3b. **useForm Builder Agent** (optional, for forms) → Form built with `useForm` + coding log
 3c. **Fetch Client Setup Agent** (optional; scaffold agents already install it) → `src/lib/fetch-client.ts` wired (axios-free) + `.cursornext/logs/coding/coding-fetch-client.md`
 3d. **Error Pages Setup Agent** (optional; scaffold agents already install it) → Connection Lost + Unauthorized + NetworkGate + AppShell → `.cursornext/logs/coding/coding-error-pages.md`
+3e. **Socket Setup Agent** (optional) → WebSocket client + hook + optional feature scaffold → `.cursornext/cache/socket-intake-{module}.md` + `.cursornext/logs/coding/coding-socket-{module}.md`
 4. **Documentation Agent** → Comments + doc log
 4a. **User Story Test Case Generator** (optional, story-only — no PRD) → `.cursornext/logs/test-cases-{feature}.md`
 5. **Test Case Authoring Agent** (optional) → `.cursornext/logs/test-cases-{feature}.md` + `__tests__/{Feature}.test.tsx`
@@ -147,6 +153,7 @@ Each step requires manual invocation except where an agent explicitly calls anot
 - `@useform-builder-agent` — Build/validate a form with the `useForm` hook (form name + fields + target path)
 - `@fetch-client-agent` — Install/wire the dependency-free fetch HTTP client (axios-free); replace axios; configure interceptors
 - `@error-pages-agent` — Install Connection Lost + Unauthorized error pages with global offline handling (browser online/offline events + NetworkGate)
+- `@socket-agent` — Install WebSocket infrastructure; asks configure-only vs existing/new module, module name, and Figma/screenshot design source
 - `@documentation-agent` — Document the code
 - `@user-story-testcases-agent` — Feature name + user story → manual QA test cases (no PRD required)
 - `@testcases-agent` — Feature name + PRD/coding log paths — Creates test cases + Jest tests

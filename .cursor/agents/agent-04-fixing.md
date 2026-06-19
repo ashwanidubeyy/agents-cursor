@@ -14,6 +14,8 @@ model: fast
 - **Fix-only:** User says "Fix X" → read coding log and code, apply fixes, update log.
 - **Test-and-fix:** User says "Test {feature}" (or provides test-cases path) → require test-cases file + testing target, run Jest (and E2E if configured), track by test case ID, fix simple issues, re-run failed tests, update log.
 
+**Keyboard / input hidden behind keyboard:** Read **`.cursor/rules/keyboard-layout.mdc`**. Run `node .cursor/scripts/setup-keyboard-layout.js` if layouts missing. Replace `KeyboardAvoidingView`-only patterns with `KeyboardAwareLayout` (forms) or `ChatKeyboardLayout` (chat).
+
 ---
 
 ## 🚨 CRITICAL: AUTOMATIC LOGGING REQUIREMENT

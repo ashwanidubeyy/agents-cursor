@@ -122,12 +122,12 @@ I am STOPPED and waiting for PRD.
   - **Path aliases:** @, @screens, @constants, @store, @widgets, @layouts, @api, @utility, @hooks, @assets
   - **Design system:** Colors (COLORS or ColorCode from constants/colors.js), Typography (fontFamily/fontSize or FONTS from constants/fonts.js), commonStyles (constants/commonStyles.js). Use **only** project tokens in styles; no raw hex or hardcoded fontFamily/fontSize.
   - **File conventions:** One folder per screen/component (index.js + style.js); PascalCase for components/screens; store per domain (actions.js, actionTypes.js, reducers.js)
-  - **Patterns:** Functional components + hooks; optional chaining (`obj?.value`); shadow (iOS) / elevation (Android); a11y (accessibilityLabel, accessibilityRole, touch target ≥ 44px); FlatList/FlashList for lists; SafeAreaView or react-native-safe-area-context where needed; KeyboardAvoidingView for forms
+  - **Patterns:** Functional components + hooks; optional chaining (`obj?.value`); shadow (iOS) / elevation (Android); a11y (accessibilityLabel, accessibilityRole, touch target ≥ 44px); FlatList/FlashList for lists; SafeAreaView or react-native-safe-area-context where needed; **`KeyboardAwareLayout` / `ChatKeyboardLayout`** for inputs (see `keyboard-layout.mdc` — not `KeyboardAvoidingView` alone)
 
 **5.2 Load Rules**
 
 - Read **`.cursor/rules/figma-to-react-native.mdc`** — No raw hex; use ColorCode/COLORS and FONTS/fontFamily+fontSize; Figma Frame → View; Auto Layout → flex + gap; optional chaining.
-- Read **`.cursor/rules/ui-qa-checklist.mdc`** — Static UI wiring while coding: safe area, scaling, keyboard, scroll/lists, navigation routes, touch targets, status bar, offline/toast, platform shadows (code-level; no Detox/manual visual QA).
+- Read **`.cursor/rules/ui-qa-checklist.mdc`** and **`.cursor/rules/keyboard-layout.mdc`** — Static UI wiring while coding: safe area, scaling, keyboard (iOS + Android), scroll/lists, navigation routes, touch targets, status bar, offline/toast, platform shadows (code-level; no Detox/manual visual QA).
 - Read **`.cursor/rules/react-native.mdc`** or **`.cursor/rules/react-native-best-practices.md`** (if present) — Styling, navigation, performance, a11y, Platform.select.
 - Read **`.cursor/rules/coding-standards.md`** (if present).
 
@@ -162,7 +162,7 @@ I am STOPPED and waiting for PRD.
 9. **a11y** — accessibilityLabel, accessibilityRole, accessibilityHint where appropriate; min touch target 44px for interactive elements.
 10. **Navigation** — Update src/AppRouteConfig.js if new screens; register in screens barrel (src/screens/index.js); pass params as specified in PRD.
 11. **Safe area** — Use SafeAreaView or react-native-safe-area-context for full-screen content where PRD or design implies it. **When using CommonHeader (App header):** Apply **only top safe area** (not bottom). Use **SafeAreaView from `react-native-safe-area-context`** with **`edges={['top']}`** so only the status bar/notch area is inset; do not apply bottom safe area. Set the root SafeAreaView `backgroundColor` to `COLORS.headerBackground` so the top safe area matches the header; wrap the body content in a `View` with `flex: 1` and body background (e.g. `COLORS.bodyBg`).
-12. **Forms** — Use KeyboardAvoidingView (or KeyboardAwareScrollView) when PRD includes forms or text inputs above keyboard.
+12. **Forms / inputs** — Use **`KeyboardAwareLayout`** (`keyboard-layout.mdc`) for forms, ScrollViews, and text inputs. Use **`ChatKeyboardLayout`** for chat/messaging. Run `node .cursor/scripts/setup-keyboard-layout.js` if layouts are missing. Do **not** use `KeyboardAvoidingView` alone.
 13. **Static text** — All static copy (titles, labels, placeholders, button text) in `@constants/titles` (TITLES); all alert/error messages in `@constants/alerts` (ALERTS). Do not hardcode strings in components/screens.
 
 14. **Third-party / native dependencies** — When adding a package that has **native code** (e.g. `react-native-svg`, `react-native-safe-area-context`, `react-native-screens`):
