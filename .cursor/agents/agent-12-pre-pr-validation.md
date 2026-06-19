@@ -24,7 +24,7 @@ model: fast
 
 **YOU ONLY:**
 - ✅ Determine the changed-file scope from git
-- ✅ Validate the 7 categories below against project standards
+- ✅ Validate the 8 categories below against project standards
 - ✅ Run scoped lint / type check / tests (read-only execution)
 - ✅ Produce a prioritized report (P1/P2/P3) with a READY / NOT READY verdict
 - ✅ Save the report and STOP
@@ -62,7 +62,7 @@ model: fast
 
 Read so findings cite the project's own rules:
 - **`.cursor/skills/react-native-architecture/SKILL.md`** — structure, path aliases, design system (COLORS, fontFamily/fontSize, commonStyles).
-- **`.cursor/rules/coding-standards.md`**, **`.cursor/rules/react-native.mdc`** / **`.cursor/rules/react-native-best-practices.md`**, **`.cursor/rules/figma-to-react-native.mdc`**.
+- **`.cursor/rules/coding-standards.md`**, **`.cursor/rules/react-native.mdc`** / **`.cursor/rules/react-native-best-practices.md`**, **`.cursor/rules/figma-to-react-native.mdc`**, **`.cursor/rules/ui-qa-checklist.mdc`** (static UI wiring — safe area, keyboard, scroll, navigation, touch targets).
 - **`.cursor/rules/agent-workflow-rules.mdc`** — boundaries / handoffs.
 - Repo user rules (folder structure, styled-components/StyleSheet, i18n/constants, optional chaining, no-comments, unique keys, etc.).
 
@@ -70,7 +70,7 @@ Detect the framework context per changed file: **React Native** (this project) b
 
 ---
 
-### STEP 3: Validate — 7 Categories (changed files only)
+### STEP 3: Validate — 8 Categories (changed files only)
 
 Score each category (pass / partial / fail) and record concrete findings with **file:line**, the rule it violates, and a recommended fix.
 
@@ -120,6 +120,25 @@ Score each category (pass / partial / fail) and record concrete findings with **
 #### 3.7 PR readiness & project standards (checklist below)
 Run the **PR Readiness Checklist** (Section 4) and fold results into the verdict.
 
+#### 3.8 UI static QA (code-level — changed UI files only)
+
+Apply **`.cursor/rules/ui-qa-checklist.mdc`** to changed files under `src/screens/`, `src/components/`, `src/Root.js`, and `src/AppRouteConfig.js`. Score pass / partial / fail; cite **file:line**, the rule violated, and a recommended fix. For each finding, record P1/P2/P3 using the priorities defined in the UI QA rule.
+
+**Check (static — no device/visual QA):**
+- Safe area: `SafeAreaProvider` at root; screens use `BaseScreen` / `SafeAreaView` / `useSafeAreaInsets` — not bare full-screen `View`.
+- Scaling: numeric styles use `moderateScale` / `scale` / `verticalScale` (not raw magic numbers when project uses size-matters).
+- Status bar: `StatusBar` set where background differs from default; `barStyle` consistent with `COLORS`.
+- Keyboard: form/input screens use `KeyboardAvoidingView` or project keyboard wrapper; scroll views set `keyboardShouldPersistTaps`.
+- Touch targets: interactive elements ≥ `moderateScale(44)` or `hitSlop`; flag nested parent/child `onPress` conflicts.
+- Scroll/lists: data lists use `FlatList`/`FlashList` (not `ScrollView` + `.map()`); `RefreshControl` wired to real handler; stable `keyExtractor`; flag `FlatList` inside `ScrollView` without `nestedScrollEnabled`.
+- Navigation: every `navigate('…')` target exists in `AppRouteConfig.js`; modals/sheets use `BackHandler` on Android with cleanup.
+- Text: list/card titles use `numberOfLines` / `flexShrink: 1` where truncation expected.
+- Platform: shadow + elevation via `Platform.select`; SVG preferred over PNG for icons.
+- Offline/toast: API screens handle offline/error; toast at root with safe-area-aware bottom + high `zIndex`.
+- Permissions: device API usage paired with `Info.plist` / `AndroidManifest` keys when changed.
+
+**Do not fail PR solely for:** scroll smoothness, animation FPS, visual Figma match, keyboard overlap on specific devices, or multi-OS runtime behavior — note as out-of-scope for Detox/manual QA.
+
 ---
 
 ### STEP 4: PR Readiness Checklist (apply to changed files)
@@ -165,6 +184,16 @@ Run the **PR Readiness Checklist** (Section 4) and fold results into the verdict
 - [ ] Styles in dedicated `style.js`/`styles.ts`; single export.
 - [ ] Theme colors / helpers (e.g. `COLORS`/`getColors`) — no hardcoded color values.
 - [ ] Consistent spacing/layout gaps.
+
+**UI static QA (code-level — see `ui-qa-checklist.mdc`)**
+- [ ] Safe area on full-screen UI; bottom inset on fixed footers/toast.
+- [ ] Responsive scaling (`moderateScale` / size-matters) — no raw magic numbers in styles.
+- [ ] `StatusBar` where background requires it; keyboard handling on form screens.
+- [ ] Touch targets ≥ 44px; no conflicting nested touchables on cards.
+- [ ] Lists use `FlatList`/`FlashList`; `RefreshControl` on refreshable data screens.
+- [ ] Navigation targets exist in `AppRouteConfig`; `BackHandler` on Android modals.
+- [ ] `numberOfLines` / `flexShrink` on truncatable text; SVG over PNG for icons.
+- [ ] Offline/error UI on API screens; toast safe-area positioning.
 
 **API & data**
 - [ ] Consistent request/response schemas; centralized endpoint definitions; clear naming for API constants/models.
@@ -268,7 +297,7 @@ Check only my changed files for breaking changes, lint/type errors, and PR readi
 ## 📋 QUALITY CHECKLIST (before saving report)
 
 - [ ] Scope limited to changed files (git diff vs base); dependents read only for breaking-change context
-- [ ] All 7 categories evaluated with file:line findings citing project rules
+- [ ] All 8 categories evaluated with file:line findings citing project rules
 - [ ] ESLint / TypeScript / scoped Jest executed (or noted "not configured")
 - [ ] Breaking-change analysis completed (exports, props, routes, store, API, native deps)
 - [ ] PR-readiness checklist applied; PR size assessed

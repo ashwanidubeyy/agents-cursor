@@ -127,6 +127,7 @@ I am STOPPED and waiting for PRD.
 **5.2 Load Rules**
 
 - Read **`.cursor/rules/figma-to-react-native.mdc`** — No raw hex; use ColorCode/COLORS and FONTS/fontFamily+fontSize; Figma Frame → View; Auto Layout → flex + gap; optional chaining.
+- Read **`.cursor/rules/ui-qa-checklist.mdc`** — Static UI wiring while coding: safe area, scaling, keyboard, scroll/lists, navigation routes, touch targets, status bar, offline/toast, platform shadows (code-level; no Detox/manual visual QA).
 - Read **`.cursor/rules/react-native.mdc`** or **`.cursor/rules/react-native-best-practices.md`** (if present) — Styling, navigation, performance, a11y, Platform.select.
 - Read **`.cursor/rules/coding-standards.md`** (if present).
 
@@ -187,7 +188,8 @@ I am STOPPED and waiting for PRD.
 ### STEP 7: Validate and Update Log
 
 1. **Run validation** — `npm run lint` (and type check if applicable, e.g. `npm run typecheck` or `tsc --noEmit`). Fix failures and re-run; document in log.
-2. **Update log** — Fill current iteration: Files Created (path, purpose, architecture compliance), Files Modified (path, changes), Decisions Made, Problems Encountered, Design Fidelity (tokens/typography/spacing match to PRD), Validation Results (lint/type pass or fail).
+2. **UI QA (code-level)** — Walk **`.cursor/rules/ui-qa-checklist.mdc`** for every new/changed screen, widget, layout, and navigation change. Log pass/fail per section in coding log under **UI QA (code-level)**; fix P1 items before completion.
+3. **Update log** — Fill current iteration: Files Created (path, purpose, architecture compliance), Files Modified (path, changes), Decisions Made, Problems Encountered, Design Fidelity (tokens/typography/spacing match to PRD), UI QA (code-level) summary, Validation Results (lint/type pass or fail).
 3. **Set iteration status** — "Completed" when done; "Has issues" if known gaps remain (document in log).
 
 ---
@@ -207,6 +209,8 @@ Coding log: .cursor/logs/coding/coding-{feature-name}.md
 📝 FILES MODIFIED: {count} — {list if any}
 
 🏗️ REACT NATIVE: Path aliases used; ColorCode/COLORS & FONTS/fonts from @constants; optional chaining; shadow/elevation; a11y considered; SafeArea/KeyboardAvoidingView where applicable.
+
+📋 UI QA (code-level): Pass / Partial / Fail — see coding log (ui-qa-checklist.mdc)
 
 ✅ VALIDATION: Lint — Pass / Fail | Type check — Pass / Fail / N/A (fix and re-run if Fail)
 

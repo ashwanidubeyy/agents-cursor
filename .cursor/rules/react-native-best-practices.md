@@ -18,6 +18,7 @@ Applied by Coding and Figma agents.
 - **Shadow:** iOS shadowColor/shadowOffset/shadowOpacity/shadowRadius; Android elevation.
 - **Safe area:** SafeAreaView or react-native-safe-area-context.
 - **Keyboard:** KeyboardAvoidingView where needed.
+- **UI QA (code-level):** See **`.cursor/rules/ui-qa-checklist.mdc`** — static wiring for scroll, navigation, touch targets, status bar, offline/toast while coding.
 
 ## Accessibility
 

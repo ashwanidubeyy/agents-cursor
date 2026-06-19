@@ -1,0 +1,182 @@
+---
+description: Static UI QA checklist for React Native — enforce correct wiring in code during development (no Detox/manual visual QA required).
+globs: "src/screens/**/*.{js,jsx,ts,tsx},src/components/**/*.{js,jsx,ts,tsx},src/AppRouteConfig.js,src/Root.js"
+alwaysApply: false
+---
+# UI QA Checklist (Code-Level — React Native)
+
+Apply this rule **while implementing or editing UI** (screens, widgets, layouts, navigation). Each item is verifiable from **source code and native config** — not from running the app or visual inspection.
+
+**Scope:** Prevention at development time. For runtime/visual/device-matrix QA, use `@testcases-agent` / `@detox-testing-agent` separately.
+
+**Related rules:** `figma-to-react-native.mdc`, `react-native.mdc`, `react-native-best-practices.md`
+
+---
+
+## 1. Safe area & layout
+
+- [ ] Root app wraps content in `SafeAreaProvider` (`src/Root.js` or equivalent).
+- [ ] Full-screen screens use `BaseScreen`, `SafeAreaView` from `react-native-safe-area-context`, or `useSafeAreaInsets()` for padding — not a bare full-screen `View` ignoring insets.
+- [ ] Fixed footers, toasts, and bottom CTAs apply **bottom inset** via `useSafeAreaInsets().bottom` or `SafeAreaView` with appropriate `edges`.
+- [ ] Header-only safe area: use `edges={['top']}` when only status bar/notch should be inset.
+- [ ] Parent containers use `flex: 1` so scroll/list content fills available space.
+
+---
+
+## 2. Responsive scaling
+
+- [ ] All numeric style values (width, height, padding, margin, fontSize, borderRadius, gap) use `moderateScale`, `scale`, or `verticalScale` from `react-native-size-matters` with factor **0.9** where the project uses size-matters.
+- [ ] No raw magic numbers like `padding: 16` or `fontSize: 14` in `style.js` when the project standard is size-matters.
+- [ ] Percentage heights/widths converted to size-matters or flex — avoid `%` strings in StyleSheet when project rules forbid them.
+
+---
+
+## 3. Status bar & system chrome
+
+- [ ] Root or each screen with a non-default background sets `StatusBar` (`barStyle`, and on Android `backgroundColor` / `translucent` as needed).
+- [ ] `barStyle` matches background: light background → `dark-content`; dark background → `light-content`.
+- [ ] Status bar background aligns with header/surface color from `COLORS` — no hardcoded hex.
+
+---
+
+## 4. Keyboard & forms
+
+- [ ] Screens with `TextInput` / form fields wrap content in `KeyboardAvoidingView` (correct `behavior` for `Platform.OS`: `'padding'` on iOS, `'height'` or `undefined` on Android per project pattern) or the project's shared keyboard wrapper.
+- [ ] Set `keyboardVerticalOffset` when a fixed header or stack header consumes vertical space.
+- [ ] Scroll containers with inputs set `keyboardShouldPersistTaps="handled"` (or `'always'`) and `keyboardDismissMode="on-drag"` where appropriate.
+- [ ] Modals/sheets with inputs use the same keyboard-avoidance pattern.
+
+---
+
+## 5. Touch targets & press hierarchy
+
+- [ ] Interactive elements (buttons, chips, icon buttons) have `minHeight` / `minWidth` ≥ `moderateScale(44)` or equivalent `hitSlop`.
+- [ ] Adequate spacing between adjacent tappable elements (gap or margin) — avoid stacked touchables with zero spacing.
+- [ ] **Card + inner button:** Do not put `onPress` on a parent card and a child button without a clear pattern (`Pressable` with proper nesting, or `pointerEvents="box-none"` on container). Flag conflicting nested touchables.
+- [ ] Icon-only controls include `accessibilityLabel` and `accessibilityRole="button"`.
+
+---
+
+## 6. Scroll & lists
+
+- [ ] Long/dynamic data uses `FlatList` / `SectionList` / `FlashList` — not `ScrollView` + `.map()` for large lists.
+- [ ] List parent has `flex: 1`; avoid unbounded lists without flex parent.
+- [ ] **Anti-pattern:** `FlatList` inside `ScrollView` with same orientation — refactor or set `nestedScrollEnabled={true}` on Android and document intentional nesting.
+- [ ] Pull-to-refresh: data screens wire `RefreshControl` with `onRefresh` calling a real refresh handler (not empty/no-op).
+- [ ] Short scroll content: use `contentContainerStyle` with `flexGrow: 1` when empty/short content should fill screen.
+- [ ] `keyExtractor` returns stable unique keys (`item?.id`), never bare array index when id exists.
+
+---
+
+## 7. Navigation, gestures & back
+
+- [ ] Every `navigation.navigate('RouteName')` / `replace` / `push` target exists in `AppRouteConfig.js` (or typed param list). No orphan route strings.
+- [ ] Stack screens that should swipe back have `gestureEnabled: true` (React Navigation native stack default — do not disable without reason).
+- [ ] Custom swipe actions (`Swipeable`, gesture handlers) call `navigate(...)` or `goBack()` with validated route names.
+- [ ] Full-screen modals and custom sheets register `BackHandler` on Android with cleanup in `useEffect` return; handler calls `onClose` or `navigation.goBack()`.
+- [ ] Modal backdrop press and close button both invoke the same close handler.
+
+---
+
+## 8. Text overflow
+
+- [ ] List titles, card labels, and single-line UI text in flex rows use `numberOfLines` and `ellipsizeMode` where truncation is intended.
+- [ ] Text inside horizontal rows uses `flexShrink: 1` so it truncates instead of pushing layout off-screen.
+- [ ] Button labels and toasts intended for multiline messages do **not** force `numberOfLines={1}` unless design requires single line.
+
+---
+
+## 9. Images & icons
+
+- [ ] Icons prefer SVG components (`src/assets/SVGs/` or project icon index) over PNG/JPEG for UI icons.
+- [ ] Raster images use `resizeMode`; bounded width/height or aspect ratio — avoid unbounded full-resolution static imports in lists.
+- [ ] Images registered via project pattern (`IMAGES` from `@constants/images` with Platform.select) when using PNG/raster.
+
+---
+
+## 10. Platform-specific styles
+
+- [ ] Shadows: iOS uses `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`; Android uses `elevation` — via `Platform.select` when values differ.
+- [ ] Platform-specific keyboard, status bar, or layout differences use `Platform.OS` or `Platform.select` — do not duplicate entire components when a select suffices.
+
+---
+
+## 11. Offline & error UI
+
+- [ ] Screens that fetch data handle offline/error: use `isOnline` from store, show `OfflineBanner` or inline error/empty state, and user-facing copy from `TITLES` / `ALERTS`.
+- [ ] API calls use `.catch()` with fallback UI — never silent failure on list/form screens.
+
+---
+
+## 12. Toast & global overlays
+
+- [ ] App-level toast rendered at root **after** navigator (sibling overlay pattern in `Root.js`) with high `zIndex`.
+- [ ] Toast bottom position accounts for safe area inset (`useSafeAreaInsets().bottom + offset`).
+- [ ] Toast text uses `TITLES` / `ALERTS`; `accessibilityRole="alert"` for announcements.
+
+---
+
+## 13. Dark mode (when product supports it)
+
+- [ ] Use `useColorScheme` or theme preference — surfaces and text from `COLORS` / theme tokens, not hardcoded light-only backgrounds on main UI.
+- [ ] `StatusBar` `barStyle` updated per color scheme when dark mode is enabled.
+
+---
+
+## 14. i18n / strings (when multilingual)
+
+- [ ] No hardcoded user-visible strings in components — use `TITLES`, `ALERTS`, or i18n keys.
+- [ ] New translation keys added to **all** locale files when i18n is enabled.
+
+---
+
+## 15. Permissions (when feature uses device APIs)
+
+- [ ] Code using camera, gallery, location, notifications, etc. has matching keys in `ios/**/Info.plist` and `android/**/AndroidManifest.xml` (and permission request flow in JS if required).
+
+---
+
+## 16. Orientation & splash (native config)
+
+- [ ] If portrait-only or landscape supported: verify `Info.plist` `UISupportedInterfaceOrientations` and Android `screenOrientation` / manifest entries match product requirement.
+- [ ] Splash / launch screen native config sets background color to brand color — not unintended default white/black flash from missing theme (check `LaunchScreen.storyboard`, Android splash theme).
+
+---
+
+## 17. Animation (structure)
+
+- [ ] `Animated` timing/spring uses `useNativeDriver: true` when animating transform/opacity — not layout properties on JS thread without justification.
+
+---
+
+## 18. Figma fidelity (when specs exist)
+
+- [ ] When `.cursor/cache/figma-specs-{feature}.md` exists, spacing and typography map to design tokens and scaled values — compare key gaps/padding against spec during implementation.
+
+---
+
+## Agent validation (Coding & Pre-PR)
+
+When implementing UI or reviewing a diff, **walk this checklist** for every new/changed screen, widget, or layout. Log pass/fail in the coding log under **UI QA (code-level)**.
+
+**P1 (block merge):** missing safe area on full-screen UI, orphan navigation routes, form without keyboard handling, hardcoded UI strings, nested scroll anti-pattern on data lists, missing offline/error on API screens.
+
+**P2 (should fix):** touch target &lt; 44, missing `RefreshControl` on refreshable lists, missing `Platform.select` for shadow/elevation, missing `numberOfLines` on list titles, PNG icons where SVG exists.
+
+**P3 (nice to have):** Figma spacing drift, animation without native driver, minor a11y hints.
+
+---
+
+## Out of scope (requires runtime / device / visual QA)
+
+Do **not** claim these are verified by this rule alone:
+
+- Scroll/gesture smoothness, animation FPS, image memory usage
+- Exact keyboard overlap on every device size
+- Toast visually behind native `Modal` layer
+- Multi-OS version matrix behavior
+- Cold-start splash timing
+- Permission dialog UX after deny
+- Pixel-perfect Figma match on all devices
+
+Use `@testcases-agent`, `@detox-testing-agent`, or manual QA for those.

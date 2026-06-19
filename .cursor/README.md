@@ -37,6 +37,7 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-react-native.mdc      # Figma → RN mapping rules
+│   ├── ui-qa-checklist.mdc            # Static UI QA while coding (safe area, keyboard, scroll, nav)
 │   ├── react-native.mdc               # RN best practices (feature-first)
 │   ├── react-native-best-practices.md
 │   ├── coding-standards.md
@@ -158,7 +159,7 @@ Invoke an agent by typing `@<agent-name>` in Cursor with the required info. Belo
 
 ### Agent 02 — Coding (`@coding-agent`)
 - **Input:** Approved PRD path (+ optional Figma specs).
-- **Does:** Reads the PRD, **creates the coding log before writing code**, loads the architecture skill + rules, then implements files under `src/` using path aliases, design tokens (no raw hex/fonts), TITLES/ALERTS constants, IMAGES registry, shadow/elevation, a11y, SafeArea/KeyboardAvoidingView, etc. Runs lint/type checks. If a native dep is added, runs `npm install` (+ `pod install`) and documents rebuild steps.
+- **Does:** Reads the PRD, **creates the coding log before writing code**, loads the architecture skill + rules (incl. **`ui-qa-checklist.mdc`** for static UI wiring), then implements files under `src/` using path aliases, design tokens (no raw hex/fonts), TITLES/ALERTS constants, IMAGES registry, shadow/elevation, a11y, SafeArea/KeyboardAvoidingView, etc. Validates UI QA checklist in coding log. Runs lint/type checks. If a native dep is added, runs `npm install` (+ `pod install`) and documents rebuild steps.
 - **After running:** Source files created/modified; coding log saved/updated at `logs/coding/coding-{feature}.md` with validation results. Stops; hand off to `@documentation-agent` or `@fixing-agent`.
 - **Does not:** Create a PRD or run E2E.
 
@@ -242,7 +243,7 @@ Path: src/screens/Login
 
 ### Agent 12 — Pre-PR Validation (`@pre-pr-validation-agent`)
 - **Input:** Current branch / working tree; optional base branch (default `main`), feature name, or file scope.
-- **Does:** Reviews **only the changed files** (`git diff` vs base) plus related dependents for context. Validates seven areas — code quality & best practices, folder-structure compliance, React/React Native (and Next.js if present) performance, security & insecure patterns, TypeScript/lint/test (scoped), PR readiness, and potential **breaking changes** — then runs scoped ESLint/type check/Jest and produces P1/P2/P3 findings with a **READY / NOT READY** verdict.
+- **Does:** Reviews **only the changed files** (`git diff` vs base) plus related dependents for context. Validates eight areas — code quality & best practices, folder-structure compliance, React/React Native performance, security & insecure patterns, TypeScript/lint/test (scoped), error handling & reliability, **UI static QA (code-level)**, PR readiness, and potential **breaking changes** — then runs scoped ESLint/type check/Jest and produces P1/P2/P3 findings with a **READY / NOT READY** verdict.
 - **After running:** Report saved to `logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md` + chat summary. Stops. **Recommendations only — does not modify code.** Hand off fixes to `@fixing-agent` / `@coding-agent`, then run `@pr-orchestrator-agent`.
 - **Does not:** Fix/refactor code, review the whole codebase, or create/commit/submit/merge a PR.
 
@@ -463,12 +464,43 @@ This is the full happy path from a Figma design to a PR document. Each line is a
 ### Rules (`rules/`)
 - **`agent-workflow-rules.mdc`** — Defines each agent's boundaries and the full workflow sequence (always applied).
 - **`figma-to-react-native.mdc`** — Mapping rules: Figma frame → `View`, auto-layout → flex/gap, colors → ColorCode/COLORS, text → FONTS (with mandatory fontWeight), effects → shadow/elevation (always applied).
+- **`ui-qa-checklist.mdc`** — **Static UI QA during development** (glob-scoped to `src/screens/**`, `src/components/**`, `Root.js`, `AppRouteConfig.js`): safe area, scaling, status bar, keyboard, touch targets, scroll/lists, navigation/back, text overflow, platform styles, offline/toast, permissions config. Verifiable from code — no Detox or manual visual QA required. Applied by `@coding-agent`; validated by `@pre-pr-validation-agent` (Section 3.8).
 - **`react-native.mdc` / `react-native-best-practices.md`** — Feature-first structure, StyleSheet co-location, performance (FlatList/FlashList, memoization), a11y, error handling (glob-scoped to JS/TS files).
 - **`coding-standards.md`** — Naming, import order, DRY, optional chaining, project structure conventions.
 - **`detox-testing.mdc`** — Detox config (`.detoxrc.js`), spec location (`e2e/**/*.e2e.js`), and commands used by the testing agents.
 - **`useform-validation.mdc`** — Schema-based forms with the `useForm` hook: schema shape, RN `(name, value)` handlers, `dirty`-gated errors, validator factories, checklist (glob-scoped to JS/TS files).
 
 > Note: these `.cursor/rules/` files are the **shared knowledge base** the agents read. The repo-level user rules (folder structure, styled-components, i18n, optional chaining, no-comments, etc.) also apply to all generated code.
+
+### UI QA during development (`ui-qa-checklist.mdc`)
+
+Use this when building **any screen, widget, layout, or navigation change** — without waiting for Detox or manual device testing.
+
+**What it checks (from code only):**
+
+| Area | Examples |
+|------|----------|
+| Safe area & layout | `SafeAreaProvider`, `BaseScreen`, bottom inset on toast/footer |
+| Scaling | `moderateScale` / size-matters — no raw pixel magic numbers |
+| Status bar | `StatusBar` + `barStyle` matched to `COLORS` background |
+| Keyboard | `KeyboardAvoidingView` on forms; `keyboardShouldPersistTaps` on scroll |
+| Touch & press | ≥ 44px targets; no conflicting card + button `onPress` |
+| Scroll & lists | `FlatList` not `ScrollView.map`; `RefreshControl`; stable keys |
+| Navigation & back | `navigate('Route')` exists in `AppRouteConfig`; `BackHandler` on modals |
+| Text, assets, platform | `numberOfLines`, SVG icons, shadow + elevation |
+| States | Offline/error UI, toast z-index + safe area |
+
+**Who applies it:**
+
+| When | Agent / tool |
+|------|----------------|
+| While implementing UI | `@coding-agent` + Cursor (rule auto-loads on `src/screens/**`, `src/components/**`) |
+| Before PR | `@pre-pr-validation-agent` (Section 3.8 — UI static QA) |
+| Ad-hoc while editing | Mention in chat: "follow ui-qa-checklist" |
+
+**What it does not replace:** scroll smoothness, animation FPS, keyboard overlap on every device size, visual Figma match, multi-OS matrix — use `@testcases-agent` / `@detox-testing-agent` or manual QA for those.
+
+**Coding log:** `@coding-agent` records **UI QA (code-level)** pass/fail in `logs/coding/coding-{feature}.md`.
 
 ### Skill (`skills/react-native-architecture/SKILL.md`)
 The canonical reference for **app structure**, **path aliases** (`@`, `@components`, `@screens`, `@constants`, `@store`, `@utility`, `@api`, `@assets`, `@layouts`, `@widgets`, `@hooks`), and the **design system** (COLORS, fontFamily/fontSize, commonStyles). Planning, Coding, Scaffold, and Prompt agents all load this first.

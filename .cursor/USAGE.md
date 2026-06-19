@@ -654,6 +654,24 @@ logs/pr/pr-forgot-password-screen.md
 
 # Setup Notes
 
+## UI QA during development
+
+Static UI wiring checks (safe area, keyboard, scroll, navigation, touch targets) — **no Detox or manual QA required**.
+
+**Rule:** `.cursor/rules/ui-qa-checklist.mdc` (loads on `src/screens/**`, `src/components/**`)
+
+**When it runs:**
+
+| Trigger | What happens |
+| ------- | -------------- |
+| `@coding-agent` | Loads rule while implementing; logs **UI QA (code-level)** in coding log |
+| Edit screen/component in Cursor | Rule applies via glob |
+| `@pre-pr-validation-agent` | Section 3.8 validates changed UI files before PR |
+
+See [README § UI QA during development](./README.md).
+
+---
+
 ## Figma Setup
 
 1. Create **`.env`** in the project root (do not use `.env.local` or `.env.example`):

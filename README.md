@@ -106,6 +106,32 @@ New projects scaffold a **dependency-free `fetch` client** (`src/lib/fetch-clien
 - **Axios-compatible shape** — `{ data, status, ... }` responses and `error.response` errors, so existing `.then()/.catch()` service code keeps working.
 - **Install:** `pnpm setup:fetch` (Next.js) or `node .cursor/scripts/setup-fetch.js` (React Native). Invoke `@fetch-client-agent` to wire interceptors or migrate off axios.
 
+### UI QA during development (React Native)
+
+Static UI checks run **while you code** — no Detox or manual device testing required for this layer.
+
+**Rule file:** [`.cursor/rules/ui-qa-checklist.mdc`](.cursor/rules/ui-qa-checklist.mdc) (auto-loads when editing `src/screens/**`, `src/components/**`, `Root.js`, `AppRouteConfig.js`).
+
+**What it enforces from code:**
+
+- Safe area, responsive scaling (`moderateScale`), status bar props
+- Keyboard wrappers on forms, scroll/list patterns, pull-to-refresh wiring
+- Navigation route validation, Android `BackHandler` on modals
+- Touch targets, press hierarchy, text truncation, SVG over PNG
+- Offline/error UI, toast positioning, platform shadow/elevation
+
+**Who uses it:**
+
+| When | How |
+| ---- | --- |
+| Implementing UI | `@coding-agent` loads the rule and logs **UI QA (code-level)** in the coding log |
+| Editing UI in Cursor | Rule applies via glob when you open screen/component files |
+| Before PR | `@pre-pr-validation-agent` runs Section 3.8 (UI static QA) on changed files |
+
+**What it does not replace:** visual polish, scroll/gesture feel, multi-OS device matrix, keyboard overlap on every screen size — use `@testcases-agent` / `@detox-testing-agent` for those.
+
+Full details: [`.cursor/README.md` § UI QA during development](.cursor/README.md).
+
 ---
 
 ## 1. React Native vs Next.js — what differs
@@ -120,7 +146,7 @@ New projects scaffold a **dependency-free `fetch` client** (`src/lib/fetch-clien
 | E2E (Agent 11) | **Detox** — `@detox-testing-agent`, needs **testing target** (iOS/Android) | **Playwright** — `@e2e-testing-agent`, needs **base URL** |
 | Unit/component tests | Jest + React Native Testing Library | Jest/Vitest + React Testing Library |
 | Figma token file | `.env` | `.env` |
-| Rules folder | `react-native.mdc`, `figma-to-react-native.mdc`, `detox-testing.mdc` | `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc` |
+| Rules folder | `react-native.mdc`, `figma-to-react-native.mdc`, **`ui-qa-checklist.mdc`**, `detox-testing.mdc` | `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc` |
 | E2E setup doc | [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) |
 
 **Same across both:** Planning (PRD), Coding, Documentation, Test Cases, Fixing, Code Scanning, Vulnerability, Pre-PR Validation, PR Orchestrator, Prompt Generator — and the "one agent, one task, one stop" contract.

@@ -17,7 +17,7 @@ alwaysApply: true
 - **Stops when:** PRD is saved. Invoke: `@planning-agent` with prompt or path to specs.
 
 ### Agent 02: Coding Agent
-- **Does:** Read PRD, load rules/skills, implement code, update coding log, run lint/validation.
+- **Does:** Read PRD, load rules/skills (incl. **`ui-qa-checklist.mdc`**), implement code, validate static UI QA in coding log, update coding log, run lint/validation.
 - **Does not:** Create PRD or run E2E tests.
 - **Stops when:** Code is implemented and log updated. Invoke: `@coding-agent` with PRD path.
 
@@ -67,7 +67,7 @@ alwaysApply: true
 - **Stops when:** Tests executed, artifacts organized, test results document generated. Invoke: `@detox-testing-agent` with feature name (or "entire app") + testing target (iOS Simulator / Android Emulator / Both). **E2E (Detox):** config `.detoxrc.js`, specs `e2e/**/*.e2e.js`, commands `npm run e2e:ios` / `e2e:android`; see `docs/DETOX-INTEGRATION.md` and `.cursor/rules/detox-testing.mdc`.
 
 ### Agent 12: Pre-PR Validation Agent
-- **Does:** Review **only the changed files** (git diff vs base branch; default `main`) and related dependents (for breaking-change context) before a PR. Validates code quality & best practices, folder-structure compliance, React/React Native (and Next.js if present) performance, security/insecure patterns, TypeScript/lint/test (scoped), PR readiness, and potential breaking changes. Runs scoped ESLint/type check/Jest, produces P1/P2/P3 findings and a **READY / NOT READY** verdict. Saves report to `.cursor/logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md`. **Recommendations only — does not modify code.**
+- **Does:** Review **only the changed files** (git diff vs base branch; default `main`) and related dependents (for breaking-change context) before a PR. Validates code quality & best practices, folder-structure compliance, React/React Native performance, security/insecure patterns, TypeScript/lint/test (scoped), error handling, **UI static QA (code-level via `ui-qa-checklist.mdc`)**, PR readiness, and potential breaking changes. Runs scoped ESLint/type check/Jest, produces P1/P2/P3 findings and a **READY / NOT READY** verdict. Saves report to `.cursor/logs/pre-pr/pre-pr-{branch-or-feature}-{timestamp}.md`. **Recommendations only — does not modify code.**
 - **Does not:** Fix/refactor code, create PRD, implement/scaffold, or create/commit/submit/merge a PR.
 - **Stops when:** Report saved and verdict announced. Invoke: `@pre-pr-validation-agent` (optional base branch). Run **before** `@pr-orchestrator-agent`; hand off fixes to `@fixing-agent` / `@coding-agent`.
 
