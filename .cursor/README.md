@@ -36,7 +36,8 @@ This folder turns Cursor into an **agentic software factory** for a React Native
 │   ├── agent-17-npm-audit-auto-fix.md
 │   ├── agent-18-error-pages.md
 │   ├── agent-19-socket-setup.md
-│   └── agent-20-keyboard-layout.md
+│   ├── agent-20-keyboard-layout.md
+│   └── agent-21-ponytail.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-react-native.mdc      # Figma → RN mapping rules
@@ -1188,3 +1189,96 @@ WebSocket URL: wss://api.example.com/ws
 ---
 
 > **One agent per prompt.** Wait for the output file before continuing. See **Section 6** for the React Native invocation table. For Next.js, see **[`.cursornext/README.md`](../.cursornext/README.md)** Section 6.
+
+---
+
+## 10. Complete Agent Reference (React Native)
+
+### How triggering works
+
+| Trigger type | Agents |
+| --- | --- |
+| **Always-on** | Agent 21 Ponytail — `alwaysApply: true` behavior rule (no `@`); every chat prefers minimal diff, reuse, YAGNI |
+| **Auto (hook)** | Agent 17 npm Audit Auto-Fix — runs after `npm install` / `npm ci` via `afterShellExecution` hook |
+| **Chained by Agent 08** | Fetch client (14), useForm, error pages (18), keyboard layout (20) — setup scripts, not separate `@` calls |
+| **Chained by Agent 19** | Keyboard layout (20) runs first via `setup-keyboard-layout.js` |
+| **Manual only** | All other agents (00–16, 18–20 standalone) |
+
+**Golden rule:** Each step requires manual `@` invocation unless noted. Planning does **not** auto-call Coding.
+
+### All agents — invoke, trigger, input, output
+
+| # | Agent | Invoke | Trigger | Input | Output |
+| --- | --- | --- | --- | --- | --- |
+| 00 | Figma Analyzer | `@figma-analyzer` | Manual | Feature name, Mobile Figma URL + node-id, Frame, Section | `cache/figma-specs-{feature}.md` + assets |
+| 01 | Planning | `@planning-agent` | Manual | Prompt/specs path or description | `logs/prd-{feature}-{ts}.md` |
+| 02 | Coding | `@coding-agent` | Manual | PRD path (+ optional Figma specs) | `src/...` + `logs/coding/coding-{feature}.md` |
+| 03 | Documentation | `@documentation-agent` | Manual | Files or coding log | Documented files + optional doc log |
+| 04 | Fixing | `@fixing-agent` | Manual | Feature/issue; test mode: test-cases + iOS/Android target | `logs/fixing/fixing-{feature}.md` |
+| 05 | Code Scanning | `@code-scanning-agent` | Manual | Feature or scope | `logs/code-scanning/code-scanning-{feature}-{ts}.md` |
+| 06 | Vulnerability | `@vulnerability-agent` | Manual | Project root | `logs/vulnerability/vulnerability-{date}.md` |
+| 07 | PR Orchestrator | `@pr-orchestrator-agent` | Manual | Feature name | `logs/pr/pr-{feature}-{ts}.md` |
+| 08 | Project Scaffold | `@project-scaffold-agent` | Manual (chains setup) | App name (+ optional folder) | Sibling RN project + `logs/project-scaffold/...` |
+| 09 | Prompt Generator | `@prompt-generator-agent` | Manual | Feature (Mode A) or project name (Mode B) | `cache/prompt-*.md` |
+| 10 | Test Cases | `@testcases-agent` | Manual | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + Jest file |
+| 11 | Detox Testing | `@detox-testing-agent` | Manual | Feature + testing target (iOS/Android/Both) | `logs/detox-testing/{feature}/{ts}/` |
+| 12 | Pre-PR Validation | `@pre-pr-validation-agent` | Manual | Git diff vs base (default `main`) | `logs/pre-pr/...` + READY / NOT READY |
+| 13 | useForm Builder | `@useform-builder-agent` | Manual | Form name, fields, target path | Form + `logs/coding/coding-{feature}.md` |
+| 14 | Fetch Client | `@fetch-client-agent` | Manual / chained by 08 | Optional interceptors / axios migration | `src/lib/fetch-client.ts` + coding log |
+| 15 | User Story Test Cases | `@user-story-testcases-agent` | Manual | Feature + user story text | `logs/test-cases-{feature}.md` |
+| 16 | Unit Test Analysis | `@unit-test-analysis-agent` | Manual | Target name; optional scope | `logs/unit-test-analysis/...` + Jest file |
+| 17 | npm Audit Auto-Fix | `@npm-audit-auto-fix-agent` | **Auto** + manual | Project root | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
+| 18 | Error Pages | `@error-pages-agent` | Manual / chained by 08 | Optional `--force` | Connection Lost + Unauthorized + coding log |
+| 19 | Socket Setup | `@socket-agent` | Manual (chains 20) | Intake: mode, module, design, WS URL | Socket infra + `cache/socket-intake-{module}.md` |
+| 20 | Keyboard Layout | `@keyboard-layout-agent` | Manual / chained by 08, 19 | Optional `--force` | Keyboard layouts + `logs/coding/coding-keyboard-layout.md` |
+| 21 | Ponytail | *(no @)* | **Always-on** | Every chat | Minimal-diff behavior (not a workflow step) |
+
+### Does / does not (summary)
+
+| Agent | Does | Does not |
+| --- | --- | --- |
+| 00 | Extract mobile Figma specs + export assets | PRD, code |
+| 01 | Write PRD | Code, tests |
+| 02 | Implement from PRD + coding log + UI QA | PRD, E2E |
+| 03 | JSDoc and comments | Change logic |
+| 04 | Fix bugs; Jest/Detox test-and-fix | PRD, new features |
+| 05 | ESLint + quality report | Fix code |
+| 06 | npm audit + Snyk report | Apply fixes |
+| 07 | PR document from logs | Submit/merge PR |
+| 08 | RN CLI init + boilerplate + chained setup | `npm install`, ios/android |
+| 09 | Generate prompts for Planning or Scaffold | PRD, code |
+| 10 | Manual QA test cases + Jest | Detox, fixes |
+| 11 | Detox E2E + artifacts | Fix code |
+| 12 | Pre-PR review of changed files | Modify code |
+| 13 | Schema-based `useForm` forms | Formik/yup, PRD |
+| 14 | axios-free fetch client | Product features |
+| 15 | Test cases from user story alone | Code, Jest/Detox files |
+| 16 | Code-driven unit test analysis | Fix code, Detox |
+| 17 | Semver-safe npm audit fix | `audit fix --force` |
+| 18 | Offline + unauthorized error pages | Auth flow |
+| 19 | WebSocket infra + optional chat module | PRD, skip UI QA on new module |
+| 20 | Keyboard-aware layouts (forms + chat) | PRD |
+| 21 | Enforce simplest working solution | Skip security, a11y, explicit requests |
+
+### Setup scripts
+
+| Script | Agent(s) |
+| --- | --- |
+| `setup-fetch.js` | 08, 14 |
+| `setup-useform.js` | 08, 13 |
+| `setup-error-pages.js` | 08, 18 |
+| `setup-keyboard-layout.js` | 08, 19, 20 |
+| `setup-socket.js` | 19 |
+| `npm-audit-auto-fix.js` | 17 (hook + manual) |
+
+### Recommended workflow
+
+```
+08 Scaffold (optional) → 00 Figma → 09 Prompt (optional) → 01 Planning → 02 Coding
+  → 13 useForm / 14 Fetch / 18 Error Pages / 19 Socket / 20 Keyboard (optional)
+    → 03 Docs → 15 User Story TCs / 10 Test Cases / 16 Unit Test Analysis (optional)
+      → 11 Detox → 04 Fixing → 05 Scan → 06 Vulnerability → 17 npm Audit (auto on install)
+        → 12 Pre-PR → 07 PR Orchestrator
+```
+
+See also: root [`README.md`](../README.md) § Complete Agent Reference (React Native + Next.js side-by-side).

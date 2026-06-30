@@ -1,6 +1,6 @@
 # `.cursornext/` — Next.js Vibe Engineering Agent System
 
-This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 21 specialized agents, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch/error-pages/socket setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
+This folder turns Cursor into an **agentic software factory** for a Next.js app. It is a set of 21 specialized agents plus the always-on Ponytail behavior rule, supporting rules, a skill, helper scripts, form/E2E/example/monorepo/fetch/error-pages/socket setup templates, business-brief templates, and a structured logs system. Each agent does **one job, then stops** and hands off to the next — with a human approving every step.
 
 > **TL;DR**
 > - **New single app?** Start at `@project-scaffold-agent` (or `@prompt-generator-agent` Mode B). **Monorepo?** Use `@monorepo-scaffold-agent`.
@@ -38,7 +38,8 @@ This folder turns Cursor into an **agentic software factory** for a Next.js app.
 │   ├── agent-17-unit-test-analysis.md
 │   ├── agent-18-npm-audit-auto-fix.md
 │   ├── agent-19-error-pages.md
-│   └── agent-20-socket-setup.md
+│   ├── agent-20-socket-setup.md
+│   └── agent-21-ponytail.md
 ├── rules/             # Always-on / glob-scoped coding & workflow rules
 │   ├── agent-workflow-rules.mdc       # Agent boundaries + full sequence
 │   ├── figma-to-nextjs.mdc            # Figma → Next.js mapping rules
@@ -609,4 +610,111 @@ Scaffolded projects use a **custom, dependency-free `fetch` client** instead of 
 - **Where do agents save things?** Inputs/intermediate → `.cursornext/cache/`; outputs/audit trail → `.cursornext/logs/`; generated app code → `src/`, `__tests__/`, `e2e/`, `public/images/`.
 - **Can I skip steps?** Yes. Optional steps are 1b/1c (brief/prompt), 4a (user-story test cases), 5 (test cases), 5b (unit test analysis), 6 (Playwright E2E), 9b (npm audit auto-fix). Minimum designed-feature path: Figma → Planning → Coding → Fixing.
 - **What about React Native?** The sibling `.cursor/` folder mirrors this system for React Native (Figma → RN rules, Detox instead of Playwright).
+
+---
+
+## 10. Complete Agent Reference (Next.js)
+
+### How triggering works
+
+| Trigger type | Agents |
+| --- | --- |
+| **Always-on** | Agent 21 Ponytail — `alwaysApply: true` behavior rule (no `@`); every chat prefers minimal diff, reuse, YAGNI |
+| **Auto (hook)** | Agent 18 npm Audit Auto-Fix — runs after `npm install` / `npm ci` via `afterShellExecution` hook |
+| **Chained by Agent 08** | Fetch client (15), useForm, error pages (19) — setup scripts, not separate `@` calls |
+| **Chained by Agent 14** | Monorepo scaffold also installs fetch, useForm, error pages |
+| **Manual only** | All other agents |
+
+**Golden rule:** Each step requires manual `@` invocation unless noted. Planning does **not** auto-call Coding.
+
+### All agents — invoke, trigger, input, output
+
+| # | Agent | Invoke | Trigger | Input | Output |
+| --- | --- | --- | --- | --- | --- |
+| 00 | Figma Analyzer | `@figma-analyzer` | Manual | Feature, Figma URL + node-id, Frame, Section | `cache/figma-specs-{feature}.md` + assets |
+| 01 | Planning | `@planning-agent` | Manual | Prompt/specs path or description | `logs/prd-{feature}-{ts}.md` |
+| 02 | Coding | `@coding-agent` | Manual | PRD path (+ optional Figma specs) | `src/...` + `logs/coding/coding-{feature}.md` |
+| 03 | Documentation | `@documentation-agent` | Manual | Files or coding log | Documented files + optional doc log |
+| 04 | Fixing | `@fixing-agent` | Manual | Feature/issue; test mode: test-cases + **base URL** | `logs/fixing/fixing-{feature}.md` |
+| 05 | Code Scanning | `@code-scanning-agent` | Manual | Feature or scope | `logs/code-scanning/code-scanning-{feature}-{ts}.md` |
+| 06 | Vulnerability | `@vulnerability-agent` | Manual | Project root | `logs/vulnerability/vulnerability-{date}.md` |
+| 07 | PR Orchestrator | `@pr-orchestrator-agent` | Manual | Feature name | `logs/pr/pr-{feature}-{ts}.md` |
+| 08 | Project Scaffold | `@project-scaffold-agent` | Manual (chains setup) | App name (+ optional folder) | Sibling Next.js app + scaffold log |
+| 09 | Prompt Generator | `@prompt-generator-agent` | Manual | Feature (Mode A) or project name (Mode B) | `cache/prompt-*.md` |
+| 10 | Test Cases | `@testcases-agent` | Manual | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + test file |
+| 11 | Playwright E2E | `@e2e-testing-agent` | Manual | Feature + **base URL** | `logs/e2e-testing/{feature}/{ts}/` |
+| 12 | Pre-PR Validation | `@pre-pr-validation-agent` | Manual | Git diff vs base (default `main`) | `logs/pre-pr/...` + READY / NOT READY |
+| 13 | useForm Builder | `@useform-builder-agent` | Manual | Form name, fields, target path | Form + `logs/coding/coding-{feature}.md` |
+| 14 | Monorepo Scaffold | `@monorepo-scaffold-agent` | Manual (chains setup) | Monorepo name, apps, packages | Sibling pnpm monorepo + log |
+| 15 | Fetch Client | `@fetch-client-agent` | Manual / chained by 08, 14 | Optional target/interceptors | `src/lib/fetch-client.ts` + coding log |
+| 16 | User Story Test Cases | `@user-story-testcases-agent` | Manual | Feature + user story text | `logs/test-cases-{feature}.md` |
+| 17 | Unit Test Analysis | `@unit-test-analysis-agent` | Manual | Target name; optional scope | `logs/unit-test-analysis/...` + Jest file |
+| 18 | npm Audit Auto-Fix | `@npm-audit-auto-fix-agent` | **Auto** + manual | Project root | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
+| 19 | Error Pages | `@error-pages-agent` | Manual / chained by 08, 14 | Optional `ERROR_PAGES_TARGET` | Connection Lost + Unauthorized + coding log |
+| 20 | Socket Setup | `@socket-agent` | Manual | Intake: mode, module, design, WS URL | Socket infra + `cache/socket-intake-{module}.md` |
+| 21 | Ponytail | *(no @)* | **Always-on** | Every chat | Minimal-diff behavior (not a workflow step) |
+
+### Does / does not (summary)
+
+| Agent | Does | Does not |
+| --- | --- | --- |
+| 00 | Extract Figma specs + export assets to `public/images/` | PRD, code |
+| 01 | Write PRD (incl. Server/Client boundaries) | Code, tests |
+| 02 | Implement from PRD + coding log | PRD, E2E |
+| 03 | JSDoc and comments | Change logic |
+| 04 | Fix bugs; component + Playwright test-and-fix | PRD, new features |
+| 05 | ESLint + Next.js quality report | Fix code |
+| 06 | npm audit + Snyk report | Apply fixes |
+| 07 | PR document from logs | Submit/merge PR |
+| 08 | `create-next-app` + boilerplate + chained setup | Recreate config from scratch |
+| 09 | Generate prompts for Planning or Scaffold | PRD, code |
+| 10 | Manual QA test cases + RTL tests | Playwright, fixes |
+| 11 | Playwright E2E + artifacts | Fix code |
+| 12 | Pre-PR review of changed files | Modify code |
+| 13 | Schema-based `useForm` forms | Formik/yup, PRD |
+| 14 | pnpm workspace monorepo scaffold | Single-app scaffold (use 08) |
+| 15 | axios-free fetch client | Product features |
+| 16 | Test cases from user story alone | Code, Jest/Playwright files |
+| 17 | Code-driven unit test analysis | Fix code, Playwright |
+| 18 | Semver-safe npm audit fix | `audit fix --force` |
+| 19 | Browser offline + unauthorized pages | Auth flow |
+| 20 | WebSocket infra + optional feature scaffold | PRD, skip design intake |
+| 21 | Enforce simplest working solution | Skip security, a11y, explicit requests |
+
+### Setup scripts
+
+| Script | Agent(s) |
+| --- | --- |
+| `setup-fetch.js` | 08, 14, 15 |
+| `setup-useform.js` | 08, 13, 14 |
+| `setup-error-pages.js` | 08, 14, 19 |
+| `setup-socket.js` | 20 |
+| `setup-monorepo.js` | 14 |
+| `setup-e2e.js` | 11 (Playwright bootstrap) |
+| `npm-audit-auto-fix.js` | 18 (hook + manual) |
+
+### Recommended workflow
+
 ```
+08 Scaffold or 14 Monorepo (optional) → 00 Figma → 09 Prompt (optional) → 01 Planning → 02 Coding
+  → 13 useForm / 15 Fetch / 19 Error Pages / 20 Socket (optional)
+    → 03 Docs → 16 User Story TCs / 10 Test Cases / 17 Unit Test Analysis (optional)
+      → 11 Playwright E2E → 04 Fixing → 05 Scan → 06 Vulnerability → 18 npm Audit (auto on install)
+        → 12 Pre-PR → 07 PR Orchestrator
+```
+
+### RN vs Next.js numbering (same `@` names, different numbers)
+
+| Capability | React Native (`.cursor/`) | Next.js (`.cursornext/`) |
+| --- | --- | --- |
+| E2E | Agent 11 `@detox-testing-agent` | Agent 11 `@e2e-testing-agent` |
+| Monorepo | — | Agent 14 `@monorepo-scaffold-agent` |
+| Fetch client | Agent 14 | Agent 15 |
+| User story TCs | Agent 15 | Agent 16 |
+| Unit test analysis | Agent 16 | Agent 17 |
+| npm audit auto-fix | Agent 17 | Agent 18 |
+| Error pages | Agent 18 | Agent 19 |
+| Socket | Agent 19 | Agent 20 |
+| Keyboard layout | Agent 20 `@keyboard-layout-agent` | *(not in Next.js kit)* |
+
+See also: root [`README.md`](../README.md) § Complete Agent Reference (full side-by-side tables + examples).

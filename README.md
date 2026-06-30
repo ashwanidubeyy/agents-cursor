@@ -92,7 +92,7 @@ This repo ships **two** agentic "software factory" systems for Cursor. Each is a
 
 | System | Folder | Stack | Agents | E2E | Full guide |
 | ------ | ------ | ----- | ------ | --- | ---------- |
-| **React Native** | `.cursor/` | RN + TypeScript | 19 (00–19) | Detox | [`.cursor/README.md`](.cursor/README.md) · [cheat sheet](.cursor/USAGE.md) |
+| **React Native** | `.cursor/` | RN + TypeScript | 22 (00–20 + Ponytail) | Detox | [`.cursor/README.md`](.cursor/README.md) · [cheat sheet](.cursor/USAGE.md) |
 | **Next.js** | `.cursornext/` | Next.js + TypeScript | 21 (00–20) | Playwright | [`.cursornext/README.md`](.cursornext/README.md) |
 
 Both systems share the **same workflow** — only the framework details differ. Pick the folder for your stack; the agents auto-load that folder's rules.
@@ -355,3 +355,236 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+---
+
+# Complete Agent Reference
+
+How agents are triggered, what each one does, and how to invoke them. Full guides: [`.cursor/README.md`](.cursor/README.md) (React Native) · [`.cursornext/README.md`](.cursornext/README.md) (Next.js).
+
+## How triggering works
+
+| Trigger type | Meaning |
+| --- | --- |
+| **Manual** | You must `@invoke` the agent |
+| **Auto (hook)** | Runs without `@` when a shell event fires |
+| **Always-on** | Behavioral rule applied to every chat |
+| **Chained** | Setup scripts run when you invoke a parent agent |
+
+**Golden rule:** Each step is manual unless noted. Planning does **not** auto-call Coding.
+
+| Trigger | React Native | Next.js |
+| --- | --- | --- |
+| **Always-on** | Agent 21 Ponytail (`alwaysApply: true`) | Same Ponytail rule in `.cursornext/agents/agent-21-ponytail.md` |
+| **Auto (hook)** | Agent 17 after `npm install` / `npm ci` | Agent 18 after `npm install` / `npm ci` |
+| **Chained by Scaffold** | Agent 08 → fetch, useForm, error pages (18), keyboard (20) | Agent 08 → fetch, useForm, error pages (19); Agent 14 monorepo → same |
+| **Chained by Socket** | Agent 19 → keyboard (20) first | Agent 20 socket setup (no keyboard agent) |
+| **Manual only** | All other agents | All other agents |
+
+---
+
+## Recommended workflow order
+
+```
+Scaffold (optional) → Figma → Prompt (optional) → Planning → Coding
+  → useForm / Fetch / Error Pages / Socket / Keyboard (optional)
+    → Docs → User Story TCs / Test Cases / Unit Test Analysis (optional)
+      → E2E (Detox or Playwright) → Fixing
+        → Code Scan → Vulnerability → npm Audit Auto-Fix (auto on install)
+          → Pre-PR Validation → PR Orchestrator
+```
+
+---
+
+## React Native agents (`.cursor/` — Agents 00–21)
+
+| # | Agent | Invoke | Trigger | Input | Output | Does | Does not |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 00 | Figma Analyzer | `@figma-analyzer` | Manual | Feature name, Figma URL + node-id, Frame, Section | `cache/figma-specs-{feature}.md` + assets | Mobile specs, SVG/PNG export | PRD, code |
+| 01 | Planning | `@planning-agent` | Manual | Prompt/specs path or description | `logs/prd-{feature}-{ts}.md` | PRD for RN | Code, tests |
+| 02 | Coding | `@coding-agent` | Manual | PRD path | `src/...` + `logs/coding/coding-{feature}.md` | Implement from PRD, UI QA log | PRD, E2E |
+| 03 | Documentation | `@documentation-agent` | Manual | Files or coding log | Documented files + optional doc log | JSDoc, comments | Change logic |
+| 04 | Fixing | `@fixing-agent` | Manual | Feature/issue; for test mode: test-cases + iOS/Android target | `logs/fixing/fixing-{feature}.md` | Fix bugs; Jest/Detox test-and-fix | PRD, new features |
+| 05 | Code Scanning | `@code-scanning-agent` | Manual | Feature or scope | `logs/code-scanning/...` | ESLint + quality checklist | Fix code |
+| 06 | Vulnerability | `@vulnerability-agent` | Manual | Project root | `logs/vulnerability/...` | npm audit + Snyk report | Apply fixes |
+| 07 | PR Orchestrator | `@pr-orchestrator-agent` | Manual | Feature name | `logs/pr/pr-{feature}-{ts}.md` | PR document | Submit/merge PR |
+| 08 | Project Scaffold | `@project-scaffold-agent` | Manual (chains setup) | App name | Sibling RN project + scaffold log | CLI init + boilerplate + fetch/useForm/error/keyboard | `npm install`, ios/android |
+| 09 | Prompt Generator | `@prompt-generator-agent` | Manual | Feature (A) or project name (B) | `cache/prompt-*.md` | Planning or scaffold prompt | PRD, code |
+| 10 | Test Cases | `@testcases-agent` | Manual | Feature + PRD + coding log | `logs/test-cases-{feature}.md` + Jest file | Manual QA + Jest | Detox, fixes |
+| 11 | Detox Testing | `@detox-testing-agent` | Manual | Feature + iOS/Android target | `logs/detox-testing/{feature}/{ts}/` | E2E run + artifacts | Fix code |
+| 12 | Pre-PR Validation | `@pre-pr-validation-agent` | Manual | Git diff vs base (default `main`) | `logs/pre-pr/...` + READY/NOT READY | Review changed files only | Modify code |
+| 13 | useForm Builder | `@useform-builder-agent` | Manual | Form name, fields, path | Form + coding log | Schema `useForm` forms | Formik/yup, PRD |
+| 14 | Fetch Client | `@fetch-client-agent` | Manual / chained by 08 | Optional interceptors | `src/lib/fetch-client.ts` + log | axios-free HTTP client | Product features |
+| 15 | User Story Test Cases | `@user-story-testcases-agent` | Manual | Feature + user story | `logs/test-cases-{feature}.md` | TCs from story alone | Code, Jest/Detox files |
+| 16 | Unit Test Analysis | `@unit-test-analysis-agent` | Manual | Target screen/component | Analysis report + Jest file | Code-driven tests + bugs | Fix code, Detox |
+| 17 | npm Audit Auto-Fix | `@npm-audit-auto-fix-agent` | **Auto** + manual | Project root | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` | Semver-safe audit fix | `audit fix --force` |
+| 18 | Error Pages | `@error-pages-agent` | Manual / chained by 08 | Optional `--force` | Connection Lost + Unauthorized + log | NetInfo offline gate | Auth flow |
+| 19 | Socket Setup | `@socket-agent` | Manual (chains 20) | Intake: mode, module, design | Socket infra + intake + log | WebSocket + chat scaffold | PRD, skip UI QA |
+| 20 | Keyboard Layout | `@keyboard-layout-agent` | Manual / chained by 08, 19 | Optional `--force` | Keyboard layouts + log | iOS/Android keyboard avoidance | PRD |
+| 21 | Ponytail | *(no @)* | **Always-on** | Every chat | Behavior only | Minimal diff, reuse, YAGNI | Skip security/a11y when requested |
+
+### React Native — example invocations
+
+```
+@figma-analyzer
+Feature name: auth-login
+Mobile URL: https://www.figma.com/design/ABC123/App?node-id=8-6335
+Mobile Frame: M_Login_Screen
+Section: Login screen with email, password, and CTA
+```
+
+```
+@planning-agent
+Plan feature auth-login from .cursor/cache/figma-specs-auth-login.md
+```
+
+```
+@coding-agent
+Implement PRD from .cursor/logs/prd-auth-login-20260630-143000.md
+```
+
+```
+@project-scaffold-agent
+FitnessTracker
+```
+
+```bash
+npm install
+# → Agent 17 runs automatically via afterShellExecution hook
+```
+
+```
+@socket-agent
+Setup mode: new-module
+Module name: Chat
+Design source: figma
+WebSocket URL: wss://api.example.com/ws
+```
+
+### React Native — setup scripts
+
+| Script | Used by |
+| --- | --- |
+| `node .cursor/scripts/setup-fetch.js` | Agents 08, 14 |
+| `node .cursor/scripts/setup-useform.js` | Agents 08, 13 |
+| `node .cursor/scripts/setup-error-pages.js` | Agents 08, 18 |
+| `node .cursor/scripts/setup-keyboard-layout.js` | Agents 08, 19, 20 |
+| `node .cursor/scripts/setup-socket.js` | Agent 19 |
+| `node .cursor/scripts/npm-audit-auto-fix.js` | Agent 17 (hook + manual) |
+
+---
+
+## Next.js agents (`.cursornext/` — Agents 00–20)
+
+Agent **names** (`@coding-agent`, etc.) are the same; **numbers differ** for setup agents. Paths use `.cursornext/logs/` and `.cursornext/cache/`.
+
+| # | Agent | Invoke | Trigger | Input | Output | Notes vs React Native |
+| --- | --- | --- | --- | --- | --- | --- |
+| 00 | Figma Analyzer | `@figma-analyzer` | Manual | Feature, URL, Frame, Section | `cache/figma-specs-{feature}.md` | Web frame; raster → `public/images/` |
+| 01 | Planning | `@planning-agent` | Manual | Prompt/specs/description | `logs/prd-{feature}-{ts}.md` | Server/Client component boundaries in PRD |
+| 02 | Coding | `@coding-agent` | Manual | PRD path | `src/...` + coding log | App Router, styled-components |
+| 03 | Documentation | `@documentation-agent` | Manual | Files or coding log | Documented files | Same contract |
+| 04 | Fixing | `@fixing-agent` | Manual | Feature/issue; test mode needs **base URL** | `logs/fixing/fixing-{feature}.md` | Playwright instead of Detox |
+| 05 | Code Scanning | `@code-scanning-agent` | Manual | Feature or scope | `logs/code-scanning/...` | Next.js checklist |
+| 06 | Vulnerability | `@vulnerability-agent` | Manual | Project root | `logs/vulnerability/...` | Document only |
+| 07 | PR Orchestrator | `@pr-orchestrator-agent` | Manual | Feature name | `logs/pr/pr-{feature}-{ts}.md` | Same contract |
+| 08 | Project Scaffold | `@project-scaffold-agent` | Manual (chains setup) | App name | Sibling Next.js app + log | `create-next-app`; chains fetch, useForm, error pages |
+| 09 | Prompt Generator | `@prompt-generator-agent` | Manual | Feature (A) or project (B) | `cache/prompt-*.md` | Same modes |
+| 10 | Test Cases | `@testcases-agent` | Manual | Feature + PRD + coding log | Test cases + `__tests__/*.test.tsx` | RTL component tests |
+| 11 | Playwright E2E | `@e2e-testing-agent` | Manual | Feature + **base URL** | `logs/e2e-testing/{feature}/{ts}/` | **Not** `@detox-testing-agent` |
+| 12 | Pre-PR Validation | `@pre-pr-validation-agent` | Manual | Git diff vs base | `logs/pre-pr/...` + verdict | Same contract |
+| 13 | useForm Builder | `@useform-builder-agent` | Manual | Form, fields, path | Form + coding log | Same `useForm` pattern |
+| 14 | Monorepo Scaffold | `@monorepo-scaffold-agent` | Manual | Monorepo name, apps/packages | Sibling pnpm monorepo + log | **Next.js only** |
+| 15 | Fetch Client | `@fetch-client-agent` | Manual / chained by 08, 14 | Optional target/interceptors | `src/lib/fetch-client.ts` + log | `NEXT_PUBLIC_API_BASE_URL` |
+| 16 | User Story Test Cases | `@user-story-testcases-agent` | Manual | Feature + user story | `logs/test-cases-{feature}.md` | RN Agent 15 equivalent |
+| 17 | Unit Test Analysis | `@unit-test-analysis-agent` | Manual | Target page/component | Analysis + Jest file | RN Agent 16 equivalent |
+| 18 | npm Audit Auto-Fix | `@npm-audit-auto-fix-agent` | **Auto** + manual | Project root | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` | RN Agent 17 equivalent |
+| 19 | Error Pages | `@error-pages-agent` | Manual / chained by 08, 14 | Optional `ERROR_PAGES_TARGET` | Connection Lost + Unauthorized | Browser online/offline (no NetInfo) |
+| 20 | Socket Setup | `@socket-agent` | Manual | Intake: mode, module, design | Socket infra + intake + log | No keyboard layout agent |
+| 21 | Ponytail | *(no @)* | **Always-on** | Every chat | Behavior only | Same lazy-senior-dev rule |
+
+### Next.js — example invocations
+
+```
+@figma-analyzer
+Feature name: pricing-section
+URL: https://www.figma.com/design/ABC123/Web?node-id=22-140
+Frame: Pricing_Section
+Section: Pricing section – plan cards, toggle, CTA
+```
+
+```
+@planning-agent
+Plan feature pricing-section from .cursornext/cache/figma-specs-pricing-section.md
+```
+
+```
+@coding-agent
+Implement PRD from .cursornext/logs/prd-pricing-section-20260630-143000.md
+```
+
+```
+@project-scaffold-agent
+MyDashboard
+```
+
+```
+@e2e-testing-agent
+Run E2E for pricing-section
+Base URL: http://localhost:3000
+```
+
+```
+@monorepo-scaffold-agent
+Create monorepo AcmePlatform with apps web and admin
+```
+
+```
+@fixing-agent
+Test pricing-section.
+Base URL: http://localhost:3000
+```
+
+### Next.js — setup scripts
+
+| Script | Used by |
+| --- | --- |
+| `node .cursornext/scripts/setup-fetch.js` | Agents 08, 14, 15 |
+| `node .cursornext/scripts/setup-useform.js` | Agents 08, 13, 14 |
+| `node .cursornext/scripts/setup-error-pages.js` | Agents 08, 14, 19 |
+| `node .cursornext/scripts/setup-socket.js` | Agent 20 |
+| `node .cursornext/scripts/setup-monorepo.js` | Agent 14 |
+| `node .cursornext/scripts/npm-audit-auto-fix.js` | Agent 18 (hook + manual) |
+
+---
+
+## Side-by-side: agent numbering differences
+
+| Capability | React Native (`.cursor/`) | Next.js (`.cursornext/`) |
+| --- | --- | --- |
+| E2E testing | Agent 11 `@detox-testing-agent` | Agent 11 `@e2e-testing-agent` |
+| User story test cases | Agent 15 `@user-story-testcases-agent` | Agent 16 |
+| Unit test analysis | Agent 16 `@unit-test-analysis-agent` | Agent 17 |
+| npm audit auto-fix | Agent 17 `@npm-audit-auto-fix-agent` | Agent 18 |
+| Error pages | Agent 18 `@error-pages-agent` | Agent 19 |
+| Socket setup | Agent 19 `@socket-agent` | Agent 20 |
+| Keyboard layout | Agent 20 `@keyboard-layout-agent` | *(not in Next.js kit)* |
+| Monorepo scaffold | *(not in RN kit)* | Agent 14 `@monorepo-scaffold-agent` |
+| Fetch client | Agent 14 `@fetch-client-agent` | Agent 15 |
+| Ponytail behavior rule | Agent 21 (always-on) | Agent 21 (always-on) |
+
+---
+
+## Output locations (both kits)
+
+| Agent ran | React Native path | Next.js path |
+| --- | --- | --- |
+| Figma Analyzer | `.cursor/cache/figma-specs-{feature}.md` | `.cursornext/cache/figma-specs-{feature}.md` |
+| Planning | `.cursor/logs/prd-{feature}-{ts}.md` | `.cursornext/logs/prd-{feature}-{ts}.md` |
+| Coding | `.cursor/logs/coding/coding-{feature}.md` | `.cursornext/logs/coding/coding-{feature}.md` |
+| Fixing | `.cursor/logs/fixing/fixing-{feature}.md` | `.cursornext/logs/fixing/fixing-{feature}.md` |
+| Test cases | `.cursor/logs/test-cases-{feature}.md` | `.cursornext/logs/test-cases-{feature}.md` |
+| E2E results | `.cursor/logs/detox-testing/...` | `.cursornext/logs/e2e-testing/...` |
+| Pre-PR | `.cursor/logs/pre-pr/...` | `.cursornext/logs/pre-pr/...` |
+| PR doc | `.cursor/logs/pr/...` | `.cursornext/logs/pr/...` |
+| npm audit auto-fix | `.cursor/logs/vulnerability/npm-audit-auto-fix-{ts}.md` | `.cursornext/logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
