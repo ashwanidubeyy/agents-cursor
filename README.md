@@ -1,18 +1,34 @@
-For React Native: https://docs.google.com/document/d/1DB0if_g6tVlS1xhuW0uhhv3OoBF9yXhOKMyFjk00sQY/edit?tab=t.0#heading=h.oj34vq1p6br0
+# AgentsReactNative
 
-For Next JS: https://docs.google.com/document/d/12rLzhaPYanMHOlRMxeJvsFF3KXl9EzZUhPzqNcAW0UM/edit?tab=t.0
+**External guides**
 
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+- React Native: [Google Doc](https://docs.google.com/document/d/1DB0if_g6tVlS1xhuW0uhhv3OoBF9yXhOKMyFjk00sQY/edit?tab=t.0#heading=h.oj34vq1p6br0)
+- Next.js: [Google Doc](https://docs.google.com/document/d/12rLzhaPYanMHOlRMxeJvsFF3KXl9EzZUhPzqNcAW0UM/edit?tab=t.0)
 
-# Getting Started
+This is a [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli). The repo also ships **two Cursor AI agent systems** — one for React Native (`.cursor/`) and one for Next.js (`.cursornext/`).
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## Table of contents
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+1. [React Native — Getting Started](#react-native--getting-started)
+2. [Cursor AI Agent Systems](#cursor-ai-agent-systems)
+3. [React Native vs Next.js](#react-native-vs-nextjs)
+4. [Workflows](#workflows)
+5. [Agent reference](#agent-reference)
+6. [Examples](#examples)
+7. [Rules, docs & scripts](#rules-docs--scripts)
+8. [Troubleshooting & Learn More](#troubleshooting--learn-more)
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
+
+## React Native — Getting Started
+
+> **Note**: Complete the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+
+### Step 1: Start Metro
+
+Run **Metro**, the JavaScript build tool for React Native, from the project root:
 
 ```sh
 # Using npm
@@ -22,11 +38,11 @@ npm start
 yarn start
 ```
 
-## Step 2: Build and run your app
+### Step 2: Build and run your app
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+With Metro running, open a new terminal and use one of the following commands:
 
-### Android
+#### Android
 
 ```sh
 # Using npm
@@ -36,23 +52,23 @@ npm run android
 yarn android
 ```
 
-### iOS
+#### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+Install CocoaPods dependencies on first clone or after updating native deps.
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+First time — install CocoaPods via Bundler:
 
 ```sh
 bundle install
 ```
 
-Then, and every time you update your native dependencies, run:
+Then, and whenever native dependencies change:
 
 ```sh
 bundle exec pod install
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+For more information, see the [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
 
 ```sh
 # Using npm
@@ -62,31 +78,29 @@ npm run ios
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+If everything is set up correctly, the app runs in the Android Emulator, iOS Simulator, or a connected device. You can also build directly from Android Studio or Xcode.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### Step 3: Modify your app
 
-## Step 3: Modify your app
+Open `App.tsx`, make changes, and save — [Fast Refresh](https://reactnative.dev/docs/fast-refresh) updates the app automatically.
 
-Now that you have successfully run the app, let's make changes!
+To force a full reload:
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- **Android**: Press <kbd>R</kbd> twice or select **"Reload"** from the **Dev Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> on Windows/Linux, <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> on macOS).
+- **iOS**: Press <kbd>R</kbd> in the iOS Simulator.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
+### Congratulations! :tada:
 
 You've successfully run and modified your React Native App. :partying_face:
 
-### Now what?
+**Now what?**
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+- Add this code to an existing app → [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps)
+- Learn more about React Native → [docs](https://reactnative.dev/docs/getting-started)
 
-# Cursor AI Agent Systems
+---
+
+## Cursor AI Agent Systems
 
 This repo ships **two** agentic "software factory" systems for Cursor. Each is a set of specialized agents that do one job, write output to a file, then stop and hand off to the next agent (a human approves each step).
 
@@ -96,6 +110,25 @@ This repo ships **two** agentic "software factory" systems for Cursor. Each is a
 | **Next.js** | `.cursornext/` | Next.js + TypeScript | 21 (00–20) | Playwright | [`.cursornext/README.md`](.cursornext/README.md) |
 
 Both systems share the **same workflow** — only the framework details differ. Pick the folder for your stack; the agents auto-load that folder's rules.
+
+**Core principle:** One agent, one task, one stop. Each step is manual unless noted. Planning does **not** auto-call Coding.
+
+### How triggering works
+
+| Trigger type | Meaning |
+| --- | --- |
+| **Manual** | You must `@invoke` the agent |
+| **Auto (hook)** | Runs without `@` when a shell event fires |
+| **Always-on** | Behavioral rule applied to every chat |
+| **Chained** | Setup scripts run when you invoke a parent agent |
+
+| Trigger | React Native | Next.js |
+| --- | --- | --- |
+| **Always-on** | Agent 21 Ponytail (`alwaysApply: true`) | Same Ponytail rule in `.cursornext/agents/agent-21-ponytail.md` |
+| **Auto (hook)** | Agent 17 after `npm install` / `npm ci` | Agent 18 after `npm install` / `npm ci` |
+| **Chained by Scaffold** | Agent 08 → fetch, useForm, error pages (18), keyboard (20) | Agent 08 → fetch, useForm, error pages (19); Agent 14 monorepo → same |
+| **Chained by Socket** | Agent 19 → keyboard (20) first | Agent 20 socket setup (no keyboard agent) |
+| **Manual only** | All other agents | All other agents |
 
 ### HTTP client: fetch over axios
 
@@ -134,7 +167,7 @@ Full details: [`.cursor/README.md` § UI QA during development](.cursor/README.m
 
 ---
 
-## 1. React Native vs Next.js — what differs
+## React Native vs Next.js
 
 | Concern | React Native (`.cursor/`) | Next.js (`.cursornext/`) |
 | ------- | ------------------------- | ------------------------ |
@@ -153,37 +186,39 @@ Full details: [`.cursor/README.md` § UI QA during development](.cursor/README.m
 
 **Same across both:** Planning (PRD), Coding, Documentation, Test Cases, Fixing, Code Scanning, Vulnerability, Pre-PR Validation, PR Orchestrator, Prompt Generator — and the "one agent, one task, one stop" contract.
 
----
+### Agent numbering differences
 
-## 2. Agents (priority + invocation)
-
-**Priority** = how essential the agent is to ship something. **P1** = core path, **P2** = recommended quality gates, **P3** = optional/on-demand.
-
-| Priority | Agent | Invoke | Output |
-| -------- | ----- | ------ | ------ |
-| P1 | Figma Analyzer | `@figma-analyzer` | `cache/figma-specs-{feature}.md` + assets |
-| P1 | Planning | `@planning-agent` | `logs/prd-{feature}-{ts}.md` |
-| P1 | Coding | `@coding-agent` | Source + `logs/coding/coding-{feature}.md` |
-| P3 | useForm Builder | `@useform-builder-agent` | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
-| P1 | Fixing | `@fixing-agent` | `logs/fixing/fixing-{feature}.md` |
-| P2 | Test Cases | `@testcases-agent` | `logs/test-cases-{feature}.md` + test file |
-| P2 | E2E Testing | `@detox-testing-agent` (RN) / `@e2e-testing-agent` (Next.js) | `logs/{detox,e2e}-testing/{feature}/{ts}/test-results.md` |
-| P2 | Pre-PR Validation | `@pre-pr-validation-agent` | READY / NOT READY report |
-| P2 | PR Orchestrator | `@pr-orchestrator-agent` | `logs/pr/pr-{feature}-{ts}.md` |
-| P3 | Documentation | `@documentation-agent` | Documented code |
-| P3 | Code Scanning | `@code-scanning-agent` | `logs/code-scanning/...` |
-| P3 | Vulnerability | `@vulnerability-agent` | `logs/vulnerability/...` |
-| P3 | Project Scaffold | `@project-scaffold-agent` | New project + boilerplate (incl. fetch client) |
-| P3 | Fetch Client | `@fetch-client-agent` | `src/lib/fetch-client.ts` wired (axios-free) |
-| P3 | Error Pages | `@error-pages-agent` | Connection Lost + Unauthorized + NetworkGate |
-| P3 | Socket Setup | `@socket-agent` | WebSocket infra + optional module scaffold |
-| P3 | Prompt Generator | `@prompt-generator-agent` | Planning/project prompt |
+| Capability | React Native (`.cursor/`) | Next.js (`.cursornext/`) |
+| --- | --- | --- |
+| E2E testing | Agent 11 `@detox-testing-agent` | Agent 11 `@e2e-testing-agent` |
+| User story test cases | Agent 15 `@user-story-testcases-agent` | Agent 16 |
+| Unit test analysis | Agent 16 `@unit-test-analysis-agent` | Agent 17 |
+| npm audit auto-fix | Agent 17 `@npm-audit-auto-fix-agent` | Agent 18 |
+| Error pages | Agent 18 `@error-pages-agent` | Agent 19 |
+| Socket setup | Agent 19 `@socket-agent` | Agent 20 |
+| Keyboard layout | Agent 20 `@keyboard-layout-agent` | *(not in Next.js kit)* |
+| Monorepo scaffold | *(not in RN kit)* | Agent 14 `@monorepo-scaffold-agent` |
+| Fetch client | Agent 14 `@fetch-client-agent` | Agent 15 |
+| Ponytail behavior rule | Agent 21 (always-on) | Agent 21 (always-on) |
 
 ---
 
-## 3. Job A — Integrate a NEW module (priority order)
+## Workflows
 
-Run these in order; review each output before the next. **P1** steps are the minimum to ship; P2/P3 are quality gates.
+### Recommended order (both kits)
+
+```
+Scaffold (optional) → Figma → Prompt (optional) → Planning → Coding
+  → useForm / Fetch / Error Pages / Socket / Keyboard (optional)
+    → Docs → User Story TCs / Test Cases / Unit Test Analysis (optional)
+      → E2E (Detox or Playwright) → Fixing
+        → Code Scan → Vulnerability → npm Audit Auto-Fix (auto on install)
+          → Pre-PR Validation → PR Orchestrator
+```
+
+### Job A — Integrate a NEW module
+
+Run in order; review each output before the next. **P1** = minimum to ship; **P2/P3** = quality gates.
 
 ```
 P1  1. @figma-analyzer       → design specs + exported assets
@@ -199,69 +234,11 @@ P2 10. @pre-pr-validation-agent → READY / NOT READY
 P2 11. @pr-orchestrator-agent   → PR document
 ```
 
-### React Native example
-
-```
-@figma-analyzer
-Feature name: profile-card
-Mobile URL: https://www.figma.com/design/ABC123/App?node-id=10-8700
-Mobile Frame: M_Profile_Card
-Section: Profile card – avatar, name, stats, action buttons
-```
-```
-@planning-agent
-Plan feature: profile-card from .cursor/cache/figma-specs-profile-card.md
-```
-```
-@coding-agent
-Implement PRD from .cursor/logs/prd-profile-card-20260615-120000.md
-```
-```
-@fixing-agent
-Test profile-card.
-Testing target: Android Emulator
-```
-
-**Build a form (any project):** use the **useForm Builder Agent** for validated forms (schema-based `useForm` hook; no Formik/yup).
-
-```
-@useform-builder-agent
-
-Form: login
-Fields: email (required), password (required, min 6)
-Path: src/screens/Login
-```
-
-> Creates `src/screens/Login/index.tsx` + `style.ts` using `useForm`, with `ALERTS`-based validation and a service-layer submit. Installs the hook automatically if missing (`node .cursor/scripts/setup-useform.js`). See `.cursor/rules/useform-validation.mdc`.
-
-### Next.js example
-
-```
-@figma-analyzer
-Feature name: pricing-section
-URL: https://www.figma.com/design/ABC123/Web?node-id=22-140
-Frame: Pricing_Section
-Section: Pricing section – plan cards, toggle, CTA
-```
-```
-@planning-agent
-Plan feature: pricing-section from .cursornext/cache/figma-specs-pricing-section.md
-```
-```
-@coding-agent
-Implement PRD from .cursornext/logs/prd-pricing-section-20260615-120000.md
-```
-```
-@fixing-agent
-Test pricing-section.
-Base URL: http://localhost:3000
-```
-
 > **Minimum path (designed feature):** `@figma-analyzer → @planning-agent → @coding-agent → @fixing-agent`. No design? Skip Figma and describe the feature to `@planning-agent`.
 
----
+**Build a form (any project):** use `@useform-builder-agent` for validated forms (schema-based `useForm` hook; no Formik/yup). Installs the hook automatically if missing (`node .cursor/scripts/setup-useform.js`). See `.cursor/rules/useform-validation.mdc`.
 
-## 4. Job B — Fix bugs in an EXISTING module (priority order)
+### Job B — Fix bugs in an EXISTING module
 
 ```
 P1  1. @fixing-agent          → reproduce + apply simple fixes (or test-and-fix by TC-ID)
@@ -270,133 +247,48 @@ P2  3. @pre-pr-validation-agent → confirm READY
 P2  4. @pr-orchestrator-agent   → PR document
 ```
 
-The Fixing Agent has **two modes**: *fix-only* (describe the bug) and *test-and-fix* (run tests, fix failures by TC-ID — needs a test-cases file + target/URL).
+The Fixing Agent has **two modes**:
 
-### React Native examples
+- **Fix-only** — describe the bug; reads coding log + code, applies simple fixes.
+- **Test-and-fix** — run tests, fix failures by TC-ID; needs a test-cases file + target (RN: iOS/Android; Next.js: base URL).
 
-```
-@fixing-agent
-Fix profile-card: avatar overflows its container on small screens, and the
-follow button has no press feedback.
-```
-```
-@fixing-agent
-Test profile-card.
-Testing target: iOS Simulator
-```
-
-### Next.js examples
-
-```
-@fixing-agent
-Fix pricing-section: monthly/yearly toggle does not update prices, and the
-CTA button is missing a data-testid.
-```
-```
-@fixing-agent
-Test pricing-section.
-Base URL: http://localhost:3000
-```
-
-> If the Fixing Agent reports an issue as "**Requires Coding Agent**" (new feature / complex change), hand it to `@planning-agent` → `@coding-agent`, then re-validate.
+> If the Fixing Agent reports "**Requires Coding Agent**" (new feature / complex change), hand it to `@planning-agent` → `@coding-agent`, then re-validate.
 
 ---
 
-## 5. Rules, docs, scripts
+## Agent reference
 
-### Rules (auto-applied by Cursor)
-- **React Native** (`.cursor/rules/`): `agent-workflow-rules.mdc`, `react-native.mdc`, `figma-to-react-native.mdc`, `detox-testing.mdc`, `coding-standards.md`.
-- **Next.js** (`.cursornext/rules/`): `agent-workflow-rules.mdc`, `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc`, `coding-standards.md`.
+**Priority:** P1 = core path · P2 = recommended quality gates · P3 = optional/on-demand.
 
-### Reference docs
-| Doc | Purpose |
-| --- | ------- |
-| [`.cursor/README.md`](.cursor/README.md) | Full React Native agent-system guide |
-| [`.cursornext/README.md`](.cursornext/README.md) | Full Next.js agent-system guide |
-| [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | RN Detox E2E setup (iOS + Android native wiring, troubleshooting, checklist) |
-| [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) | Next.js Playwright E2E setup (config, specs, troubleshooting, checklist) |
-| [`.cursor/TOKEN-USAGE.md`](.cursor/TOKEN-USAGE.md) | Tips to reduce Cursor token usage |
-| [`.cursor/USAGE.md`](.cursor/USAGE.md) | One-page command cheat sheet (React Native) |
+### Quick lookup (both stacks)
 
-### Figma export scripts (need `FIGMA_ACCESS_TOKEN`)
-```sh
-# React Native (.cursor) — token in .env; PNG → Android drawable + iOS Images.xcassets
-node .cursor/scripts/export-figma-svg.js <feature> <nodeId> [fileKey]
-node .cursor/scripts/export-figma-png.js <nodeId> <android_name> <IosImageSet> [fileKey]
+| Priority | Agent | Invoke | Output |
+| -------- | ----- | ------ | ------ |
+| P1 | Figma Analyzer | `@figma-analyzer` | `cache/figma-specs-{feature}.md` + assets |
+| P1 | Planning | `@planning-agent` | `logs/prd-{feature}-{ts}.md` |
+| P1 | Coding | `@coding-agent` | Source + `logs/coding/coding-{feature}.md` |
+| P1 | Fixing | `@fixing-agent` | `logs/fixing/fixing-{feature}.md` |
+| P2 | Test Cases | `@testcases-agent` | `logs/test-cases-{feature}.md` + test file |
+| P2 | E2E Testing | `@detox-testing-agent` (RN) / `@e2e-testing-agent` (Next.js) | `logs/{detox,e2e}-testing/{feature}/{ts}/test-results.md` |
+| P2 | Pre-PR Validation | `@pre-pr-validation-agent` | READY / NOT READY report |
+| P2 | PR Orchestrator | `@pr-orchestrator-agent` | `logs/pr/pr-{feature}-{ts}.md` |
+| P3 | Documentation | `@documentation-agent` | Documented code |
+| P3 | Code Scanning | `@code-scanning-agent` | `logs/code-scanning/...` |
+| P3 | Vulnerability | `@vulnerability-agent` | `logs/vulnerability/...` |
+| P3 | Project Scaffold | `@project-scaffold-agent` | New project + boilerplate (incl. fetch client) |
+| P3 | useForm Builder | `@useform-builder-agent` | Form (`useForm`) + `logs/coding/coding-{feature}.md` |
+| P3 | Fetch Client | `@fetch-client-agent` | `src/lib/fetch-client.ts` wired (axios-free) |
+| P3 | Error Pages | `@error-pages-agent` | Connection Lost + Unauthorized + NetworkGate |
+| P3 | Socket Setup | `@socket-agent` | WebSocket infra + optional module scaffold |
+| P3 | Prompt Generator | `@prompt-generator-agent` | Planning/project prompt |
+| P3 | User Story Test Cases | `@user-story-testcases-agent` | `logs/test-cases-{feature}.md` |
+| P3 | Unit Test Analysis | `@unit-test-analysis-agent` | Analysis report + Jest file |
+| P3 | Keyboard Layout | `@keyboard-layout-agent` (RN only) | Keyboard layouts + log |
+| P3 | Monorepo Scaffold | `@monorepo-scaffold-agent` (Next.js only) | Sibling pnpm monorepo + log |
+| — | npm Audit Auto-Fix | `@npm-audit-auto-fix-agent` (auto on install) | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
+| — | Ponytail | *(no @)* | Always-on minimal-diff behavior |
 
-# Next.js (.cursornext) — token in .env; raster → public/images
-node .cursornext/scripts/export-figma-svg.js <feature> <nodeId> [fileKey] [outFile]
-node .cursornext/scripts/export-figma-png.js <nodeId> <output-name> <fileKey> [scale]
-```
-
-### E2E commands
-```sh
-# React Native (Detox) — this project
-npm run e2e:build:android && npm run e2e:android   # emulator
-npm run e2e:build:ios && npm run e2e:ios           # simulator
-npm run e2e:android:attached                       # physical device
-node scripts/collect-detox-artifacts.js {feature}  # collect failure screenshots/videos → logs
-
-# Next.js (Playwright) — when used in a Next.js project
-npm run e2e                                          # all specs
-npx playwright test e2e/{feature}.spec.ts            # single spec
-```
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
-
----
-
-# Complete Agent Reference
-
-How agents are triggered, what each one does, and how to invoke them. Full guides: [`.cursor/README.md`](.cursor/README.md) (React Native) · [`.cursornext/README.md`](.cursornext/README.md) (Next.js).
-
-## How triggering works
-
-| Trigger type | Meaning |
-| --- | --- |
-| **Manual** | You must `@invoke` the agent |
-| **Auto (hook)** | Runs without `@` when a shell event fires |
-| **Always-on** | Behavioral rule applied to every chat |
-| **Chained** | Setup scripts run when you invoke a parent agent |
-
-**Golden rule:** Each step is manual unless noted. Planning does **not** auto-call Coding.
-
-| Trigger | React Native | Next.js |
-| --- | --- | --- |
-| **Always-on** | Agent 21 Ponytail (`alwaysApply: true`) | Same Ponytail rule in `.cursornext/agents/agent-21-ponytail.md` |
-| **Auto (hook)** | Agent 17 after `npm install` / `npm ci` | Agent 18 after `npm install` / `npm ci` |
-| **Chained by Scaffold** | Agent 08 → fetch, useForm, error pages (18), keyboard (20) | Agent 08 → fetch, useForm, error pages (19); Agent 14 monorepo → same |
-| **Chained by Socket** | Agent 19 → keyboard (20) first | Agent 20 socket setup (no keyboard agent) |
-| **Manual only** | All other agents | All other agents |
-
----
-
-## Recommended workflow order
-
-```
-Scaffold (optional) → Figma → Prompt (optional) → Planning → Coding
-  → useForm / Fetch / Error Pages / Socket / Keyboard (optional)
-    → Docs → User Story TCs / Test Cases / Unit Test Analysis (optional)
-      → E2E (Detox or Playwright) → Fixing
-        → Code Scan → Vulnerability → npm Audit Auto-Fix (auto on install)
-          → Pre-PR Validation → PR Orchestrator
-```
-
----
-
-## React Native agents (`.cursor/` — Agents 00–21)
+### React Native agents (`.cursor/` — Agents 00–21)
 
 | # | Agent | Invoke | Trigger | Input | Output | Does | Does not |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -423,7 +315,80 @@ Scaffold (optional) → Figma → Prompt (optional) → Planning → Coding
 | 20 | Keyboard Layout | `@keyboard-layout-agent` | Manual / chained by 08, 19 | Optional `--force` | Keyboard layouts + log | iOS/Android keyboard avoidance | PRD |
 | 21 | Ponytail | *(no @)* | **Always-on** | Every chat | Behavior only | Minimal diff, reuse, YAGNI | Skip security/a11y when requested |
 
-### React Native — example invocations
+### Next.js agents (`.cursornext/` — Agents 00–20)
+
+Agent **names** (`@coding-agent`, etc.) are the same; **numbers differ** for setup agents. Paths use `.cursornext/logs/` and `.cursornext/cache/`.
+
+| # | Agent | Invoke | Trigger | Input | Output | Notes vs React Native |
+| --- | --- | --- | --- | --- | --- | --- |
+| 00 | Figma Analyzer | `@figma-analyzer` | Manual | Feature, URL, Frame, Section | `cache/figma-specs-{feature}.md` | Web frame; raster → `public/images/` |
+| 01 | Planning | `@planning-agent` | Manual | Prompt/specs/description | `logs/prd-{feature}-{ts}.md` | Server/Client component boundaries in PRD |
+| 02 | Coding | `@coding-agent` | Manual | PRD path | `src/...` + coding log | App Router, styled-components |
+| 03 | Documentation | `@documentation-agent` | Manual | Files or coding log | Documented files | Same contract |
+| 04 | Fixing | `@fixing-agent` | Manual | Feature/issue; test mode needs **base URL** | `logs/fixing/fixing-{feature}.md` | Playwright instead of Detox |
+| 05 | Code Scanning | `@code-scanning-agent` | Manual | Feature or scope | `logs/code-scanning/...` | Next.js checklist |
+| 06 | Vulnerability | `@vulnerability-agent` | Manual | Project root | `logs/vulnerability/...` | Document only |
+| 07 | PR Orchestrator | `@pr-orchestrator-agent` | Manual | Feature name | `logs/pr/pr-{feature}-{ts}.md` | Same contract |
+| 08 | Project Scaffold | `@project-scaffold-agent` | Manual (chains setup) | App name | Sibling Next.js app + log | `create-next-app`; chains fetch, useForm, error pages |
+| 09 | Prompt Generator | `@prompt-generator-agent` | Manual | Feature (A) or project (B) | `cache/prompt-*.md` | Same modes |
+| 10 | Test Cases | `@testcases-agent` | Manual | Feature + PRD + coding log | Test cases + `__tests__/*.test.tsx` | RTL component tests |
+| 11 | Playwright E2E | `@e2e-testing-agent` | Manual | Feature + **base URL** | `logs/e2e-testing/{feature}/{ts}/` | **Not** `@detox-testing-agent` |
+| 12 | Pre-PR Validation | `@pre-pr-validation-agent` | Manual | Git diff vs base | `logs/pre-pr/...` + verdict | Same contract |
+| 13 | useForm Builder | `@useform-builder-agent` | Manual | Form, fields, path | Form + coding log | Same `useForm` pattern |
+| 14 | Monorepo Scaffold | `@monorepo-scaffold-agent` | Manual | Monorepo name, apps/packages | Sibling pnpm monorepo + log | **Next.js only** |
+| 15 | Fetch Client | `@fetch-client-agent` | Manual / chained by 08, 14 | Optional target/interceptors | `src/lib/fetch-client.ts` + log | `NEXT_PUBLIC_API_BASE_URL` |
+| 16 | User Story Test Cases | `@user-story-testcases-agent` | Manual | Feature + user story | `logs/test-cases-{feature}.md` | RN Agent 15 equivalent |
+| 17 | Unit Test Analysis | `@unit-test-analysis-agent` | Manual | Target page/component | Analysis + Jest file | RN Agent 16 equivalent |
+| 18 | npm Audit Auto-Fix | `@npm-audit-auto-fix-agent` | **Auto** + manual | Project root | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` | RN Agent 17 equivalent |
+| 19 | Error Pages | `@error-pages-agent` | Manual / chained by 08, 14 | Optional `ERROR_PAGES_TARGET` | Connection Lost + Unauthorized | Browser online/offline (no NetInfo) |
+| 20 | Socket Setup | `@socket-agent` | Manual | Intake: mode, module, design | Socket infra + intake + log | No keyboard layout agent |
+| 21 | Ponytail | *(no @)* | **Always-on** | Every chat | Behavior only | Same lazy-senior-dev rule |
+
+### Output locations (both kits)
+
+| Agent ran | React Native path | Next.js path |
+| --- | --- | --- |
+| Figma Analyzer | `.cursor/cache/figma-specs-{feature}.md` | `.cursornext/cache/figma-specs-{feature}.md` |
+| Planning | `.cursor/logs/prd-{feature}-{ts}.md` | `.cursornext/logs/prd-{feature}-{ts}.md` |
+| Coding | `.cursor/logs/coding/coding-{feature}.md` | `.cursornext/logs/coding/coding-{feature}.md` |
+| Fixing | `.cursor/logs/fixing/fixing-{feature}.md` | `.cursornext/logs/fixing/fixing-{feature}.md` |
+| Test cases | `.cursor/logs/test-cases-{feature}.md` | `.cursornext/logs/test-cases-{feature}.md` |
+| E2E results | `.cursor/logs/detox-testing/...` | `.cursornext/logs/e2e-testing/...` |
+| Pre-PR | `.cursor/logs/pre-pr/...` | `.cursornext/logs/pre-pr/...` |
+| PR doc | `.cursor/logs/pr/...` | `.cursornext/logs/pr/...` |
+| npm audit auto-fix | `.cursor/logs/vulnerability/npm-audit-auto-fix-{ts}.md` | `.cursornext/logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
+
+---
+
+## Examples
+
+### React Native — new module (profile-card)
+
+```
+@figma-analyzer
+Feature name: profile-card
+Mobile URL: https://www.figma.com/design/ABC123/App?node-id=10-8700
+Mobile Frame: M_Profile_Card
+Section: Profile card – avatar, name, stats, action buttons
+```
+
+```
+@planning-agent
+Plan feature: profile-card from .cursor/cache/figma-specs-profile-card.md
+```
+
+```
+@coding-agent
+Implement PRD from .cursor/logs/prd-profile-card-20260615-120000.md
+```
+
+```
+@fixing-agent
+Test profile-card.
+Testing target: Android Emulator
+```
+
+### React Native — auth flow
 
 ```
 @figma-analyzer
@@ -461,49 +426,33 @@ Design source: figma
 WebSocket URL: wss://api.example.com/ws
 ```
 
-### React Native — setup scripts
+### React Native — useForm
 
-| Script | Used by |
-| --- | --- |
-| `node .cursor/scripts/setup-fetch.js` | Agents 08, 14 |
-| `node .cursor/scripts/setup-useform.js` | Agents 08, 13 |
-| `node .cursor/scripts/setup-error-pages.js` | Agents 08, 18 |
-| `node .cursor/scripts/setup-keyboard-layout.js` | Agents 08, 19, 20 |
-| `node .cursor/scripts/setup-socket.js` | Agent 19 |
-| `node .cursor/scripts/npm-audit-auto-fix.js` | Agent 17 (hook + manual) |
+```
+@useform-builder-agent
 
----
+Form: login
+Fields: email (required), password (required, min 6)
+Path: src/screens/Login
+```
 
-## Next.js agents (`.cursornext/` — Agents 00–20)
+→ Creates `src/screens/Login/index.tsx` + `style.ts` using `useForm`, with `ALERTS`-based validation and a service-layer submit.
 
-Agent **names** (`@coding-agent`, etc.) are the same; **numbers differ** for setup agents. Paths use `.cursornext/logs/` and `.cursornext/cache/`.
+### React Native — fix bugs
 
-| # | Agent | Invoke | Trigger | Input | Output | Notes vs React Native |
-| --- | --- | --- | --- | --- | --- | --- |
-| 00 | Figma Analyzer | `@figma-analyzer` | Manual | Feature, URL, Frame, Section | `cache/figma-specs-{feature}.md` | Web frame; raster → `public/images/` |
-| 01 | Planning | `@planning-agent` | Manual | Prompt/specs/description | `logs/prd-{feature}-{ts}.md` | Server/Client component boundaries in PRD |
-| 02 | Coding | `@coding-agent` | Manual | PRD path | `src/...` + coding log | App Router, styled-components |
-| 03 | Documentation | `@documentation-agent` | Manual | Files or coding log | Documented files | Same contract |
-| 04 | Fixing | `@fixing-agent` | Manual | Feature/issue; test mode needs **base URL** | `logs/fixing/fixing-{feature}.md` | Playwright instead of Detox |
-| 05 | Code Scanning | `@code-scanning-agent` | Manual | Feature or scope | `logs/code-scanning/...` | Next.js checklist |
-| 06 | Vulnerability | `@vulnerability-agent` | Manual | Project root | `logs/vulnerability/...` | Document only |
-| 07 | PR Orchestrator | `@pr-orchestrator-agent` | Manual | Feature name | `logs/pr/pr-{feature}-{ts}.md` | Same contract |
-| 08 | Project Scaffold | `@project-scaffold-agent` | Manual (chains setup) | App name | Sibling Next.js app + log | `create-next-app`; chains fetch, useForm, error pages |
-| 09 | Prompt Generator | `@prompt-generator-agent` | Manual | Feature (A) or project (B) | `cache/prompt-*.md` | Same modes |
-| 10 | Test Cases | `@testcases-agent` | Manual | Feature + PRD + coding log | Test cases + `__tests__/*.test.tsx` | RTL component tests |
-| 11 | Playwright E2E | `@e2e-testing-agent` | Manual | Feature + **base URL** | `logs/e2e-testing/{feature}/{ts}/` | **Not** `@detox-testing-agent` |
-| 12 | Pre-PR Validation | `@pre-pr-validation-agent` | Manual | Git diff vs base | `logs/pre-pr/...` + verdict | Same contract |
-| 13 | useForm Builder | `@useform-builder-agent` | Manual | Form, fields, path | Form + coding log | Same `useForm` pattern |
-| 14 | Monorepo Scaffold | `@monorepo-scaffold-agent` | Manual | Monorepo name, apps/packages | Sibling pnpm monorepo + log | **Next.js only** |
-| 15 | Fetch Client | `@fetch-client-agent` | Manual / chained by 08, 14 | Optional target/interceptors | `src/lib/fetch-client.ts` + log | `NEXT_PUBLIC_API_BASE_URL` |
-| 16 | User Story Test Cases | `@user-story-testcases-agent` | Manual | Feature + user story | `logs/test-cases-{feature}.md` | RN Agent 15 equivalent |
-| 17 | Unit Test Analysis | `@unit-test-analysis-agent` | Manual | Target page/component | Analysis + Jest file | RN Agent 16 equivalent |
-| 18 | npm Audit Auto-Fix | `@npm-audit-auto-fix-agent` | **Auto** + manual | Project root | `logs/vulnerability/npm-audit-auto-fix-{ts}.md` | RN Agent 17 equivalent |
-| 19 | Error Pages | `@error-pages-agent` | Manual / chained by 08, 14 | Optional `ERROR_PAGES_TARGET` | Connection Lost + Unauthorized | Browser online/offline (no NetInfo) |
-| 20 | Socket Setup | `@socket-agent` | Manual | Intake: mode, module, design | Socket infra + intake + log | No keyboard layout agent |
-| 21 | Ponytail | *(no @)* | **Always-on** | Every chat | Behavior only | Same lazy-senior-dev rule |
+```
+@fixing-agent
+Fix profile-card: avatar overflows its container on small screens, and the
+follow button has no press feedback.
+```
 
-### Next.js — example invocations
+```
+@fixing-agent
+Test profile-card.
+Testing target: iOS Simulator
+```
+
+### Next.js — new module (pricing-section)
 
 ```
 @figma-analyzer
@@ -515,12 +464,18 @@ Section: Pricing section – plan cards, toggle, CTA
 
 ```
 @planning-agent
-Plan feature pricing-section from .cursornext/cache/figma-specs-pricing-section.md
+Plan feature: pricing-section from .cursornext/cache/figma-specs-pricing-section.md
 ```
 
 ```
 @coding-agent
-Implement PRD from .cursornext/logs/prd-pricing-section-20260630-143000.md
+Implement PRD from .cursornext/logs/prd-pricing-section-20260615-120000.md
+```
+
+```
+@fixing-agent
+Test pricing-section.
+Base URL: http://localhost:3000
 ```
 
 ```
@@ -539,52 +494,100 @@ Base URL: http://localhost:3000
 Create monorepo AcmePlatform with apps web and admin
 ```
 
+### Next.js — fix bugs
+
+```
+@fixing-agent
+Fix pricing-section: monthly/yearly toggle does not update prices, and the
+CTA button is missing a data-testid.
+```
+
 ```
 @fixing-agent
 Test pricing-section.
 Base URL: http://localhost:3000
 ```
 
-### Next.js — setup scripts
-
-| Script | Used by |
-| --- | --- |
-| `node .cursornext/scripts/setup-fetch.js` | Agents 08, 14, 15 |
-| `node .cursornext/scripts/setup-useform.js` | Agents 08, 13, 14 |
-| `node .cursornext/scripts/setup-error-pages.js` | Agents 08, 14, 19 |
-| `node .cursornext/scripts/setup-socket.js` | Agent 20 |
-| `node .cursornext/scripts/setup-monorepo.js` | Agent 14 |
-| `node .cursornext/scripts/npm-audit-auto-fix.js` | Agent 18 (hook + manual) |
+> For copy-paste examples for **every** agent, see [`.cursor/USAGE.md`](.cursor/USAGE.md) (React Native) and [`.cursornext/README.md`](.cursornext/README.md) (Next.js).
 
 ---
 
-## Side-by-side: agent numbering differences
+## Rules, docs & scripts
 
-| Capability | React Native (`.cursor/`) | Next.js (`.cursornext/`) |
+### Rules (auto-applied by Cursor)
+
+- **React Native** (`.cursor/rules/`): `agent-workflow-rules.mdc`, `react-native.mdc`, `figma-to-react-native.mdc`, `ui-qa-checklist.mdc`, `detox-testing.mdc`, `coding-standards.md`.
+- **Next.js** (`.cursornext/rules/`): `agent-workflow-rules.mdc`, `nextjs.mdc`, `figma-to-nextjs.mdc`, `e2e-testing.mdc`, `coding-standards.md`.
+
+### Reference docs
+
+| Doc | Purpose |
+| --- | ------- |
+| [`.cursor/README.md`](.cursor/README.md) | Full React Native agent-system guide |
+| [`.cursornext/README.md`](.cursornext/README.md) | Full Next.js agent-system guide |
+| [`docs/DETOX-INTEGRATION.md`](docs/DETOX-INTEGRATION.md) | RN Detox E2E setup (iOS + Android native wiring, troubleshooting, checklist) |
+| [`.cursornext/docs/E2E-PLAYWRIGHT.md`](.cursornext/docs/E2E-PLAYWRIGHT.md) | Next.js Playwright E2E setup (config, specs, troubleshooting, checklist) |
+| [`.cursor/TOKEN-USAGE.md`](.cursor/TOKEN-USAGE.md) | Tips to reduce Cursor token usage |
+| [`.cursor/USAGE.md`](.cursor/USAGE.md) | One-page command cheat sheet (React Native) |
+
+### Setup scripts
+
+| Script | React Native — used by | Next.js — used by |
 | --- | --- | --- |
-| E2E testing | Agent 11 `@detox-testing-agent` | Agent 11 `@e2e-testing-agent` |
-| User story test cases | Agent 15 `@user-story-testcases-agent` | Agent 16 |
-| Unit test analysis | Agent 16 `@unit-test-analysis-agent` | Agent 17 |
-| npm audit auto-fix | Agent 17 `@npm-audit-auto-fix-agent` | Agent 18 |
-| Error pages | Agent 18 `@error-pages-agent` | Agent 19 |
-| Socket setup | Agent 19 `@socket-agent` | Agent 20 |
-| Keyboard layout | Agent 20 `@keyboard-layout-agent` | *(not in Next.js kit)* |
-| Monorepo scaffold | *(not in RN kit)* | Agent 14 `@monorepo-scaffold-agent` |
-| Fetch client | Agent 14 `@fetch-client-agent` | Agent 15 |
-| Ponytail behavior rule | Agent 21 (always-on) | Agent 21 (always-on) |
+| `setup-fetch.js` | Agents 08, 14 | Agents 08, 14, 15 |
+| `setup-useform.js` | Agents 08, 13 | Agents 08, 13, 14 |
+| `setup-error-pages.js` | Agents 08, 18 | Agents 08, 14, 19 |
+| `setup-keyboard-layout.js` | Agents 08, 19, 20 | — |
+| `setup-socket.js` | Agent 19 | Agent 20 |
+| `setup-monorepo.js` | — | Agent 14 |
+| `npm-audit-auto-fix.js` | Agent 17 (hook + manual) | Agent 18 (hook + manual) |
+
+Run from project root:
+
+```sh
+# React Native (.cursor) — token in .env; PNG → Android drawable + iOS Images.xcassets
+node .cursor/scripts/setup-fetch.js
+node .cursor/scripts/setup-useform.js
+node .cursor/scripts/setup-error-pages.js
+node .cursor/scripts/setup-keyboard-layout.js
+node .cursor/scripts/setup-socket.js
+node .cursor/scripts/export-figma-svg.js <feature> <nodeId> [fileKey]
+node .cursor/scripts/export-figma-png.js <nodeId> <android_name> <IosImageSet> [fileKey]
+
+# Next.js (.cursornext) — token in .env; raster → public/images
+node .cursornext/scripts/setup-fetch.js
+node .cursornext/scripts/setup-socket.js
+node .cursornext/scripts/setup-monorepo.js
+node .cursornext/scripts/export-figma-svg.js <feature> <nodeId> [fileKey] [outFile]
+node .cursornext/scripts/export-figma-png.js <nodeId> <output-name> <fileKey> [scale]
+```
+
+Figma export scripts require `FIGMA_ACCESS_TOKEN` in `.env`.
+
+### E2E commands
+
+```sh
+# React Native (Detox) — this project
+npm run e2e:build:android && npm run e2e:android   # emulator
+npm run e2e:build:ios && npm run e2e:ios           # simulator
+npm run e2e:android:attached                       # physical device
+node scripts/collect-detox-artifacts.js {feature}  # collect failure screenshots/videos → logs
+
+# Next.js (Playwright) — when used in a Next.js project
+npm run e2e                                          # all specs
+npx playwright test e2e/{feature}.spec.ts            # single spec
+```
 
 ---
 
-## Output locations (both kits)
+## Troubleshooting & Learn More
 
-| Agent ran | React Native path | Next.js path |
-| --- | --- | --- |
-| Figma Analyzer | `.cursor/cache/figma-specs-{feature}.md` | `.cursornext/cache/figma-specs-{feature}.md` |
-| Planning | `.cursor/logs/prd-{feature}-{ts}.md` | `.cursornext/logs/prd-{feature}-{ts}.md` |
-| Coding | `.cursor/logs/coding/coding-{feature}.md` | `.cursornext/logs/coding/coding-{feature}.md` |
-| Fixing | `.cursor/logs/fixing/fixing-{feature}.md` | `.cursornext/logs/fixing/fixing-{feature}.md` |
-| Test cases | `.cursor/logs/test-cases-{feature}.md` | `.cursornext/logs/test-cases-{feature}.md` |
-| E2E results | `.cursor/logs/detox-testing/...` | `.cursornext/logs/e2e-testing/...` |
-| Pre-PR | `.cursor/logs/pre-pr/...` | `.cursornext/logs/pre-pr/...` |
-| PR doc | `.cursor/logs/pr/...` | `.cursornext/logs/pr/...` |
-| npm audit auto-fix | `.cursor/logs/vulnerability/npm-audit-auto-fix-{ts}.md` | `.cursornext/logs/vulnerability/npm-audit-auto-fix-{ts}.md` |
+If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+
+To learn more about React Native:
+
+- [React Native Website](https://reactnative.dev) — learn more about React Native.
+- [Getting Started](https://reactnative.dev/docs/environment-setup) — an **overview** of React Native and how setup your environment.
+- [Learn the Basics](https://reactnative.dev/docs/getting-started) — a **guided tour** of the React Native **basics**.
+- [Blog](https://reactnative.dev/blog) — read the latest official React Native **Blog** posts.
+- [`@facebook/react-native`](https://github.com/facebook/react-native) — the Open Source GitHub **repository** for React Native.
